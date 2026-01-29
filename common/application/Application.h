@@ -8,14 +8,19 @@ namespace sLink::application
     class Application
     {
     public:
-        Application(window::Window&& window);
+        Application(int windowWidth, int windowHeight, std::string_view windowName);
 
+        void run();
     private:
         window::Window m_Window;
 
         renderer::Renderer m_Renderer;
 
         ui::UIBackend m_UIBackend;
+
+        void render();
+
+        void handleWindowResize();
     };
 }
 

@@ -380,6 +380,14 @@ namespace sLink::renderer
 
         m_SwapChainImageFormat = m_SwapChainSurfaceFormat.format;
 
+        m_Viewport = vk::Viewport(0.f, 0.f,
+                                  static_cast<float>(m_SwapChainExtent.width),
+                                  static_cast<float>(m_SwapChainExtent.height),
+                                  0.f, 1.f);
+
+        m_Scissor = vk::Rect2D({0, 0},
+                               m_SwapChainExtent);
+
         auto minImageCount = std::max(3u, surfaceCapabilities.minImageCount);
 
         minImageCount = (surfaceCapabilities.maxImageCount > 0 && minImageCount > surfaceCapabilities.maxImageCount)
@@ -750,12 +758,6 @@ namespace sLink::renderer
         createColorResources();
 
         createDepthResources();
-
-        m_Viewport.width = static_cast<float>(m_SwapChainExtent.width);
-
-        m_Viewport.height = static_cast<float>(m_SwapChainExtent.height);
-
-        m_Scissor.extent = m_SwapChainExtent;
     }
 
     vk::SampleCountFlagBits Renderer::getMaxUsableSampleCount()
@@ -1018,7 +1020,7 @@ namespace sLink::renderer
         return vk::raii::ImageView(m_Device, viewInfo);
     }
 
-    void Renderer::recordUIData(ui::UIBackend::UIRenderData* data)
+    void Renderer::recordUIData(ui::UIBackend::UIRenderData *data)
     {
         auto &cmd = m_ImGuiCommandBuffers[m_CurrentFrame];
 
