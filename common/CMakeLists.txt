@@ -1,7 +1,7 @@
 add_library(common_shared STATIC
         renderer/Renderer.cpp
         window/Window.cpp
-        ui/backend/UiBackend.cpp
+        ui/backend/UIBackend.cpp
 )
 
 target_include_directories(common_shared PUBLIC

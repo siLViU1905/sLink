@@ -14,7 +14,7 @@
 #include <vector>
 #include <GLFW/glfw3native.h>
 
-#include <ui/backend/UiBackend.h>
+#include <ui/backend/UIBackend.h>
 
 namespace sLink::renderer
 {
