@@ -790,7 +790,7 @@ namespace sLink::renderer
         m_ColorImageView = createImageView(m_ColorImage, m_SwapChainImageFormat, vk::ImageAspectFlagBits::eColor, 1);
     }
 
-    uint32_t Renderer::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
+    uint32_t Renderer::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties) const
     {
         auto memProperties = m_PhysicalDevice.getMemoryProperties();
 
@@ -824,19 +824,19 @@ namespace sLink::renderer
     {
         waitIdle();
 
-        // ImGui_ImplVulkan_Shutdown();
-        //
-        // ImGui_ImplGlfw_Shutdown();
+        ImGui_ImplVulkan_Shutdown();
+
+        ImGui_ImplGlfw_Shutdown();
 
         cleanupSwapChain();
 
         rebuildSwapChain(window);
 
-        //initImGuiBackend(window);
+        initImGuiBackend(window);
 
-        // ImGui::NewFrame();
-        //
-        // ImGui::EndFrame();
+        ui::UIBackend::begin_frame();
+
+        ui::UIBackend::end_frame();
     }
 
     void Renderer::setClearColor(vk::ClearValue color)
@@ -1018,7 +1018,7 @@ namespace sLink::renderer
         return vk::raii::ImageView(m_Device, viewInfo);
     }
 
-    void Renderer::recordUIData(ui::UIBackend::UIRenderData* data)
+    void Renderer::recordUIData(ui::UIBackend::UIRenderData *data)
     {
         auto &cmd = m_ImGuiCommandBuffers[m_CurrentFrame];
 
