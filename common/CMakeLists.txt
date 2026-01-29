@@ -2,10 +2,12 @@ add_library(common_shared STATIC
         renderer/Renderer.cpp
         window/Window.cpp
         ui/backend/UIBackend.cpp
+        application/Application.cpp
 )
 
 target_include_directories(common_shared PUBLIC
         .
+        application
         protocol
         window
         renderer
