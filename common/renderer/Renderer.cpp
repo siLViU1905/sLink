@@ -3,6 +3,9 @@
 #include <map>
 #include <print>
 
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
+
 namespace sLink::renderer
 {
     Renderer::Renderer()
@@ -42,47 +45,50 @@ namespace sLink::renderer
 
         createCommandPools();
 
-        //createImGuiDescriptorPool();
+        createImGuiDescriptorPool();
 
         createCommandBuffers();
 
         createSyncObjects();
+
+
+        initImGuiBackend(window);
     }
 
-    // void Renderer::initImGuiBackend(window::Window &window)
-    // {
-    //     ImGui_ImplGlfw_InitForVulkan(window.getGLFWWindow(), true);
-    //
-    //     ImGui_ImplVulkan_InitInfo initInfo{};
-    //
-    //     initInfo.Instance = *m_Instance;
-    //     initInfo.PhysicalDevice = *m_PhysicalDevice;
-    //     initInfo.Device = *m_Device;
-    //     initInfo.QueueFamily = m_GraphicsQueueFamilyIndex;
-    //     initInfo.Queue = *m_GraphicsQueue;
-    //     initInfo.DescriptorPool = *m_ImGuiDescriptorPool;
-    //     initInfo.MinImageCount = m_SwapChainImages.size();
-    //     initInfo.ImageCount = m_SwapChainImages.size();
-    //     initInfo.PipelineInfoMain.MSAASamples = static_cast<VkSampleCountFlagBits>(m_MsaaSamples);
-    //     initInfo.Allocator = nullptr;
-    //     initInfo.CheckVkResultFn = nullptr;
-    //
-    //     initInfo.UseDynamicRendering = true;
-    //     initInfo.PipelineInfoMain.RenderPass = VK_NULL_HANDLE;
-    //
-    //     initInfo.PipelineInfoMain.PipelineRenderingCreateInfo.sType =
-    //             VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
-    //     initInfo.PipelineInfoMain.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
-    //     initInfo.PipelineInfoMain.PipelineRenderingCreateInfo.pColorAttachmentFormats = reinterpret_cast<const VkFormat
-    //         *>(&
-    //         m_SwapChainImageFormat);
-    //
-    //     initInfo.PipelineInfoMain.PipelineRenderingCreateInfo.depthAttachmentFormat = *reinterpret_cast<const VkFormat
-    //         *>(&m_DepthFormat);
-    //
-    //     if (!ImGui_ImplVulkan_Init(&initInfo))
-    //         throw std::runtime_error("Failed to initialize ImGui for Vulkan");
-    // }
+    void Renderer::initImGuiBackend(window::Window &window)
+    {
+        ImGui_ImplGlfw_InitForVulkan(window.getGLFWWindow(), true);
+
+        ImGui_ImplVulkan_InitInfo initInfo{};
+
+        initInfo.Instance = *m_Instance;
+        initInfo.PhysicalDevice = *m_PhysicalDevice;
+        initInfo.Device = *m_Device;
+        initInfo.QueueFamily = m_GraphicsQueueFamilyIndex;
+        initInfo.Queue = *m_GraphicsQueue;
+        initInfo.DescriptorPool = *m_ImGuiDescriptorPool;
+        initInfo.MinImageCount = m_SwapChainImages.size();
+        initInfo.ImageCount = m_SwapChainImages.size();
+        initInfo.PipelineInfoMain.MSAASamples = static_cast<VkSampleCountFlagBits>(m_MsaaSamples);
+        initInfo.Allocator = nullptr;
+        initInfo.CheckVkResultFn = nullptr;
+
+        initInfo.UseDynamicRendering = true;
+        initInfo.PipelineInfoMain.RenderPass = VK_NULL_HANDLE;
+
+        initInfo.PipelineInfoMain.PipelineRenderingCreateInfo.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
+        initInfo.PipelineInfoMain.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
+        initInfo.PipelineInfoMain.PipelineRenderingCreateInfo.pColorAttachmentFormats = reinterpret_cast<const VkFormat
+            *>(&
+            m_SwapChainImageFormat);
+
+        initInfo.PipelineInfoMain.PipelineRenderingCreateInfo.depthAttachmentFormat = *reinterpret_cast<const VkFormat
+            *>(&m_DepthFormat);
+
+        if (!ImGui_ImplVulkan_Init(&initInfo))
+            throw std::runtime_error("Failed to initialize ImGui for Vulkan");
+    }
 
     void Renderer::createInstance()
     {
@@ -1012,49 +1018,35 @@ namespace sLink::renderer
         return vk::raii::ImageView(m_Device, viewInfo);
     }
 
-    // void Renderer::recordImGuiData(Im_Gui &imgui)
-    // {
-    //     auto &cmd = m_ImGuiCommandBuffers[m_CurrentFrame];
-    //
-    //     cmd.reset();
-    //
-    //     vk::CommandBufferInheritanceRenderingInfoKHR inheritanceRenderingInfo{};
-    //
-    //     inheritanceRenderingInfo.colorAttachmentCount = 1;
-    //     inheritanceRenderingInfo.pColorAttachmentFormats = &m_SwapChainImageFormat;
-    //     inheritanceRenderingInfo.depthAttachmentFormat = m_DepthFormat;
-    //     inheritanceRenderingInfo.rasterizationSamples = m_MsaaSamples;
-    //
-    //     vk::CommandBufferInheritanceInfo inheritanceInfo;
-    //
-    //     inheritanceInfo.pNext = &inheritanceRenderingInfo;
-    //     inheritanceInfo.renderPass = VK_NULL_HANDLE;
-    //
-    //     vk::CommandBufferBeginInfo beginInfo(
-    //         vk::CommandBufferUsageFlagBits::eRenderPassContinue | vk::CommandBufferUsageFlagBits::eOneTimeSubmit,
-    //         &inheritanceInfo
-    //     );
-    //
-    //     cmd.begin(beginInfo);
-    //
-    //     ImGui_ImplVulkan_RenderDrawData(imgui.getDrawData(), *cmd);
-    //
-    //     cmd.end();
-    // }
-    //
-    // void Renderer::beginImGuiFrame(Im_Gui &imgui)
-    // {
-    //     ImGui_ImplVulkan_NewFrame();
-    //
-    //     ImGui_ImplGlfw_NewFrame();
-    //
-    //     imgui.beginFrame();
-    // }
-    //
-    // void Renderer::endImGuiFrame(Im_Gui &imgui)
-    // {
-    //     imgui.endFrame();
-    // }
+    void Renderer::recordUIData(ui::UIBackend::UIRenderData* data)
+    {
+        auto &cmd = m_ImGuiCommandBuffers[m_CurrentFrame];
+
+        cmd.reset();
+
+        vk::CommandBufferInheritanceRenderingInfoKHR inheritanceRenderingInfo{};
+
+        inheritanceRenderingInfo.colorAttachmentCount = 1;
+        inheritanceRenderingInfo.pColorAttachmentFormats = &m_SwapChainImageFormat;
+        inheritanceRenderingInfo.depthAttachmentFormat = m_DepthFormat;
+        inheritanceRenderingInfo.rasterizationSamples = m_MsaaSamples;
+
+        vk::CommandBufferInheritanceInfo inheritanceInfo;
+
+        inheritanceInfo.pNext = &inheritanceRenderingInfo;
+        inheritanceInfo.renderPass = VK_NULL_HANDLE;
+
+        vk::CommandBufferBeginInfo beginInfo(
+            vk::CommandBufferUsageFlagBits::eRenderPassContinue | vk::CommandBufferUsageFlagBits::eOneTimeSubmit,
+            &inheritanceInfo
+        );
+
+        cmd.begin(beginInfo);
+
+        ImGui_ImplVulkan_RenderDrawData(data, *cmd);
+
+        cmd.end();
+    }
 
     void Renderer::renderFrame()
     {
@@ -1122,9 +1114,9 @@ namespace sLink::renderer
     {
         m_Device.waitIdle();
 
-        // ImGui_ImplVulkan_Shutdown();
-        //
-        // ImGui_ImplGlfw_Shutdown();
+        ImGui_ImplVulkan_Shutdown();
+
+        ImGui_ImplGlfw_Shutdown();
 
         cleanupSwapChain();
     }
