@@ -139,7 +139,7 @@ namespace sLink::renderer
 
         void createColorResources();
 
-        uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
+        uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties) const;
 
         static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
                                                               vk::DebugUtilsMessageTypeFlagsEXT type,
