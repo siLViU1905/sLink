@@ -23,12 +23,6 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(${GLFW_PATH})
 
-if(MSVC)
-    add_compile_options(/W4 /permissive- /utf-8)
-else()
-    add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
-
 add_subdirectory(external)
 
 add_subdirectory(common)
