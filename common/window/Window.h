@@ -27,17 +27,11 @@ namespace sLink::window
 
         void resize(int width, int height);
 
-        constexpr int getHeight() const { return height; }
+        constexpr int getHeight() const { return m_Height; }
 
-        constexpr int getWidth() const { return width; }
+        constexpr int getWidth() const { return m_Width; }
 
         void getFramebufferSize(int &width, int &height) const;
-
-        void getCursorDeltaPos(double &deltaX, double &deltaY);
-
-        void disableCursor();
-
-        void enableCursor();
 
         void pollEvents() const;
 
@@ -46,13 +40,13 @@ namespace sLink::window
         ~Window();
 
     private:
-        GLFWwindow *windowHandle;
+        GLFWwindow *m_WindowHandle;
 
-        int width;
+        int m_Width;
 
-        int height;
+        int m_Height;
 
-        bool framebufferResized;
+        bool m_FramebufferResized;
 
         static void glfw_framebufferCallback(GLFWwindow *window, int width, int height);
     };

@@ -6,69 +6,69 @@ namespace sLink::window
 {
     GLFWwindow *Window::getGLFWWindow()
     {
-        return windowHandle;
+        return m_WindowHandle;
     }
 
-    Window::Window(int width, int height, std::string_view title) : width(width), height(height),
-                                                                    framebufferResized(false)
+    Window::Window(int width, int height, std::string_view title) : m_Width(width), m_Height(height),
+                                                                    m_FramebufferResized(false)
     {
         if (!glfwInit())
             throw std::runtime_error("Failed to init GLFW");
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-        windowHandle = glfwCreateWindow(width, height, title.data(), nullptr, nullptr);
+        m_WindowHandle = glfwCreateWindow(width, height, title.data(), nullptr, nullptr);
 
-        if (!windowHandle)
+        if (!m_WindowHandle)
             throw std::runtime_error("Failed to create GLFW Window");
 
-        glfwSetWindowUserPointer(windowHandle, this);
+        glfwSetWindowUserPointer(m_WindowHandle, this);
 
-        glfwSetFramebufferSizeCallback(windowHandle, glfw_framebufferCallback);
+        glfwSetFramebufferSizeCallback(m_WindowHandle, glfw_framebufferCallback);
     }
 
     bool Window::isOpen() const
     {
-        return !glfwWindowShouldClose(windowHandle);
+        return !glfwWindowShouldClose(m_WindowHandle);
     }
 
     void Window::close()
     {
-        glfwSetWindowShouldClose(windowHandle, true);
+        glfwSetWindowShouldClose(m_WindowHandle, true);
     }
 
     bool Window::wasResized()
     {
-        bool temp = framebufferResized;
+        bool temp = m_FramebufferResized;
 
-        framebufferResized = false;
+        m_FramebufferResized = false;
 
         return temp;
     }
 
     void Window::maximize()
     {
-        glfwMaximizeWindow(windowHandle);
+        glfwMaximizeWindow(m_WindowHandle);
     }
 
     bool Window::isMaximized() const
     {
-        return static_cast<bool>(glfwGetWindowAttrib(windowHandle, GLFW_MAXIMIZED));
+        return static_cast<bool>(glfwGetWindowAttrib(m_WindowHandle, GLFW_MAXIMIZED));
     }
 
     void Window::restore()
     {
-        glfwRestoreWindow(windowHandle);
+        glfwRestoreWindow(m_WindowHandle);
     }
 
     void Window::resize(int width, int height)
     {
-        glfwSetWindowSize(windowHandle, width, height);
+        glfwSetWindowSize(m_WindowHandle, width, height);
     }
 
     void Window::getFramebufferSize(int &width, int &height) const
     {
-        glfwGetFramebufferSize(windowHandle, &width, &height);
+        glfwGetFramebufferSize(m_WindowHandle, &width, &height);
     }
 
     void Window::pollEvents() const
@@ -85,16 +85,16 @@ namespace sLink::window
     {
         auto *self = static_cast<Window *>(glfwGetWindowUserPointer(window));
 
-        self->framebufferResized = true;
+        self->m_FramebufferResized = true;
 
-        self->width = width;
+        self->m_Width = width;
 
-        self->height = height;
+        self->m_Height = height;
     }
 
     Window::~Window()
     {
-        glfwDestroyWindow(windowHandle);
+        glfwDestroyWindow(m_WindowHandle);
 
         glfwTerminate();
     }
