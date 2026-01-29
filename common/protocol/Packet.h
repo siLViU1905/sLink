@@ -1,15 +1,15 @@
 #ifndef SLINK_PACKET_H
 #define SLINK_PACKET_H
-#include "packet_header.h"
+#include "Packet_Header.h"
 #include <vector>
 
 namespace slink::protocol
 {
     struct Packet
     {
-        PacketHeader header;
+        PacketHeader m_Header;
 
-        std::vector<std::byte> data;
+        std::vector<std::byte> m_Data;
     };
 }
 

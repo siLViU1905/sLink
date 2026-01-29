@@ -1,14 +1,14 @@
 #ifndef SLINK_PACKET_HEADER_H
 #define SLINK_PACKET_HEADER_H
-#include "command.h"
+#include "Command.h"
 
 namespace slink::protocol
 {
     struct PacketHeader
     {
-        Command command;
+        Command m_Command;
 
-        size_t payloadSize;
+        size_t m_PayloadSize;
     };
 }
 
