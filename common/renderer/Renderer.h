@@ -14,6 +14,8 @@
 #include <vector>
 #include <GLFW/glfw3native.h>
 
+#include <ui/backend/UiBackend.h>
+
 namespace sLink::renderer
 {
     class Renderer
@@ -22,8 +24,6 @@ namespace sLink::renderer
         Renderer();
 
         void init(window::Window &window);
-
-        //void initImGuiBackend(window::Window &window);
 
         void notifyFramebufferResized();
 
@@ -35,17 +35,15 @@ namespace sLink::renderer
 
         void setClearColor(vk::ClearValue color);
 
-        // void recordImGuiData(Im_Gui &imgui);
-        //
-        // void beginImGuiFrame(Im_Gui &imgui);
-        //
-        // void endImGuiFrame(Im_Gui &imgui);
+        void recordUIData(ui::UIBackend::UIRenderData *data);
 
         void renderFrame();
 
         ~Renderer();
 
     private:
+        void initImGuiBackend(window::Window &window);
+
         void createInstance();
 
         std::vector<const char *> getRequiredExtensions() const;
