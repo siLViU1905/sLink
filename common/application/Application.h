@@ -14,9 +14,9 @@ namespace sLink::application
     private:
         window::Window m_Window;
 
-        renderer::Renderer m_Renderer;
-
         ui::UIBackend m_UIBackend;
+
+        renderer::Renderer m_Renderer;
 
         void render();
 
