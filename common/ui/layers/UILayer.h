@@ -12,7 +12,7 @@ namespace sLink::ui::layer
     public:
         void render() const;
 
-        void addComponent(std::unique_ptr<component::UIComponent> component);
+        void addComponent(std::unique_ptr<component::UIComponent>&& component);
     private:
         std::vector<std::unique_ptr<component::UIComponent>> m_Components;
     };

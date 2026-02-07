@@ -8,7 +8,7 @@ namespace sLink::ui::layer
 			component->render();
 	}
 
-	void UILayer::addComponent(std::unique_ptr<component::UIComponent> component)
+	void UILayer::addComponent(std::unique_ptr<component::UIComponent>&& component)
 	{
 		m_Components.push_back(std::move(component));
 	}
