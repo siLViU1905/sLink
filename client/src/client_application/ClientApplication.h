@@ -1,6 +1,7 @@
 #ifndef SLINK_CLIENT_APPLICATION_H
 #define SLINK_CLIENT_APPLICATION_H
 
+#include "../client/Client.h"
 #include <application/Application.h>
 
 namespace sLink::client_application
@@ -16,7 +17,11 @@ namespace sLink::client_application
         void onRender() override;
 
     private:
-      
+        asio::io_context m_IOContext;
+
+        client::Client m_Client;
+
+        std::jthread m_NetworkThread;
     };
 }
 
