@@ -93,7 +93,7 @@ namespace sLink::renderer
 	void Renderer::createInstance()
 	{
 		constexpr vk::ApplicationInfo appInfo(
-			"MinecraftCloneVK",
+			"sLink",
 			VK_MAKE_VERSION(1, 0, 0),
 			"vk",
 			VK_MAKE_VERSION(1, 0, 0),
