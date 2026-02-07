@@ -27,6 +27,8 @@ namespace sLink::client_application
         std::jthread m_NetworkThread;
 
         ui::layer::UILayer m_MainLayer;
+
+        void initLayers();
     };
 }
 

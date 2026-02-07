@@ -47,7 +47,12 @@ namespace sLink::ui::component
 
         if (ImGui::Button("Send", ImVec2(button_width, 0)) || input_submitted)
             if (m_InputContent[0] != '\0')
+            {
+                if (m_OnSendCallback)
+                    m_OnSendCallback(m_InputContent);
+
                 m_InputContent[0] = '\0';
+            }
 
         ImGui::End();
         ImGui::PopStyleVar(); 
@@ -56,5 +61,10 @@ namespace sLink::ui::component
 	void UIChatWindow::addMessage(const message::Message& message)
 	{
 		m_Messages.push_back(message);
+	}
+
+	void UIChatWindow::setOnMessageSend(OnSendCallback&& callback)
+	{
+        m_OnSendCallback = std::move(callback);
 	}
 }

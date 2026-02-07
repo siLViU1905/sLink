@@ -13,7 +13,7 @@ namespace sLink::client_application
 				m_IOContext.run();
 			});
 
-		m_MainLayer.addComponent(std::make_unique<ui::component::UIChatWindow>());
+		initLayers();
 	}
 
 	void ClientApplication::onUpdate()
@@ -38,5 +38,17 @@ namespace sLink::client_application
 		m_MainLayer.render();
 
 		ui::UIBackend::end_frame();
+	}
+
+	void ClientApplication::initLayers()
+	{
+		auto component = std::make_unique<ui::component::UIChatWindow>();
+
+		component->setOnMessageSend([this](std::string_view msg)
+			{
+				m_Client.send(msg.data());
+			});
+
+		m_MainLayer.addComponent(std::move(component));
 	}
 }
