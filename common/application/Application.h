@@ -21,6 +21,8 @@ namespace sLink::application
         virtual void onUpdate() = 0;
 
         virtual void onRender() = 0;
+
+        virtual void onRenderUI() = 0;
     private:
         void handleWindowResize();
     };
