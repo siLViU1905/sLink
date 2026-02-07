@@ -6,7 +6,7 @@ namespace sLink::ui::component
     class UIComponent
     {
     public:
-        virtual void render() const = 0;
+        virtual void render() = 0;
 
         virtual ~UIComponent() = default;
     };
