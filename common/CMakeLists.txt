@@ -3,6 +3,7 @@ add_library(common_shared STATIC
         window/Window.cpp
         ui/backend/UIBackend.cpp
         application/Application.cpp
+        message/Message.cpp
 )
 
 target_include_directories(common_shared PUBLIC
