@@ -180,3 +180,4 @@ out/build/x64-Debug/VSInheritEnvironments.txt
 /out/build/x64-Debug/common/CMakeFiles/common_shared.dir/ui
 /.vs
 /out/build/x64-Debug/client
+/out/build/x64-Release
