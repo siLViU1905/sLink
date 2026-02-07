@@ -8,27 +8,38 @@ namespace sLink::ui::component
 	{
 	}
 
-	void UIChatWindow::render()
-	{
-		ImGui::Begin("Chat Window");
+    void UIChatWindow::render()
+    {
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
 
-		ImGui::BeginChild("ScrollingRegion", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), false);
+        ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 
-		for (const auto& msg : m_Messages) 
-		{
-			ImGui::Text("[%lld] %s: %s", msg.getTimestamp(), msg.getSenderName().data(), msg.getContent().data());
-		}
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
+        
+        constexpr ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoBringToFrontOnFocus;
 
-		ImGui::EndChild();
+        ImGui::Begin("Chat Window", nullptr, window_flags);
 
-		if (ImGui::InputText("##input", m_InputContent.data(), 256, ImGuiInputTextFlags_EnterReturnsTrue))
-		{
-			//TODO: add callback to send message
-			m_InputContent[0] = '\0';
-		}
+        ImGui::BeginChild("ScrollingRegion", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), false);
+        for (const auto& msg : m_Messages)
+        {
+            ImGui::Text("[%lld] %s: %s", msg.getTimestamp(), msg.getSenderName().data(), msg.getContent().data());
+        }
+        ImGui::EndChild();
 
-		ImGui::End();
-	}
+        if (ImGui::InputText("##input", m_InputContent.data(), 256, ImGuiInputTextFlags_EnterReturnsTrue))
+        {
+            //TODO: add callback for send message
+            m_InputContent[0] = '\0';
+        }
+
+        ImGui::End();
+        ImGui::PopStyleVar(); 
+    }
 
 	void UIChatWindow::addMessage(const message::Message& message)
 	{
