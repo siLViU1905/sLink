@@ -1,8 +1,8 @@
 #ifndef SLINK_CLIENT_H
 #define SLINK_CLIENT_H
 
-#include <utility/safe_queue/SafeQueue.h>
 #include <asio.hpp>
+#include <utility/safe_queue/SafeQueue.h>
 
 namespace sLink::client
 {
