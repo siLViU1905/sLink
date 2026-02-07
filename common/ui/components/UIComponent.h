@@ -1,12 +1,12 @@
 #ifndef SLINK_UI_COMPONENT_H
 #define SLINK_UI_COMPONENT_H
 
-namespace sLink::ui
+namespace sLink::ui::component
 {
     class UIComponent
     {
     public:
-        virtual void render() const = 0;
+        virtual void render() = 0;
 
         virtual ~UIComponent() = default;
     };
