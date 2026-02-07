@@ -1,11 +1,11 @@
 #include <print>
-#include <application/Application.h>
+#include "client_application/ClientApplication.h"
 
 int main()
 {
     try
     {
-        sLink::application::Application application(800, 600, "Client");
+        sLink::client_application::ClientApplication application(800, 600, "Client");
 
         application.run();
     } catch (const std::exception &exception)
