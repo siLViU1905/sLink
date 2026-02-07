@@ -27,9 +27,9 @@ namespace sLink::client
 
 		asio::ip::tcp::socket m_Socket;
 
-		SafeQueue<std::string> m_Inbox;
+		utility::SafeQueue<std::string> m_Inbox;
 
-		SafeQueue<std::string> m_Outbox;
+		utility::SafeQueue<std::string> m_Outbox;
 
 		asio::streambuf m_ReadBuffer;
 
