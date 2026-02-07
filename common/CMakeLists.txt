@@ -19,6 +19,7 @@ target_include_directories(common_shared PUBLIC
 target_link_libraries(common_shared
         PUBLIC
         asio_lib
+        json_lib
         imgui_lib
         glfw
         Vulkan::Vulkan

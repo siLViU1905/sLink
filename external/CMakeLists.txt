@@ -6,6 +6,10 @@ target_compile_definitions(asio_lib INTERFACE
         $<$<PLATFORM_ID:Windows>:_WIN32_WINNT=0x0601>
 )
 
+add_library(json_lib INTERFACE)
+
+target_include_directories(json_lib INTERFACE json/include)
+
 add_library(imgui_lib STATIC
         imgui/imgui.cpp
         imgui/imgui_draw.cpp
