@@ -12,6 +12,7 @@ target_include_directories(common_shared PUBLIC
         window
         renderer
         ui
+        utility
 )
 
 target_link_libraries(common_shared
