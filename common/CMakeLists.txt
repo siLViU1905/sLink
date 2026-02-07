@@ -4,6 +4,7 @@ add_library(common_shared STATIC
         ui/backend/UIBackend.cpp
         application/Application.cpp
         message/Message.cpp
+        ui/layers/UILayer.cpp
 )
 
 target_include_directories(common_shared PUBLIC
