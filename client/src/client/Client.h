@@ -34,6 +34,8 @@ namespace sLink::client
 		asio::streambuf m_ReadBuffer;
 
 		bool m_IsWriting;
+
+		std::string m_CurrentMessage;
 	};
 }
 

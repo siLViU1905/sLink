@@ -55,9 +55,9 @@ namespace sLink::client
 
 		m_IsWriting = true;
 
-		auto to_send = *msg + "\n";
+		m_CurrentMessage = *msg + "\n";
 
-		asio::async_write(m_Socket, asio::buffer(to_send),
+		asio::async_write(m_Socket, asio::buffer(m_CurrentMessage),
 			[this](std::error_code ec, size_t)
 			{
 				if (!ec)
