@@ -1,6 +1,6 @@
 add_library(asio_lib INTERFACE)
 
-target_include_directories(asio_lib INTERFACE asio/asio/include)
+target_include_directories(asio_lib INTERFACE asio/include)
 target_compile_definitions(asio_lib INTERFACE ASIO_STANDALONE)
 
 add_library(imgui_lib STATIC
