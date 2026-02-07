@@ -176,3 +176,4 @@ out/build/x64-Debug/Testing/Temporary/LastTest.log
 out/build/x64-Debug/VSInheritEnvironments.txt
 /.vs/sLink
 /out/build/x64-Debug/.cmake/api/v1/reply
+/out/build/x64-Debug/common/CMakeFiles/common_shared.dir/message
