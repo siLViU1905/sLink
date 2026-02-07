@@ -10,7 +10,7 @@ namespace sLink::ui::layer
     class UILayer
     {
     public:
-        void render() const;
+        void render();
 
         void addComponent(std::unique_ptr<component::UIComponent>&& component);
     private:

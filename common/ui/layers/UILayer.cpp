@@ -2,7 +2,7 @@
 
 namespace sLink::ui::layer
 {
-	void UILayer::render() const
+	void UILayer::render()
 	{
 		for (const auto& component : m_Components)
 			component->render();
