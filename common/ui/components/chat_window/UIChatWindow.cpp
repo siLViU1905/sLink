@@ -31,11 +31,23 @@ namespace sLink::ui::component
         }
         ImGui::EndChild();
 
-        if (ImGui::InputText("##input", m_InputContent.data(), 256, ImGuiInputTextFlags_EnterReturnsTrue))
-        {
-            //TODO: add callback for send message
-            m_InputContent[0] = '\0';
-        }
+        ImGui::Separator();
+
+        constexpr float button_width = 60.f;
+
+        float spacing = ImGui::GetStyle().ItemSpacing.x;
+
+        ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - button_width - spacing);
+
+        bool input_submitted = ImGui::InputText("##input", m_InputContent.data(), 256, ImGuiInputTextFlags_EnterReturnsTrue);
+
+        ImGui::PopItemWidth();
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Send", ImVec2(button_width, 0)) || input_submitted)
+            if (m_InputContent[0] != '\0')
+                m_InputContent[0] = '\0';
 
         ImGui::End();
         ImGui::PopStyleVar(); 
