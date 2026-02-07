@@ -11,15 +11,17 @@ namespace sLink::application
         Application(int windowWidth, int windowHeight, std::string_view windowName);
 
         void run();
-    private:
+    protected:
         window::Window m_Window;
 
         ui::UIBackend m_UIBackend;
 
         renderer::Renderer m_Renderer;
 
-        void render();
+        virtual void onUpdate() = 0;
 
+        virtual void onRender() = 0;
+    private:
         void handleWindowResize();
     };
 }

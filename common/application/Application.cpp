@@ -12,7 +12,9 @@ namespace sLink::application
     {
         while (m_Window.isOpen())
         {
-            render();
+            onUpdate();
+
+            onRender();
 
             m_Window.pollEvents();
 
@@ -21,13 +23,6 @@ namespace sLink::application
         }
 
         m_Renderer.waitIdle();
-    }
-
-    void Application::render()
-    {
-        m_Renderer.waitForFences();
-
-        m_Renderer.renderFrame();
     }
 
     void Application::handleWindowResize()
