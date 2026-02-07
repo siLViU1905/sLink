@@ -1,7 +1,7 @@
 #ifndef SLINK_UI_COMPONENT_H
 #define SLINK_UI_COMPONENT_H
 
-namespace sLink::ui
+namespace sLink::ui::component
 {
     class UIComponent
     {
