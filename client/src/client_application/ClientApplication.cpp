@@ -10,6 +10,8 @@ namespace sLink::client_application
 	{
 		initLayers();
 
+		m_Client.setUsername("ClientTest");
+
 		m_Client.connect("127.0.0.1", "12444");
 
 		m_NetworkThread = std::jthread([this]()
@@ -51,9 +53,14 @@ namespace sLink::client_application
 	{
 		auto component = std::make_unique<ui::component::UIChatWindow>();
 
-		component->setOnMessageSend([this](std::string_view msg)
+		component->setOnMessageSend([this](std::string_view content)
 			{
-				m_Client.send(msg.data());
+				message::Message message(
+					m_Client.getUsername(),
+					content
+				);
+
+				m_Client.send(message);
 			});
 
 		m_MainLayer.addComponent(std::move(component));

@@ -4,6 +4,8 @@
 #include <asio.hpp>
 #include <utility/safe_queue/SafeQueue.h>
 
+#include "message/Message.h"
+
 namespace sLink::client
 {
 	class Client
@@ -11,9 +13,13 @@ namespace sLink::client
 	public:
 		Client(asio::io_context& ctx);
 
+		void setUsername(std::string_view name);
+
+		std::string_view getUsername() const;
+
 		void connect(std::string_view host, std::string_view port);
 
-		void send(std::string msg);
+		void send(const message::Message& message);
 
 		bool isConnected() const;
 	private:
@@ -22,6 +28,8 @@ namespace sLink::client
 		void onWrite();
 
 		void onRead();
+
+		std::string m_Username;
 
 		asio::io_context& m_IOContext;
 

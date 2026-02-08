@@ -6,6 +6,16 @@ namespace sLink::client
 	{
 	}
 
+	void Client::setUsername(std::string_view name)
+	{
+		m_Username = name;
+	}
+
+	std::string_view Client::getUsername() const
+	{
+		return m_Username;
+	}
+
 	void Client::connect(std::string_view host, std::string_view port)
 	{
 		asio::ip::tcp::resolver resolver(m_IOContext);
@@ -15,9 +25,9 @@ namespace sLink::client
 		onConnect(endpoints);
 	}
 
-	void Client::send(std::string msg)
+	void Client::send(const message::Message& message)
 	{
-		m_Outbox.push(std::move(msg));
+		m_Outbox.push(message.serialize());
 
 		asio::post(m_IOContext, [this]()
 			{
