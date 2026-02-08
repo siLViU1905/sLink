@@ -3,7 +3,7 @@
 
 #include "../client/Client.h"
 #include <application/Application.h>
-#include <layers/UILayer.h>
+#include <layers/chat_layer/UIChatLayer.h>
 
 namespace sLink::client_application
 {
@@ -22,15 +22,15 @@ namespace sLink::client_application
         void onRenderUI() override;
 
     private:
+        void initLayers();
+
         asio::io_context m_IOContext;
 
         client::Client m_Client;
 
         std::jthread m_NetworkThread;
 
-        ui::layer::UILayer m_MainLayer;
-
-        void initLayers();
+        ui::layer::UIChatLayer m_ChatLayer;
     };
 }
 

@@ -29,7 +29,9 @@ namespace sLink::client_application
 	{
 		while (auto raw_message = m_Client.getInbox().tryPop())
 		{
+			auto message = message::Message::deserialize(*raw_message);
 
+			m_ChatLayer.getChatWindow().addMessage(message);
 		}
 	}
 
@@ -48,16 +50,14 @@ namespace sLink::client_application
 	{
 		ui::UIBackend::begin_frame();
 
-		m_MainLayer.render();
+		m_ChatLayer.render();
 
 		ui::UIBackend::end_frame();
 	}
 
 	void ClientApplication::initLayers()
 	{
-		auto component = std::make_unique<ui::component::UIChatWindow>();
-
-		component->setOnMessageSend([this](std::string_view content)
+		m_ChatLayer.getChatWindow().setOnMessageSend([this](std::string_view content)
 			{
 				message::Message message(
 					m_Client.getUsername(),
@@ -66,7 +66,5 @@ namespace sLink::client_application
 
 				m_Client.send(message);
 			});
-
-		m_MainLayer.addComponent(std::move(component));
 	}
 }
