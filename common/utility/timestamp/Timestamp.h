@@ -10,6 +10,8 @@ namespace sLink::utility
     public:
         Timestamp();
 
+        Timestamp(int64_t ms);
+
         int64_t getMs() const;
 
         std::string toString() const;

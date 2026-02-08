@@ -2,17 +2,18 @@
 #define SLINK_MESSAGE_H 
 
 #include <string>
+#include <timestamp/Timestamp.h>
 
 namespace sLink::message
 {
 	class Message
 	{
 	public:
-		Message();
+		Message() = default;
 
 		Message(std::string_view senderName, std::string_view content);
 
-		Message(std::string_view senderName, std::string_view content, int64_t timestamp);
+		Message(std::string_view senderName, std::string_view content, utility::Timestamp timestamp);
 
 		void setSenderName(std::string_view name);
 
@@ -22,7 +23,7 @@ namespace sLink::message
 
 		std::string_view getContent() const;
 
-		int64_t getTimestamp() const;
+		utility::Timestamp getTimestamp() const;
 
 		std::string serialize() const;
 
@@ -35,7 +36,7 @@ namespace sLink::message
 
 		std::string m_Content;
 
-		int64_t m_Timestamp;
+		utility::Timestamp m_Timestamp;
 
 		static constexpr std::string_view s_JSONSenderNameSelector = "sender_name";
 

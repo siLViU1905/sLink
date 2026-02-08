@@ -11,6 +11,10 @@ namespace sLink::utility
     {
     }
 
+    Timestamp::Timestamp(int64_t ms):m_MsSinceEpoch(ms)
+    {
+    }
+
     int64_t Timestamp::getMs() const
     {
         return m_MsSinceEpoch;
