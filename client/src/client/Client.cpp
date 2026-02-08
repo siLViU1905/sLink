@@ -2,9 +2,12 @@
 
 namespace sLink::client
 {
-	Client::Client(asio::io_context& ctx) :m_IOContext(ctx), m_Socket(ctx), m_IsWriting(false)
+	Client::Client(asio::io_context& ctx)
+		:m_IOContext(ctx),
+		m_WorkGuard(asio::make_work_guard(ctx)),
+		m_Socket(ctx),
+		m_IsWriting(false)
 	{
-		onRead();
 	}
 
 	void Client::setUsername(std::string_view name)
