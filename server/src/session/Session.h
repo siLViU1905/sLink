@@ -5,7 +5,7 @@
 
 namespace sLink::session
 {
-	class Session
+	class Session : public std::enable_shared_from_this<Session>
 	{
 	public:
 		Session(asio::ip::tcp::socket&& socket);

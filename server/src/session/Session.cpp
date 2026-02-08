@@ -13,16 +13,21 @@ namespace sLink::session
 
 	void Session::onRead()
 	{
+		auto self(shared_from_this());
+
 		asio::async_read_until(m_Socket, m_Buffer, '\n',
-			[this](std::error_code ec, size_t)
+			[this, self](std::error_code ec, size_t)
 			{
-				std::istream is(&m_Buffer);
+				if (!ec)
+				{
+					std::istream is(&m_Buffer);
 
-				std::string msg;
+					std::string msg;
 
-				std::getline(is, msg);
+					std::getline(is, msg);
 
-				onRead();
+					onRead();
+				}
 			});
 	}
 }

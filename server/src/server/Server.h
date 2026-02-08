@@ -28,7 +28,7 @@ namespace sLink::server
 
 		asio::streambuf m_ReadBuffer;
 
-		std::vector<std::unique_ptr<session::Session>> m_Sessions;
+		std::vector<std::shared_ptr<session::Session>> m_Sessions;
 
 		bool m_IsWriting;
 	};
