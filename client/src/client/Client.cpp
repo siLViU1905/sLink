@@ -4,6 +4,7 @@ namespace sLink::client
 {
 	Client::Client(asio::io_context& ctx) :m_IOContext(ctx), m_Socket(ctx), m_IsWriting(false)
 	{
+		onRead();
 	}
 
 	void Client::connect(std::string_view host, std::string_view port)
