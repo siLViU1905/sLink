@@ -181,3 +181,5 @@ out/build/x64-Debug/VSInheritEnvironments.txt
 /.vs
 /out/build/x64-Debug/client
 /out/build/x64-Release
+/CMakeSettings.json
+/out/build/x64-Debug
