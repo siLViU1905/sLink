@@ -2,7 +2,8 @@
 
 namespace sLink::session
 {
-	Session::Session(asio::ip::tcp::socket&& socket) :m_Socket(std::move(socket))
+	Session::Session(asio::ip::tcp::socket&& socket, utility::SafeQueue<std::string>& inbox)
+		:m_Socket(std::move(socket)), m_Inbox(inbox)
 	{
 	}
 
@@ -25,6 +26,8 @@ namespace sLink::session
 					std::string msg;
 
 					std::getline(is, msg);
+
+					m_Inbox.push(msg);
 
 					onRead();
 				}

@@ -14,7 +14,7 @@ namespace sLink::server
 		m_Acceptor.async_accept([this](std::error_code ec, asio::ip::tcp::socket socket) {
 			if (!ec)
 			{
-				m_Sessions.push_back(std::make_shared<session::Session>(std::move(socket)));
+				m_Sessions.push_back(std::make_shared<session::Session>(std::move(socket), m_Inbox));
 
 				m_Sessions.back()->start();
 			}
