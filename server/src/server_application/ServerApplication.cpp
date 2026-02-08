@@ -2,9 +2,21 @@
 
 namespace sLink::server_application
 {
-	ServerApplication::ServerApplication(int windowWidth, int windowHeight, std::string_view windowName):
-		application::Application(windowWidth, windowHeight, windowName)
+	ServerApplication::ServerApplication(int windowWidth, int windowHeight, std::string_view windowName) :
+		application::Application(windowWidth, windowHeight, windowName),
+		m_Server(m_IOContext, 12444)
 	{
+		m_NetworkThread = std::jthread([this]()
+			{
+				m_IOContext.run();
+			});
+
+		initLayers();
+	}
+
+	ServerApplication::~ServerApplication()
+	{
+		m_IOContext.stop();
 	}
 
 	void ServerApplication::onUpdate()
@@ -15,6 +27,24 @@ namespace sLink::server_application
 	{
 		m_Renderer.waitForFences();
 
+		onRenderUI();
+
+		m_Renderer.recordUIData(ui::UIBackend::get_ui_render_data());
+
 		m_Renderer.renderFrame();
+	}
+
+	void ServerApplication::onRenderUI()
+	{
+		ui::UIBackend::begin_frame();
+
+		m_MainLayer.render();
+
+		ui::UIBackend::end_frame();
+	}
+
+	void ServerApplication::initLayers()
+	{
+		
 	}
 }

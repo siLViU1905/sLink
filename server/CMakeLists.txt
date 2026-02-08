@@ -1,6 +1,8 @@
 add_executable(sLink_Server
         src/main.cpp
         src/server_application/ServerApplication.cpp
+        src/server/Server.cpp
+        src/session/Session.cpp
 )
 
 target_link_libraries(sLink_Server
