@@ -12,6 +12,8 @@ namespace sLink::server_application
     public:
         ServerApplication(int windowWidth, int windowHeight, std::string_view windowName);
 
+        ~ServerApplication();
+
     protected:
         void onUpdate() override;
 

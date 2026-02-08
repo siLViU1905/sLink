@@ -14,6 +14,11 @@ namespace sLink::server_application
 		initLayers();
 	}
 
+	ServerApplication::~ServerApplication()
+	{
+		m_IOContext.stop();
+	}
+
 	void ServerApplication::onUpdate()
 	{
 	}
