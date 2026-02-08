@@ -39,8 +39,6 @@ namespace sLink::server_application
 	{
 		ui::UIBackend::begin_frame();
 
-		m_MainLayer.render();
-
 		ui::UIBackend::end_frame();
 	}
 
