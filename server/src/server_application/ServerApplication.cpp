@@ -21,6 +21,7 @@ namespace sLink::server_application
 
 	void ServerApplication::onUpdate()
 	{
+		m_Server.update();
 	}
 
 	void ServerApplication::onRender()
