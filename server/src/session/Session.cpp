@@ -12,6 +12,21 @@ namespace sLink::session
 		onRead();
 	}
 
+	void Session::send(const std::string& message)
+	{
+		auto self(shared_from_this());
+
+		asio::post(m_Socket.get_executor(), [this, self, message]()
+			{
+				bool idle = m_WriteQueue.empty();
+
+				m_WriteQueue.push(message + "\n");
+
+				if (idle)
+					onWrite();
+			});
+	}
+
 	void Session::onRead()
 	{
 		auto self(shared_from_this());
@@ -30,6 +45,23 @@ namespace sLink::session
 					m_Inbox.push(msg);
 
 					onRead();
+				}
+			});
+	}
+
+	void Session::onWrite()
+	{
+		auto self(shared_from_this());
+
+		asio::async_write(m_Socket, asio::buffer(m_WriteQueue.front()),
+			[this, self](std::error_code ec, size_t)
+			{
+				if (!ec)
+				{
+					m_WriteQueue.pop();
+
+					if (!m_WriteQueue.empty())
+						onWrite();
 				}
 			});
 	}

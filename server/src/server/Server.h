@@ -13,7 +13,9 @@ namespace sLink::server
 	public:
 		Server(asio::io_context& ctx, uint16_t port);
 
-		//void broadcast(std::string msg);
+		void broadcast(const std::string& message);
+
+		void update();
 
 	private:
 		void onAccept();

@@ -9,6 +9,18 @@ namespace sLink::server
 		onAccept();
 	}
 
+	void Server::broadcast(const std::string& message)
+	{
+		for (auto& session : m_Sessions)
+			session->send(message);
+	}
+
+	void Server::update()
+	{
+		while (auto message = m_Inbox.tryPop())
+			broadcast(*message);
+	}
+
 	void Server::onAccept()
 	{
 		m_Acceptor.async_accept([this](std::error_code ec, asio::ip::tcp::socket socket) {
