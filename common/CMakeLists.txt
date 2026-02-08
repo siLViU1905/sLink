@@ -8,7 +8,7 @@ add_library(common_shared STATIC
         ui/layers/chat_layer/UIChatLayer.cpp
         utility/timestamp/Timestamp.cpp
         ui/components/active_clients/UIActiveClients.cpp
-        ui/layers/clients_layer/UiClientsLayer.cpp
+        ui/layers/clients_layer/UIClientsLayer.cpp
 )
 
 target_include_directories(common_shared PUBLIC
