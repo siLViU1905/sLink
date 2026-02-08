@@ -16,8 +16,11 @@ namespace sLink::client_application
 			{
 				m_IOContext.run();
 			});
+	}
 
-		initLayers();
+	ClientApplication::~ClientApplication()
+	{
+		m_IOContext.stop();
 	}
 
 	void ClientApplication::onUpdate()

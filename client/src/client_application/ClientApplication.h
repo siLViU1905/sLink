@@ -12,6 +12,8 @@ namespace sLink::client_application
     public:
         ClientApplication(int windowWidth, int windowHeight, std::string_view windowName);
 
+        ~ClientApplication();
+
     protected:
         void onUpdate() override;
 
