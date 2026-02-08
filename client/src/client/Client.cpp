@@ -45,6 +45,11 @@ namespace sLink::client
 		return m_Socket.is_open();
 	}
 
+	utility::SafeQueue<std::string>& Client::getInbox()
+	{
+		return m_Inbox;
+	}
+
 	void Client::onConnect(asio::ip::tcp::resolver::results_type endpoints)
 	{
 		asio::async_connect(m_Socket, endpoints,

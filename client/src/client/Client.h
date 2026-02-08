@@ -22,6 +22,9 @@ namespace sLink::client
 		void send(const message::Message& message);
 
 		bool isConnected() const;
+
+		utility::SafeQueue<std::string>& getInbox();
+
 	private:
 		void onConnect(asio::ip::tcp::resolver::results_type endpoints);
 

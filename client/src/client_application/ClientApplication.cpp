@@ -10,10 +10,6 @@ namespace sLink::client_application
 	{
 		initLayers();
 
-		m_Client.setUsername("ClientTest");
-
-		m_Client.connect("127.0.0.1", "12444");
-
 		m_NetworkThread = std::jthread([this]()
 			{
 				m_IOContext.run();
@@ -31,6 +27,10 @@ namespace sLink::client_application
 
 	void ClientApplication::onUpdate()
 	{
+		while (auto raw_message = m_Client.getInbox().tryPop())
+		{
+
+		}
 	}
 
 	void ClientApplication::onRender()
