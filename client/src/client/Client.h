@@ -33,6 +33,8 @@ namespace sLink::client
 
 		asio::io_context& m_IOContext;
 
+		asio::executor_work_guard<asio::io_context::executor_type> m_WorkGuard;
+
 		asio::ip::tcp::socket m_Socket;
 
 		utility::SafeQueue<std::string> m_Inbox;
