@@ -25,10 +25,9 @@ namespace sLink::ui::component
         ImGui::Begin("Chat Window", nullptr, window_flags);
 
         ImGui::BeginChild("ScrollingRegion", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), false);
-        for (const auto& msg : m_Messages)
-        {
-            ImGui::Text("[%lld] %s: %s", msg.getTimestamp(), msg.getSenderName().data(), msg.getContent().data());
-        }
+        for (const auto& message : m_Messages)
+            ImGui::Text("[%lld] %s: %s", message.getTimestamp(), message.getSenderName().data(), message.getContent().data());
+
         ImGui::EndChild();
 
         ImGui::Separator();
@@ -49,7 +48,11 @@ namespace sLink::ui::component
             if (m_InputContent[0] != '\0')
             {
                 if (m_OnSendCallback)
-                    m_OnSendCallback(m_InputContent);
+                {
+                    auto clean_content = m_InputContent.substr(0, m_InputContent.find('\0'));
+
+                    m_OnSendCallback(clean_content);
+                }
 
                 m_InputContent[0] = '\0';
             }
