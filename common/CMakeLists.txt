@@ -6,6 +6,7 @@ add_library(common_shared STATIC
         message/Message.cpp
         ui/components/chat_window/UIChatWindow.cpp
         ui/layers/chat_layer/UIChatLayer.cpp
+        utility/timestamp/Timestamp.cpp
 )
 
 target_include_directories(common_shared PUBLIC
