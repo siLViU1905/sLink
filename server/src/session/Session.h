@@ -15,10 +15,16 @@ namespace sLink::session
 		void start();
 
 		void send(const std::string& message);
+
+		void setUsername(std::string_view username);
+
+		std::string_view getUsername() const;
 	private:
 		void onRead();
 
 		void onWrite();
+
+		std::string m_Username;
 
 		asio::ip::tcp::socket m_Socket;
 

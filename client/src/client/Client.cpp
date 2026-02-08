@@ -57,6 +57,8 @@ namespace sLink::client
 			{
 				if (!ec)
 				{
+					onJoin();
+
 					onRead();
 				}
 			});
@@ -109,5 +111,12 @@ namespace sLink::client
 				else
 					m_Socket.close();
 			});
+	}
+
+	void Client::onJoin()
+	{
+		auto joinMessage = "/" + m_Username + "\n";
+
+		asio::write(m_Socket, asio::buffer(joinMessage));
 	}
 }

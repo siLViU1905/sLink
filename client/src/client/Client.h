@@ -32,6 +32,8 @@ namespace sLink::client
 
 		void onRead();
 
+		void onJoin();
+
 		std::string m_Username;
 
 		asio::io_context& m_IOContext;
