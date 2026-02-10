@@ -12,6 +12,9 @@ namespace sLink::ui::component
 {
     class UIActiveClients : public UIComponent
     {
+    public:
+        static constexpr float s_PanelWidth = 200.f;
+
     private:
         static constexpr float s_FontScale = 1.15f;
 
