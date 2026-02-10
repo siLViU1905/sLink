@@ -10,7 +10,7 @@ namespace sLink::ui::component
 
         ImGui::SetNextWindowPos(ImVec2(offset_left, 0));
 
-        ImGui::SetNextWindowSize(ImVec2(s_WindowWidth, ImGui::GetIO().DisplaySize.y / 2.f));
+        ImGui::SetNextWindowSize(ImVec2(s_PanelWidth, ImGui::GetIO().DisplaySize.y / 2.f));
 
         constexpr ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar |
                                                   ImGuiWindowFlags_NoResize |
@@ -27,9 +27,9 @@ namespace sLink::ui::component
         for (const auto &log: m_Logs)
         {
             if (log.m_State == ClientLog::State::CONNECTED)
-                ImGui::TextColored(s_ColorConnected, "User connected: %s", log.m_Username.c_str());
+                ImGui::TextColored(s_ColorConnected, "%s connected", log.m_Username.c_str());
             else
-                ImGui::TextColored(s_ColorDisconnected, "User disconnected: %s", log.m_Username.c_str());
+                ImGui::TextColored(s_ColorDisconnected, "%s disconnected", log.m_Username.c_str());
         }
 
         ImGui::End();
