@@ -26,6 +26,11 @@ namespace sLink::server
 		return m_PendingUsernames;
 	}
 
+	utility::SafeQueue<std::string> & Server::getDisconnectedUsernames()
+	{
+		return m_DisconnectedUsernames;
+	}
+
 	void Server::onAccept()
 	{
 		m_Acceptor.async_accept([this](std::error_code ec, asio::ip::tcp::socket socket) {
@@ -33,15 +38,29 @@ namespace sLink::server
 			{
 				m_Sessions.push_back(std::make_shared<session::Session>(std::move(socket), m_Inbox));
 
-				m_Sessions.back()->setOnUsernameSentCallback([this](std::string_view username)
+				auto& session = m_Sessions.back();
+
+				session->setOnUsernameSentCallback([this](std::string_view username)
 				{
 					m_PendingUsernames.push(std::string(username));
 				});
 
-				m_Sessions.back()->start();
+				session->setOnDisconnectCallback([this, session](std::string_view username)
+				{
+					onClientDisconnected(session);
+				});
+
+				session->start();
 			}
 
 			onAccept();
 			});
+	}
+
+	void Server::onClientDisconnected(const std::shared_ptr<session::Session>& session)
+	{
+		m_DisconnectedUsernames.push(std::string(session->getUsername()));
+
+		std::erase(m_Sessions, session);
 	}
 }

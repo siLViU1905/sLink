@@ -23,8 +23,11 @@ namespace sLink::server_application
 	{
 		m_Server.update();
 
-		while (auto username = m_Server.getPendingUsernames().tryPop())
-			m_ClientsLayer.getClientsPanel().addUsername(*username);
+		while (auto pendingUsername = m_Server.getPendingUsernames().tryPop())
+			m_ClientsLayer.getClientsPanel().addUsername(*pendingUsername);
+
+		while (auto disconnectedUsername = m_Server.getDisconnectedUsernames().tryPop())
+			m_ClientsLayer.getClientsPanel().removeUsername(*disconnectedUsername);
 	}
 
 	void ServerApplication::onRender()

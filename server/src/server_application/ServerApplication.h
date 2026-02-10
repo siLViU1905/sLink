@@ -3,8 +3,6 @@
 
 #include "../server/Server.h"
 #include <application/Application.h>
-#include <layers/UILayer.h>
-
 #include "layers/clients_layer/UiClientsLayer.h"
 
 namespace sLink::server_application
