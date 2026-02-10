@@ -17,6 +17,8 @@ namespace sLink::server
 
 		void update();
 
+		utility::SafeQueue<std::string>& getPendingUsernames();
+
 	private:
 		void onAccept();
 
@@ -31,6 +33,8 @@ namespace sLink::server
 		asio::streambuf m_ReadBuffer;
 
 		std::vector<std::shared_ptr<session::Session>> m_Sessions;
+
+		utility::SafeQueue<std::string> m_PendingUsernames;
 
 		bool m_IsWriting;
 	};

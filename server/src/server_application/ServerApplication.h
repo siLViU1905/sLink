@@ -5,6 +5,8 @@
 #include <application/Application.h>
 #include <layers/UILayer.h>
 
+#include "layers/clients_layer/UiClientsLayer.h"
+
 namespace sLink::server_application
 {
     class ServerApplication : public application::Application
@@ -27,6 +29,8 @@ namespace sLink::server_application
         server::Server m_Server;
 
         std::jthread m_NetworkThread;
+
+        ui::layer::UIClientsLayer m_ClientsLayer;
 
         void initLayers();
       

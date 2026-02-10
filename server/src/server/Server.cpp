@@ -21,12 +21,22 @@ namespace sLink::server
 			broadcast(*message);
 	}
 
+	utility::SafeQueue<std::string> & Server::getPendingUsernames()
+	{
+		return m_PendingUsernames;
+	}
+
 	void Server::onAccept()
 	{
 		m_Acceptor.async_accept([this](std::error_code ec, asio::ip::tcp::socket socket) {
 			if (!ec)
 			{
 				m_Sessions.push_back(std::make_shared<session::Session>(std::move(socket), m_Inbox));
+
+				m_Sessions.back()->setOnUsernameSentCallback([this](std::string_view username)
+				{
+					m_PendingUsernames.push(std::string(username));
+				});
 
 				m_Sessions.back()->start();
 			}
