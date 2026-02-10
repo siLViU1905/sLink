@@ -25,6 +25,8 @@ namespace sLink::window
 
         bool isMaximized() const;
 
+        bool isMinimized() const;
+
         void restore();
 
         void resize(int width, int height);
