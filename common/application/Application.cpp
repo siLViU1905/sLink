@@ -12,11 +12,14 @@ namespace sLink::application
     {
         while (m_Window.isOpen())
         {
+            m_Window.pollEvents();
+
+            if (m_Window.isMinimized())
+                continue;
+
             onUpdate();
 
             onRender();
-
-            m_Window.pollEvents();
 
             if (m_Window.wasResized())
                 handleWindowResize();
