@@ -38,4 +38,9 @@ namespace sLink::ui::component
     {
         m_Usernames.emplace_back(username);
     }
+
+    void UIActiveClients::removeUsername(std::string_view username)
+    {
+        std::erase(m_Usernames, username);
+    }
 }
