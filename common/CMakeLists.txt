@@ -9,6 +9,7 @@ add_library(common_shared STATIC
         utility/timestamp/Timestamp.cpp
         ui/components/active_clients/UIActiveClients.cpp
         ui/layers/clients_layer/UIClientsLayer.cpp
+        ui/components/client_logging/UIClientLogging.cpp
 )
 
 target_include_directories(common_shared PUBLIC

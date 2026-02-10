@@ -5,7 +5,7 @@ namespace sLink::ui::component
     void UIActiveClients::render()
     {
         ImGui::SetNextWindowPos(ImVec2(0, 0));
-        ImGui::SetNextWindowSize(ImVec2(200, ImGui::GetIO().DisplaySize.y));
+        ImGui::SetNextWindowSize(ImVec2(s_PanelWidth, ImGui::GetIO().DisplaySize.y));
 
         constexpr ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar |
                                                   ImGuiWindowFlags_NoResize |
