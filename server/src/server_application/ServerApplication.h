@@ -22,6 +22,12 @@ namespace sLink::server_application
         void onRenderUI() override;
 
     private:
+        void initLayers();
+
+        void onUpdateConnectedClients();
+
+        void onUpdateDisconnectedClients();
+
         asio::io_context m_IOContext;
 
         server::Server m_Server;
@@ -29,9 +35,6 @@ namespace sLink::server_application
         std::jthread m_NetworkThread;
 
         ui::layer::UIClientsLayer m_ClientsLayer;
-
-        void initLayers();
-      
     };
 }
 
