@@ -11,4 +11,9 @@ namespace sLink::ui::layer
     {
         return m_ClientsPanel;
     }
+
+    component::UIClientLogging & UIClientsLayer::getClientLogger()
+    {
+        return m_ClientLogger;
+    }
 }
