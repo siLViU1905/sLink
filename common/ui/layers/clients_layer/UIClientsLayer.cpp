@@ -5,6 +5,8 @@ namespace sLink::ui::layer
     void UIClientsLayer::render()
     {
         m_ClientsPanel.render();
+
+        m_ClientLogger.render();
     }
 
     component::UIActiveClients & UIClientsLayer::getClientsPanel()
