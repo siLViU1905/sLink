@@ -20,7 +20,7 @@ namespace sLink::ui::component
     private:
         static constexpr float s_FontScale = 1.15f;
 
-        static constexpr float s_WindowWidth = 200.f;
+        static constexpr float s_PanelWidth = 350.f;
 
         static constexpr ImVec4 s_ColorConnected = { 0.2f, 0.9f, 0.2f, 1.f };
 
