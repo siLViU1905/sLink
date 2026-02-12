@@ -10,6 +10,7 @@ add_library(common_shared STATIC
         ui/components/active_clients/UIActiveClients.cpp
         ui/layers/clients_layer/UIClientsLayer.cpp
         ui/components/client_logging/UIClientLogging.cpp
+        ui/layers/login_layer/UILoginLayer.cpp
 )
 
 target_include_directories(common_shared PUBLIC

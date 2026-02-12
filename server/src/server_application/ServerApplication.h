@@ -34,7 +34,9 @@ namespace sLink::server_application
 
         std::jthread m_NetworkThread;
 
-        ui::layer::UIClientsLayer m_ClientsLayer;
+        std::shared_ptr<ui::layer::UILayer> m_CurrentLayer;
+
+        std::shared_ptr<ui::layer::UIClientsLayer> m_ClientsLayer;
     };
 }
 

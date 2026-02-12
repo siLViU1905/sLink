@@ -4,7 +4,7 @@
 
 namespace sLink::ui::component
 {
-    UIChatWindow::UIChatWindow() : m_InputContent(255, 0)
+    UIChatWindow::UIChatWindow() : m_InputContent(255, '\0')
     {
     }
 
@@ -25,7 +25,6 @@ namespace sLink::ui::component
 
         ImGui::SetWindowFontScale(s_FontScale);
 
-        float scaled_line_height = ImGui::GetTextLineHeightWithSpacing() * s_FontScale;
         float footer_height = s_ButtonHeight + ImGui::GetStyle().ItemSpacing.y * 2;
 
         ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height), false);
