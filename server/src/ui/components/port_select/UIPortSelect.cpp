@@ -25,7 +25,7 @@ namespace sLink::server::ui::component
         ImGui::PopStyleVar();
         ImGui::Dummy(ImVec2(0, s_ItemSpacing));
 
-        if (ImGui::Button("Connect", ImVec2(-1, 40)))
+        if (ImGui::Button("Start", ImVec2(-1, 40)))
         {
             std::string portStr(m_InputPort.c_str());
 
