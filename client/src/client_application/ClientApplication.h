@@ -25,6 +25,8 @@ namespace sLink::client_application
     private:
         void initLayers();
 
+        void onConnect(std::string_view username, std::string_view serverPort);
+
         asio::io_context m_IOContext;
 
         client::Client m_Client;
@@ -34,8 +36,8 @@ namespace sLink::client_application
         std::shared_ptr<ui::layer::UILayer> m_CurrentLayer;
 
         std::shared_ptr<ui::layer::UIChatLayer> m_ChatLayer;
-        std::shared_ptr<ui::layer::UILoginLayer> m_LoginLayer;
 
+        std::shared_ptr<ui::layer::UILoginLayer> m_LoginLayer;
     };
 }
 
