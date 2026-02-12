@@ -3,12 +3,12 @@
 #include <string>
 #include <vector>
 
-#include "components/UIComponent.h"
+#include <components/UIComponent.h>
 #include <imgui.h>
 
-namespace sLink::ui::component
+namespace sLink::server::ui::component
 {
-    class UIClientLogging : UIComponent
+    class UIClientLogging : sLink::ui::component::UIComponent
     {
     public:
         void render() override;

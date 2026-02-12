@@ -3,7 +3,7 @@
 
 #include "../server/Server.h"
 #include <application/Application.h>
-#include "layers/clients_layer/UiClientsLayer.h"
+#include "../ui/layers/clients_layer/UiClientsLayer.h"
 
 namespace sLink::server_application
 {
@@ -36,7 +36,7 @@ namespace sLink::server_application
 
         std::shared_ptr<ui::layer::UILayer> m_CurrentLayer;
 
-        std::shared_ptr<ui::layer::UIClientsLayer> m_ClientsLayer;
+        std::shared_ptr<server::ui::layer::UIClientsLayer> m_ClientsLayer;
     };
 }
 
