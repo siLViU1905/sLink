@@ -11,6 +11,7 @@ add_library(common_shared STATIC
         ui/layers/clients_layer/UIClientsLayer.cpp
         ui/components/client_logging/UIClientLogging.cpp
         ui/components/client_login/UiClientLogin.cpp
+        ui/layers/UiLoginLayer.cpp
 )
 
 target_include_directories(common_shared PUBLIC
