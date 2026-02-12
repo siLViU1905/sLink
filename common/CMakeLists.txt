@@ -7,6 +7,7 @@ add_library(common_shared STATIC
         ui/components/chat_window/UIChatWindow.cpp
         ui/layers/chat_layer/UIChatLayer.cpp
         utility/timestamp/Timestamp.cpp
+        ui/components/client_login/UIClientLogin.cpp
         ui/layers/login_layer/UILoginLayer.cpp
 )
 
