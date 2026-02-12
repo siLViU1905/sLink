@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-namespace sLink::ui::component
+namespace sLink::client::ui::component
 {
     UIChatWindow::UIChatWindow() : m_InputContent(255, '\0')
     {
