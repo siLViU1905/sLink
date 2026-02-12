@@ -3,12 +3,12 @@
 #include <string>
 #include <vector>
 
-#include "components/UIComponent.h"
+#include <components/UIComponent.h>
 #include <imgui.h>
 
-namespace sLink::ui::component
+namespace sLink::server::ui::component
 {
-    class UIClientLogging : UIComponent
+    class UIClientLogging : sLink::ui::component::UIComponent
     {
     public:
         void render() override;
@@ -20,7 +20,7 @@ namespace sLink::ui::component
     private:
         static constexpr float s_FontScale = 1.15f;
 
-        static constexpr float s_WindowWidth = 200.f;
+        static constexpr float s_PanelWidth = 350.f;
 
         static constexpr ImVec4 s_ColorConnected = { 0.2f, 0.9f, 0.2f, 1.f };
 

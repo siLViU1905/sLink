@@ -1,6 +1,6 @@
 #include "UIActiveClients.h"
 
-namespace sLink::ui::component
+namespace sLink::server::ui::component
 {
     void UIActiveClients::render()
     {
