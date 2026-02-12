@@ -6,6 +6,7 @@ add_executable(sLink_Server
         src/ui/components/active_clients/UIActiveClients.cpp
         src/ui/components/client_logging/UIClientLogging.cpp
         src/ui/layers/clients_layer/UIClientsLayer.cpp
+        src/ui/components/port_select/UIPortSelect.cpp
 )
 
 target_link_libraries(sLink_Server
