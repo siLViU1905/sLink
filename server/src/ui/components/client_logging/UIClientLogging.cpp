@@ -2,7 +2,7 @@
 
 #include "../active_clients/UIActiveClients.h"
 
-namespace sLink::ui::component
+namespace sLink::server::ui::component
 {
     void UIClientLogging::render()
     {

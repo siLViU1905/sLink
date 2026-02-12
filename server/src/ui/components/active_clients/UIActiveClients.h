@@ -5,12 +5,12 @@
 #include <string_view>
 #include <vector>
 
-#include "components/UIComponent.h"
+#include <components/UIComponent.h>
 #include <imgui.h>
 
-namespace sLink::ui::component
+namespace sLink::server::ui::component
 {
-    class UIActiveClients : public UIComponent
+    class UIActiveClients : public sLink::ui::component::UIComponent
     {
     public:
         static constexpr float s_PanelWidth = 200.f;

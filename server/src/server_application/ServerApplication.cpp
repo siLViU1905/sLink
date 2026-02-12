@@ -50,7 +50,7 @@ namespace sLink::server_application
 
 	void ServerApplication::initLayers()
 	{
-		m_ClientsLayer = std::make_shared<ui::layer::UIClientsLayer>();
+		m_ClientsLayer = std::make_shared<server::ui::layer::UIClientsLayer>();
 
 		m_CurrentLayer = m_ClientsLayer;
 	}
