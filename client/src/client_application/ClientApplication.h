@@ -4,6 +4,7 @@
 #include "../client/Client.h"
 #include <application/Application.h>
 #include <layers/chat_layer/UIChatLayer.h>
+#include <layers/login_layer/UILoginLayer.h>
 
 namespace sLink::client_application
 {
@@ -30,7 +31,11 @@ namespace sLink::client_application
 
         std::jthread m_NetworkThread;
 
-        ui::layer::UIChatLayer m_ChatLayer;
+        std::shared_ptr<ui::layer::UILayer> m_CurrentLayer;
+
+        std::shared_ptr<ui::layer::UIChatLayer> m_ChatLayer;
+        std::shared_ptr<ui::layer::UILoginLayer> m_LoginLayer;
+
     };
 }
 
