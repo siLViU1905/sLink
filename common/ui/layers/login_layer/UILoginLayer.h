@@ -1,6 +1,6 @@
 #ifndef SLINK_UILOGINLAYER_H
 #define SLINK_UILOGINLAYER_H
-#include "UILayer.h"
+#include "../UILayer.h"
 
 #include "components/client_login/UiClientLogin.h"
 
