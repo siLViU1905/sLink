@@ -3,11 +3,11 @@
 #include <string>
 
 #include "asio/detail/executor_function.hpp"
-#include "components/UIComponent.h"
+#include <components/UIComponent.h>
 
-namespace sLink::ui::component
+namespace sLink::client::ui::component
 {
-    class UIClientLogin : public UIComponent
+    class UIClientLogin : public sLink::ui::component::UIComponent
     {
     private:
         static constexpr float s_WindowWidth = 350.f;

@@ -1,8 +1,8 @@
-#include "UiClientLogin.h"
+#include "UIClientLogin.h"
 
 #include <imgui.h>
 
-namespace sLink::ui::component
+namespace sLink::client::ui::component
 {
     UIClientLogin::UIClientLogin()
     {
