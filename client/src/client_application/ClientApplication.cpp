@@ -14,10 +14,6 @@ namespace sLink::client_application
 			{
 				m_IOContext.run();
 			});
-
-		m_Client.setUsername("ClientTest");
-
-		m_Client.connect("127.0.0.1", "12444");
 	}
 
 	ClientApplication::~ClientApplication()
@@ -31,7 +27,7 @@ namespace sLink::client_application
 		{
 			auto message = message::Message::deserialize(*raw_message);
 
-			m_ChatLayer.getChatWindow().addMessage(message);
+			m_ChatLayer->getChatWindow().addMessage(message);
 		}
 	}
 
@@ -50,14 +46,16 @@ namespace sLink::client_application
 	{
 		ui::UIBackend::begin_frame();
 
-		m_ChatLayer.render();
+		m_CurrentLayer->render();
 
 		ui::UIBackend::end_frame();
 	}
 
 	void ClientApplication::initLayers()
 	{
-		m_ChatLayer.getChatWindow().setOnMessageSend([this](std::string_view content)
+		m_ChatLayer = std::make_shared<ui::layer::UIChatLayer>();
+
+		m_ChatLayer->getChatWindow().setOnMessageSend([this](std::string_view content)
 			{
 				message::Message message(
 					m_Client.getUsername(),
@@ -66,5 +64,24 @@ namespace sLink::client_application
 
 				m_Client.send(message);
 			});
+
+
+		m_LoginLayer = std::make_shared<ui::layer::UILoginLayer>();
+
+		m_LoginLayer->getClientLoginPanel().setOnLoginDataInput([this](std::string_view username, std::string_view serverPort)
+		{
+			onConnect(username, serverPort);
+		});
+
+		m_CurrentLayer = m_LoginLayer;
+	}
+
+	void ClientApplication::onConnect(std::string_view username, std::string_view serverPort)
+	{
+		m_Client.setUsername(username);
+
+		m_Client.connect("127.0.0.1", serverPort);
+
+		m_CurrentLayer = m_ChatLayer;
 	}
 }
