@@ -4,14 +4,7 @@ add_library(common_shared STATIC
         ui/backend/UIBackend.cpp
         application/Application.cpp
         message/Message.cpp
-        ui/components/chat_window/UIChatWindow.cpp
-        ui/layers/chat_layer/UIChatLayer.cpp
         utility/timestamp/Timestamp.cpp
-        ui/components/active_clients/UIActiveClients.cpp
-        ui/layers/clients_layer/UIClientsLayer.cpp
-        ui/components/client_logging/UIClientLogging.cpp
-        ui/components/client_login/UIClientLogin.cpp
-        ui/layers/login_layer/UILoginLayer.cpp
 )
 
 target_include_directories(common_shared PUBLIC

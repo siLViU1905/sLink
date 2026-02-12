@@ -1,6 +1,6 @@
 #include "UiClientsLayer.h"
 
-namespace sLink::ui::layer
+namespace sLink::server::ui::layer
 {
     void UIClientsLayer::render()
     {

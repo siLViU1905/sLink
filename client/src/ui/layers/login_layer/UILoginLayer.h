@@ -1,12 +1,13 @@
 #ifndef SLINK_UILOGINLAYER_H
 #define SLINK_UILOGINLAYER_H
-#include "../UILayer.h"
 
-#include "components/client_login/UIClientLogin.h"
+#include <layers/UILayer.h>
 
-namespace sLink::ui::layer
+#include "../../components/client_login/UIClientLogin.h"
+
+namespace sLink::client::ui::layer
 {
-    class UILoginLayer : public UILayer
+    class UILoginLayer : public sLink::ui::layer::UILayer
     {
     public:
         void render() override;

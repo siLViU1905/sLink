@@ -7,9 +7,9 @@
 #include <functional>
 #include <imgui.h>
 
-namespace sLink::ui::component
+namespace sLink::client::ui::component
 {
-    class UIChatWindow: public UIComponent
+    class UIChatWindow: public sLink::ui::component::UIComponent
     {
     private:
         static constexpr float s_FontScale = 2.15f;

@@ -1,6 +1,6 @@
 #include "UIChatLayer.h"
 
-namespace sLink::ui::layer
+namespace sLink::client::ui::layer
 {
 	void UIChatLayer::render()
 	{
