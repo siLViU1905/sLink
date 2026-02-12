@@ -1,7 +1,5 @@
 #include "ClientApplication.h"
 
-#include<components/chat_window/UIChatWindow.h>
-
 namespace sLink::client_application
 {
 	ClientApplication::ClientApplication(int windowWidth, int windowHeight, std::string_view windowName):
@@ -53,7 +51,7 @@ namespace sLink::client_application
 
 	void ClientApplication::initLayers()
 	{
-		m_ChatLayer = std::make_shared<ui::layer::UIChatLayer>();
+		m_ChatLayer = std::make_shared<client::ui::layer::UIChatLayer>();
 
 		m_ChatLayer->getChatWindow().setOnMessageSend([this](std::string_view content)
 			{
@@ -66,7 +64,7 @@ namespace sLink::client_application
 			});
 
 
-		m_LoginLayer = std::make_shared<ui::layer::UILoginLayer>();
+		m_LoginLayer = std::make_shared<client::ui::layer::UILoginLayer>();
 
 		m_LoginLayer->getClientLoginPanel().setOnLoginDataInput([this](std::string_view username, std::string_view serverPort)
 		{
