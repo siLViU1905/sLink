@@ -43,23 +43,25 @@ namespace sLink::server_application
 	{
 		ui::UIBackend::begin_frame();
 
-		m_ClientsLayer.render();
+		m_CurrentLayer->render();
 
 		ui::UIBackend::end_frame();
 	}
 
 	void ServerApplication::initLayers()
 	{
+		m_ClientsLayer = std::make_shared<ui::layer::UIClientsLayer>();
 
+		m_CurrentLayer = m_ClientsLayer;
 	}
 
 	void ServerApplication::onUpdateConnectedClients()
 	{
 		while (auto pendingUsername = m_Server.getPendingUsernames().tryPop())
 		{
-			m_ClientsLayer.getClientsPanel().addUsername(*pendingUsername);
+			m_ClientsLayer->getClientsPanel().addUsername(*pendingUsername);
 
-			m_ClientsLayer.getClientLogger().logClientConnected(*pendingUsername);
+			m_ClientsLayer->getClientLogger().logClientConnected(*pendingUsername);
 		}
 	}
 
@@ -67,9 +69,9 @@ namespace sLink::server_application
 	{
 		while (auto disconnectedUsername = m_Server.getDisconnectedUsernames().tryPop())
 		{
-			m_ClientsLayer.getClientsPanel().removeUsername(*disconnectedUsername);
+			m_ClientsLayer->getClientsPanel().removeUsername(*disconnectedUsername);
 
-			m_ClientsLayer.getClientLogger().logClientDisconnected(*disconnectedUsername);
+			m_ClientsLayer->getClientLogger().logClientDisconnected(*disconnectedUsername);
 		}
 	}
 }
