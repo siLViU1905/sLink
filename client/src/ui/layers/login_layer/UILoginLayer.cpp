@@ -1,6 +1,6 @@
 #include "UILoginLayer.h"
 
-namespace sLink::ui::layer
+namespace sLink::client::ui::layer
 {
     void UILoginLayer::render()
     {
