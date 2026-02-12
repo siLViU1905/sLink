@@ -3,7 +3,7 @@
 
 #include "../server/Server.h"
 #include <application/Application.h>
-#include <layers/UILayer.h>
+#include "layers/clients_layer/UiClientsLayer.h"
 
 namespace sLink::server_application
 {
@@ -22,14 +22,19 @@ namespace sLink::server_application
         void onRenderUI() override;
 
     private:
+        void initLayers();
+
+        void onUpdateConnectedClients();
+
+        void onUpdateDisconnectedClients();
+
         asio::io_context m_IOContext;
 
         server::Server m_Server;
 
         std::jthread m_NetworkThread;
 
-        void initLayers();
-      
+        ui::layer::UIClientsLayer m_ClientsLayer;
     };
 }
 

@@ -29,6 +29,8 @@ namespace sLink::ui::component
 
         void addUsername(std::string_view username);
 
+        void removeUsername(std::string_view username);
+
     private:
         std::vector<std::string> m_Usernames;
     };

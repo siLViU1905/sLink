@@ -17,8 +17,14 @@ namespace sLink::server
 
 		void update();
 
+		utility::SafeQueue<std::string>& getPendingUsernames();
+
+		utility::SafeQueue<std::string>& getDisconnectedUsernames();
+
 	private:
 		void onAccept();
+
+		void onClientDisconnected(const std::shared_ptr<session::Session>& session);
 
 		asio::io_context& m_IOContext;
 
@@ -31,6 +37,10 @@ namespace sLink::server
 		asio::streambuf m_ReadBuffer;
 
 		std::vector<std::shared_ptr<session::Session>> m_Sessions;
+
+		utility::SafeQueue<std::string> m_PendingUsernames;
+
+		utility::SafeQueue<std::string> m_DisconnectedUsernames;
 
 		bool m_IsWriting;
 	};

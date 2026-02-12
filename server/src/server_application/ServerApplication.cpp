@@ -22,6 +22,10 @@ namespace sLink::server_application
 	void ServerApplication::onUpdate()
 	{
 		m_Server.update();
+
+		onUpdateConnectedClients();
+
+		onUpdateDisconnectedClients();
 	}
 
 	void ServerApplication::onRender()
@@ -39,11 +43,33 @@ namespace sLink::server_application
 	{
 		ui::UIBackend::begin_frame();
 
+		m_ClientsLayer.render();
+
 		ui::UIBackend::end_frame();
 	}
 
 	void ServerApplication::initLayers()
 	{
-		
+
+	}
+
+	void ServerApplication::onUpdateConnectedClients()
+	{
+		while (auto pendingUsername = m_Server.getPendingUsernames().tryPop())
+		{
+			m_ClientsLayer.getClientsPanel().addUsername(*pendingUsername);
+
+			m_ClientsLayer.getClientLogger().logClientConnected(*pendingUsername);
+		}
+	}
+
+	void ServerApplication::onUpdateDisconnectedClients()
+	{
+		while (auto disconnectedUsername = m_Server.getDisconnectedUsernames().tryPop())
+		{
+			m_ClientsLayer.getClientsPanel().removeUsername(*disconnectedUsername);
+
+			m_ClientsLayer.getClientLogger().logClientDisconnected(*disconnectedUsername);
+		}
 	}
 }

@@ -70,6 +70,11 @@ namespace sLink::window
         return static_cast<bool>(glfwGetWindowAttrib(m_WindowHandle, GLFW_MAXIMIZED));
     }
 
+    bool Window::isMinimized() const
+    {
+        return !m_Width || !m_Height;
+    }
+
     void Window::restore()
     {
         glfwRestoreWindow(m_WindowHandle);

@@ -37,6 +37,16 @@ namespace sLink::session
         return m_Username;
     }
 
+    void Session::setOnUsernameSentCallback(OnUsernameSentCallback &&callback)
+    {
+        m_OnUsernameSentCallback = std::move(callback);
+    }
+
+    void Session::setOnDisconnectCallback(OnDisconnectCallback &&callback)
+    {
+        m_OnDisconnectCallback = std::move(callback);
+    }
+
     void Session::onRead()
     {
         auto self(shared_from_this());
@@ -53,11 +63,21 @@ namespace sLink::session
                                        std::getline(is, msg);
 
                                        if (msg.front() == '/')
+                                       {
                                            m_Username = msg.substr(1);
+
+                                           if (m_OnUsernameSentCallback)
+                                               m_OnUsernameSentCallback(m_Username);
+                                       }
                                        else
                                            m_Inbox.push(msg);
 
                                        onRead();
+                                   }
+                                   else if (ec == asio::error::eof || ec == asio::error::connection_reset)
+                                   {
+                                       if (m_OnDisconnectCallback)
+                                           m_OnDisconnectCallback(m_Username);
                                    }
                                });
     }
