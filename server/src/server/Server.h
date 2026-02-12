@@ -11,7 +11,9 @@ namespace sLink::server
 	class Server
 	{
 	public:
-		Server(asio::io_context& ctx, uint16_t port);
+		Server(asio::io_context& ctx);
+
+		void startHost(uint16_t port);
 
 		void broadcast(const std::string& message);
 
@@ -28,7 +30,9 @@ namespace sLink::server
 
 		asio::io_context& m_IOContext;
 
-		asio::ip::tcp::acceptor m_Acceptor;
+		asio::executor_work_guard<asio::io_context::executor_type> m_WorkGuard;
+
+		std::unique_ptr<asio::ip::tcp::acceptor> m_Acceptor;
 
 		utility::SafeQueue<std::string> m_Inbox;
 

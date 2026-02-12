@@ -2,65 +2,74 @@
 
 namespace sLink::server
 {
-	Server::Server(asio::io_context& ctx, uint16_t port) :m_IOContext(ctx),
-		m_Acceptor(ctx, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)),
-		m_IsWriting(false)
-	{
-		onAccept();
-	}
+    Server::Server(asio::io_context &ctx) : m_IOContext(ctx),
+                                            m_WorkGuard(asio::make_work_guard(ctx)),
+                                            m_IsWriting(false)
+    {
+    }
 
-	void Server::broadcast(const std::string& message)
-	{
-		for (auto& session : m_Sessions)
-			session->send(message);
-	}
+    void Server::startHost(uint16_t port)
+    {
+        m_Acceptor = std::make_unique<asio::ip::tcp::acceptor>(
+            m_IOContext, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)
+        );
 
-	void Server::update()
-	{
-		while (auto message = m_Inbox.tryPop())
-			broadcast(*message);
-	}
+        onAccept();
+    }
 
-	utility::SafeQueue<std::string> & Server::getPendingUsernames()
-	{
-		return m_PendingUsernames;
-	}
+    void Server::broadcast(const std::string &message)
+    {
+        for (auto &session: m_Sessions)
+            session->send(message);
+    }
 
-	utility::SafeQueue<std::string> & Server::getDisconnectedUsernames()
-	{
-		return m_DisconnectedUsernames;
-	}
+    void Server::update()
+    {
+        while (auto message = m_Inbox.tryPop())
+            broadcast(*message);
+    }
 
-	void Server::onAccept()
-	{
-		m_Acceptor.async_accept([this](std::error_code ec, asio::ip::tcp::socket socket) {
-			if (!ec)
-			{
-				m_Sessions.push_back(std::make_shared<session::Session>(std::move(socket), m_Inbox));
+    utility::SafeQueue<std::string> &Server::getPendingUsernames()
+    {
+        return m_PendingUsernames;
+    }
 
-				auto& session = m_Sessions.back();
+    utility::SafeQueue<std::string> &Server::getDisconnectedUsernames()
+    {
+        return m_DisconnectedUsernames;
+    }
 
-				session->setOnUsernameSentCallback([this](std::string_view username)
-				{
-					m_PendingUsernames.push(std::string(username));
-				});
+    void Server::onAccept()
+    {
+        m_Acceptor->async_accept([this](std::error_code ec, asio::ip::tcp::socket socket)
+        {
+            if (!ec)
+            {
+                m_Sessions.push_back(std::make_shared<session::Session>(std::move(socket), m_Inbox));
 
-				session->setOnDisconnectCallback([this, session](std::string_view username)
-				{
-					onClientDisconnected(session);
-				});
+                auto &session = m_Sessions.back();
 
-				session->start();
-			}
+                session->setOnUsernameSentCallback([this](std::string_view username)
+                {
+                    m_PendingUsernames.push(std::string(username));
+                });
 
-			onAccept();
-			});
-	}
+                session->setOnDisconnectCallback([this, session](std::string_view username)
+                {
+                    onClientDisconnected(session);
+                });
 
-	void Server::onClientDisconnected(const std::shared_ptr<session::Session>& session)
-	{
-		m_DisconnectedUsernames.push(std::string(session->getUsername()));
+                session->start();
+            }
 
-		std::erase(m_Sessions, session);
-	}
+            onAccept();
+        });
+    }
+
+    void Server::onClientDisconnected(const std::shared_ptr<session::Session> &session)
+    {
+        m_DisconnectedUsernames.push(std::string(session->getUsername()));
+
+        std::erase(m_Sessions, session);
+    }
 }
