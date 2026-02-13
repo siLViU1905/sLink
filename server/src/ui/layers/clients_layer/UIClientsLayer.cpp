@@ -18,4 +18,9 @@ namespace sLink::server::ui::layer
     {
         return m_ClientLogger;
     }
+
+    sLink::ui::component::UIInfo & UIClientsLayer::getInfoPanel()
+    {
+        return m_InfoPanel;
+    }
 }

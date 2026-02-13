@@ -5,6 +5,8 @@
 #include "../../components/client_logging/UIClientLogging.h"
 #include <layers/UILayer.h>
 
+#include "components/info/UIInfo.h"
+
 namespace sLink::server::ui::layer
 {
     class UIClientsLayer : public sLink::ui::layer::UILayer
@@ -16,10 +18,14 @@ namespace sLink::server::ui::layer
 
         component::UIClientLogging& getClientLogger();
 
+        sLink::ui::component::UIInfo& getInfoPanel();
+
     private:
         component::UIActiveClients m_ClientsPanel;
 
         component::UIClientLogging m_ClientLogger;
+
+        sLink::ui::component::UIInfo m_InfoPanel;
     };
 }
 
