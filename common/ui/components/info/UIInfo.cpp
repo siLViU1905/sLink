@@ -41,7 +41,7 @@ namespace sLink::ui::component
                     color = s_ColorFail;
                     prefix = "[ERR] ";
                     break;
-                case Info::Type::INFO:
+                case Info::Type::GENERAL:
                     color = s_ColorInfo;
                     prefix = "[INFO] ";
                     break;
@@ -57,8 +57,18 @@ namespace sLink::ui::component
         ImGui::End();
     }
 
-    void UIInfo::addInfo(const Info &info)
+    void UIInfo::addSuccessInfo(std::string_view content)
     {
-        m_Infos.push_back(info);
+        m_Infos.emplace_back(content.data(), Info::Type::SUCCESS);
+    }
+
+    void UIInfo::addFailInfo(std::string_view content)
+    {
+        m_Infos.emplace_back(content.data(), Info::Type::FAIL);
+    }
+
+    void UIInfo::addGeneralInfo(std::string_view content)
+    {
+        m_Infos.emplace_back(content.data(), Info::Type::GENERAL);
     }
 }
