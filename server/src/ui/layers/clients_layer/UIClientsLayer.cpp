@@ -7,6 +7,8 @@ namespace sLink::server::ui::layer
         m_ClientsPanel.render();
 
         m_ClientLogger.render();
+
+        m_InfoPanel.render();
     }
 
     component::UIActiveClients & UIClientsLayer::getClientsPanel()
@@ -17,5 +19,10 @@ namespace sLink::server::ui::layer
     component::UIClientLogging & UIClientsLayer::getClientLogger()
     {
         return m_ClientLogger;
+    }
+
+    sLink::ui::component::UIInfo & UIClientsLayer::getInfoPanel()
+    {
+        return m_InfoPanel;
     }
 }
