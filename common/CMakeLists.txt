@@ -5,6 +5,7 @@ add_library(common_shared STATIC
         application/Application.cpp
         message/Message.cpp
         utility/timestamp/Timestamp.cpp
+        ui/components/info/UIInfo.cpp
 )
 
 target_include_directories(common_shared PUBLIC
