@@ -8,7 +8,7 @@
 
 namespace sLink::server::ui::component
 {
-    class UIClientLogging : sLink::ui::component::UIComponent
+    class UIClientLogging : public sLink::ui::component::UIComponent
     {
     public:
         void render() override;

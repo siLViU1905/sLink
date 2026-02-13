@@ -4,14 +4,14 @@ namespace sLink::server_application
 {
 	ServerApplication::ServerApplication(int windowWidth, int windowHeight, std::string_view windowName) :
 		application::Application(windowWidth, windowHeight, windowName),
-		m_Server(m_IOContext, 12444)
+		m_Server(m_IOContext)
 	{
+		initLayers();
+
 		m_NetworkThread = std::jthread([this]()
 			{
 				m_IOContext.run();
 			});
-
-		initLayers();
 	}
 
 	ServerApplication::~ServerApplication()
@@ -51,6 +51,24 @@ namespace sLink::server_application
 	void ServerApplication::initLayers()
 	{
 		m_ClientsLayer = std::make_shared<server::ui::layer::UIClientsLayer>();
+
+		m_ServerPortLayer = std::make_shared<server::ui::layer::UIServerPortLayer>();
+
+		m_ServerPortLayer->getPortSelectPanel().setOnPortInput([this](std::string_view port)
+		{
+			onPortSelected(port);
+		});
+
+		m_CurrentLayer = m_ServerPortLayer;
+	}
+
+	void ServerApplication::onPortSelected(std::string_view port)
+	{
+		uint16_t portNumber = 0;
+
+		std::from_chars(port.data(), port.data() + port.size(), portNumber);
+
+		m_Server.startHost(portNumber);
 
 		m_CurrentLayer = m_ClientsLayer;
 	}

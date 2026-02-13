@@ -14,10 +14,10 @@ namespace sLink::application
         {
             m_Window.pollEvents();
 
+            onUpdate();
+
             if (m_Window.isMinimized())
                 continue;
-
-            onUpdate();
 
             onRender();
 
