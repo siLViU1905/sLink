@@ -26,7 +26,7 @@ namespace sLink::ui::component
             {
                 SUCCESS,
                 FAIL,
-                INFO
+                GENERAL
             };
 
             std::string m_Content;
@@ -36,7 +36,11 @@ namespace sLink::ui::component
 
         void render() override;
 
-        void addInfo(const Info& info);
+        void addSuccessInfo(std::string_view content);
+
+        void addFailInfo(std::string_view content);
+
+        void addGeneralInfo(std::string_view content);
 
     private:
         std::vector<Info> m_Infos;
