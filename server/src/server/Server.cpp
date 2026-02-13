@@ -8,13 +8,22 @@ namespace sLink::server
     {
     }
 
-    void Server::startHost(uint16_t port)
+    std::expected<std::string, std::string> Server::startHost(uint16_t port)
     {
-        m_Acceptor = std::make_unique<asio::ip::tcp::acceptor>(
-            m_IOContext, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)
-        );
+        try
+        {
+            m_Acceptor = std::make_unique<asio::ip::tcp::acceptor>(
+                m_IOContext, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)
+            );
 
-        onAccept();
+            onAccept();
+
+            return {std::format("Server started on port {}", port)};
+        }
+        catch (const asio::system_error& e)
+        {
+            return std::unexpected(std::format("Failed to start server on port {}", port));
+        }
     }
 
     void Server::broadcast(const std::string &message)

@@ -68,7 +68,7 @@ namespace sLink::server_application
 
 		std::from_chars(port.data(), port.data() + port.size(), portNumber);
 
-		m_Server.startHost(portNumber);
+		auto result = m_Server.startHost(portNumber);
 
 		m_CurrentLayer = m_ClientsLayer;
 	}

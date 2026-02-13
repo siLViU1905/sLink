@@ -3,8 +3,8 @@
 
 #include <asio.hpp>
 #include <utility/safe_queue/SafeQueue.h>
-
 #include "../session/Session.h"
+#include <expected>
 
 namespace sLink::server
 {
@@ -13,7 +13,7 @@ namespace sLink::server
 	public:
 		Server(asio::io_context& ctx);
 
-		void startHost(uint16_t port);
+		std::expected<std::string, std::string> startHost(uint16_t port);
 
 		void broadcast(const std::string& message);
 
