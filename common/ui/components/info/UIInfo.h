@@ -12,7 +12,7 @@ namespace sLink::ui::component
     {
     private:
         static constexpr float s_FontScale = 1.1f;
-        static constexpr float s_SidebarWidth = 200.f;
+        static constexpr float s_SidebarWidth = 300.f;
 
         static constexpr ImVec4 s_ColorSuccess = { 0.2f, 0.8f, 0.2f, 1.f };
         static constexpr ImVec4 s_ColorFail    = { 1.f, 0.2f, 0.2f, 1.f };

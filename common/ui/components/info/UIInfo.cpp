@@ -5,18 +5,16 @@ namespace sLink::ui::component
     void UIInfo::render()
     {
         float window_height = ImGui::GetIO().DisplaySize.y;
-        float half_height = window_height / 2.0f;
+        float half_height = window_height / 2.f;
 
-        // Poziționăm în sfertul 3 al ecranului (sub log-urile de client)
-        // Începe de la jumătatea înălțimii și ocupă restul de jos
         ImGui::SetNextWindowPos(ImVec2(s_SidebarWidth, half_height));
         ImGui::SetNextWindowSize(ImVec2(s_SidebarWidth, half_height));
 
         constexpr ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoBringToFrontOnFocus;
+                                                  ImGuiWindowFlags_NoResize |
+                                                  ImGuiWindowFlags_NoMove |
+                                                  ImGuiWindowFlags_NoCollapse |
+                                                  ImGuiWindowFlags_NoBringToFrontOnFocus;
 
         ImGui::Begin("Info Console", nullptr, window_flags);
         ImGui::SetWindowFontScale(s_FontScale);
@@ -26,7 +24,7 @@ namespace sLink::ui::component
 
         ImGui::BeginChild("InfoScrollingRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
 
-        for (const auto& info : m_Infos)
+        for (const auto &info: m_Infos)
         {
             ImVec4 color;
             std::string prefix;
