@@ -2,6 +2,10 @@
 
 namespace sLink::server::ui::layer
 {
+    UIClientsLayer::UIClientsLayer():m_InfoPanel(component::UIActiveClients::s_PanelWidth)
+    {
+    }
+
     void UIClientsLayer::render()
     {
         m_ClientsPanel.render();
