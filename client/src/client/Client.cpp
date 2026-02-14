@@ -70,6 +70,8 @@ namespace sLink::client
                                     onJoin();
 
                                     onRead();
+
+                                    promise->set_value({});
                                 } else
                                     promise->set_value(std::unexpected(ec.message()));
                             });
