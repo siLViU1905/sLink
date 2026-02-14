@@ -22,6 +22,8 @@ namespace sLink::ui::component
         static constexpr ImVec4 s_ColorHeader  = { 0.8f, 0.8f, 0.f, 1.f };
 
     public:
+        UIInfo(float posX);
+
         struct Info
         {
             enum class Type
@@ -48,6 +50,8 @@ namespace sLink::ui::component
 
     private:
         std::vector<Info> m_Infos;
+
+        float m_PosX;
     };
 }
 

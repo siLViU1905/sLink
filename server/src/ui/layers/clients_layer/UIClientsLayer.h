@@ -12,6 +12,8 @@ namespace sLink::server::ui::layer
     class UIClientsLayer : public sLink::ui::layer::UILayer
     {
     public:
+        UIClientsLayer();
+
         void render() override;
 
         component::UIActiveClients& getClientsPanel();
