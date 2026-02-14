@@ -10,6 +10,8 @@ namespace sLink::client::ui::layer
 	class UIChatLayer : public sLink::ui::layer::UILayer
 	{
 	public:
+		UIChatLayer();
+
 		void render() override;
 
 		component::UIChatWindow& getChatWindow();

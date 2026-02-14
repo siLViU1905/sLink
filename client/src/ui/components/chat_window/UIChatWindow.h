@@ -31,7 +31,7 @@ namespace sLink::client::ui::component
 
         static constexpr ImVec4 s_ColorInfoSuccess = sLink::ui::component::UIInfo::s_ColorSuccess;
         static constexpr ImVec4 s_ColorInfoFail    = sLink::ui::component::UIInfo::s_ColorFail;
-        static constexpr ImVec4 s_ColorInfoGeneral = sLink::ui::component::UIInfo::s_ColorInfo;
+        static constexpr ImVec4 s_ColorInfoGeneral = sLink::ui::component::UIInfo::s_ColorGeneral;
 
     public:
         using OnSendCallback = std::move_only_function<void(std::string_view)>;

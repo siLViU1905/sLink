@@ -2,6 +2,10 @@
 
 namespace sLink::client::ui::layer
 {
+	UIChatLayer::UIChatLayer():m_ChatWindow(m_InfoPanel.getInfos())
+	{
+	}
+
 	void UIChatLayer::render()
 	{
 		m_ChatWindow.render();
