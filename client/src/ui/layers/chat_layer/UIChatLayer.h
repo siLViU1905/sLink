@@ -14,14 +14,14 @@ namespace sLink::client::ui::layer
 
 		void render() override;
 
-		component::UIChatWindow& getChatWindow();
-
 		sLink::ui::component::UIInfo& getInfoPanel();
 
-	private:
-		component::UIChatWindow m_ChatWindow;
+		component::UIChatWindow& getChatWindow();
 
+	private:
 		sLink::ui::component::UIInfo m_InfoPanel;
+
+		component::UIChatWindow m_ChatWindow;
 	};
 }
 

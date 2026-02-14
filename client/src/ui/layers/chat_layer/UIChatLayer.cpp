@@ -13,13 +13,13 @@ namespace sLink::client::ui::layer
 		m_InfoPanel.render();
 	}
 
-	component::UIChatWindow& UIChatLayer::getChatWindow()
-	{
-		return m_ChatWindow;
-	}
-
 	sLink::ui::component::UIInfo & UIChatLayer::getInfoPanel()
 	{
 		return m_InfoPanel;
+	}
+
+	component::UIChatWindow& UIChatLayer::getChatWindow()
+	{
+		return m_ChatWindow;
 	}
 }
