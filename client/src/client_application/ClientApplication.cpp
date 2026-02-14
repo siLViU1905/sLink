@@ -78,7 +78,12 @@ namespace sLink::client_application
 	{
 		m_Client.setUsername(username);
 
-		m_Client.connect("127.0.0.1", serverPort);
+		auto result = m_Client.connect("127.0.0.1", serverPort);
+
+		if (result)
+			m_ChatLayer->getInfoPanel().addSuccessInfo(*result);
+		else
+			m_ChatLayer->getInfoPanel().addFailInfo(result.error());
 
 		m_CurrentLayer = m_ChatLayer;
 	}

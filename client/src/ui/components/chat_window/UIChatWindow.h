@@ -6,6 +6,7 @@
 #include <vector>
 #include <functional>
 #include <imgui.h>
+#include <components/info/UIInfo.h>
 
 namespace sLink::client::ui::component
 {
@@ -28,10 +29,14 @@ namespace sLink::client::ui::component
         static constexpr ImVec4 s_ColorButtonHovered = { 0.2f, 0.55f, 0.95f, 1.f };
         static constexpr ImVec4 s_ColorButtonActive  = { 0.1f, 0.35f, 0.75f, 1.f };
 
+        static constexpr ImVec4 s_ColorInfoSuccess = sLink::ui::component::UIInfo::s_ColorSuccess;
+        static constexpr ImVec4 s_ColorInfoFail    = sLink::ui::component::UIInfo::s_ColorFail;
+        static constexpr ImVec4 s_ColorInfoGeneral = sLink::ui::component::UIInfo::s_ColorInfo;
+
     public:
         using OnSendCallback = std::move_only_function<void(std::string_view)>;
 
-        UIChatWindow();
+        UIChatWindow(const std::vector<sLink::ui::component::UIInfo::Info> &infos);
 
         void render() override;
 
@@ -41,6 +46,8 @@ namespace sLink::client::ui::component
 
     private:
         std::vector<message::Message> m_Messages;
+
+        const std::vector<sLink::ui::component::UIInfo::Info>& m_InfosRef;
 
         std::string m_InputContent;
 

@@ -3,6 +3,7 @@
 
 #include <layers/UILayer.h>
 #include "../../components/chat_window/UIChatWindow.h"
+#include <components/info/UIInfo.h>
 
 namespace sLink::client::ui::layer
 {
@@ -12,8 +13,13 @@ namespace sLink::client::ui::layer
 		void render() override;
 
 		component::UIChatWindow& getChatWindow();
+
+		sLink::ui::component::UIInfo& getInfoPanel();
+
 	private:
 		component::UIChatWindow m_ChatWindow;
+
+		sLink::ui::component::UIInfo m_InfoPanel;
 	};
 }
 
