@@ -40,7 +40,7 @@ namespace sLink::ui::component
                     prefix = "[ERR] ";
                     break;
                 case Info::Type::GENERAL:
-                    color = s_ColorInfo;
+                    color = s_ColorGeneral;
                     prefix = "[INFO] ";
                     break;
             }
@@ -68,5 +68,10 @@ namespace sLink::ui::component
     void UIInfo::addGeneralInfo(std::string_view content)
     {
         m_Infos.emplace_back(content.data(), Info::Type::GENERAL);
+    }
+
+    const std::vector<UIInfo::Info> & UIInfo::getInfos() const
+    {
+        return m_Infos;
     }
 }

@@ -2,6 +2,7 @@
 #define SLINK_CLIENT_H
 
 #include <asio.hpp>
+#include <expected>
 #include <utility/safe_queue/SafeQueue.h>
 
 #include "message/Message.h"
@@ -17,7 +18,7 @@ namespace sLink::client
 
 		std::string_view getUsername() const;
 
-		void connect(std::string_view host, std::string_view port);
+		std::expected<std::string, std::string> connect(std::string_view host, std::string_view port);
 
 		void send(const message::Message& message);
 
@@ -26,7 +27,7 @@ namespace sLink::client
 		utility::SafeQueue<std::string>& getInbox();
 
 	private:
-		void onConnect(asio::ip::tcp::resolver::results_type endpoints);
+		std::expected<std::string, std::string> onConnect(asio::ip::tcp::resolver::results_type endpoints);
 
 		void onWrite();
 
@@ -49,6 +50,8 @@ namespace sLink::client
 		asio::streambuf m_ReadBuffer;
 
 		bool m_IsWriting;
+
+		bool m_ConnectionFailed;
 
 		std::string m_CurrentMessage;
 	};
