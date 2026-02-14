@@ -44,6 +44,8 @@ namespace sLink::ui::component
 
         void addGeneralInfo(std::string_view content);
 
+        const std::vector<Info>& getInfos() const;
+
     private:
         std::vector<Info> m_Infos;
     };
