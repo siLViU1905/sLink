@@ -40,7 +40,7 @@ namespace sLink::ui::component
                     prefix = "[ERR] ";
                     break;
                 case Info::Type::GENERAL:
-                    color = s_ColorInfo;
+                    color = s_ColorGeneral;
                     prefix = "[INFO] ";
                     break;
             }
