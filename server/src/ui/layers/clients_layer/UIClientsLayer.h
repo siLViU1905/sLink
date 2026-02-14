@@ -16,11 +16,11 @@ namespace sLink::server::ui::layer
 
         void render() override;
 
-        component::UIActiveClients& getClientsPanel();
+        component::UIActiveClients &getClientsPanel();
 
-        component::UIClientLogging& getClientLogger();
+        component::UIClientLogging &getClientLogger();
 
-        sLink::ui::component::UIInfo& getInfoPanel();
+        sLink::ui::component::UIInfo &getInfoPanel();
 
     private:
         component::UIActiveClients m_ClientsPanel;

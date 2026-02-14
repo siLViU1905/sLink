@@ -31,12 +31,13 @@ namespace sLink::client::ui::component
 
         ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height), false);
 
-        for (const auto& info : m_InfosRef)
+        for (const auto &info: m_InfosRef)
         {
             ImVec4 infoColor;
             std::string tag;
 
-            switch (info.m_Type) {
+            switch (info.m_Type)
+            {
                 case sLink::ui::component::UIInfo::Info::Type::SUCCESS:
                     infoColor = s_ColorInfoSuccess;
                     tag = "[SYSTEM-OK]";

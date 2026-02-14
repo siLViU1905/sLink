@@ -22,11 +22,11 @@ namespace sLink::server::ui::component
 
         static constexpr float s_PanelWidth = 350.f;
 
-        static constexpr ImVec4 s_ColorConnected = { 0.2f, 0.9f, 0.2f, 1.f };
+        static constexpr ImVec4 s_ColorConnected = {0.2f, 0.9f, 0.2f, 1.f};
 
-        static constexpr ImVec4 s_ColorDisconnected = { 0.9f, 0.2f, 0.2f, 1.f };
+        static constexpr ImVec4 s_ColorDisconnected = {0.9f, 0.2f, 0.2f, 1.f};
 
-        static constexpr ImVec4 s_ColorHeader = { 0.2f, 0.7f, 0.9f, 1.f };
+        static constexpr ImVec4 s_ColorHeader = {0.2f, 0.7f, 0.9f, 1.f};
 
         struct ClientLog
         {

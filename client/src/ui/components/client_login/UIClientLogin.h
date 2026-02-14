@@ -25,7 +25,7 @@ namespace sLink::client::ui::component
 
         void render() override;
 
-        void setOnLoginDataInput(OnLoginDataInputCallback&& callback);
+        void setOnLoginDataInput(OnLoginDataInputCallback &&callback);
 
     private:
         std::string m_InputUsername;

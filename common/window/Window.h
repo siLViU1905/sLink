@@ -11,7 +11,7 @@ namespace sLink::window
     public:
         Window(int width, int height, std::string_view title);
 
-        Window(Window&& other) noexcept;
+        Window(Window &&other) noexcept;
 
         bool isOpen() const;
 

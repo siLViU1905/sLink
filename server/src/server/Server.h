@@ -8,46 +8,46 @@
 
 namespace sLink::server
 {
-	class Server
-	{
-	public:
-		Server(asio::io_context& ctx);
+    class Server
+    {
+    public:
+        Server(asio::io_context &ctx);
 
-		std::expected<std::string, std::string> startHost(uint16_t port);
+        std::expected<std::string, std::string> startHost(uint16_t port);
 
-		void broadcast(const std::string& message);
+        void broadcast(const std::string &message);
 
-		void update();
+        void update();
 
-		utility::SafeQueue<std::string>& getPendingUsernames();
+        utility::SafeQueue<std::string> &getPendingUsernames();
 
-		utility::SafeQueue<std::string>& getDisconnectedUsernames();
+        utility::SafeQueue<std::string> &getDisconnectedUsernames();
 
-	private:
-		void onAccept();
+    private:
+        void onAccept();
 
-		void onClientDisconnected(const std::shared_ptr<session::Session>& session);
+        void onClientDisconnected(const std::shared_ptr<session::Session> &session);
 
-		asio::io_context& m_IOContext;
+        asio::io_context &m_IOContext;
 
-		asio::executor_work_guard<asio::io_context::executor_type> m_WorkGuard;
+        asio::executor_work_guard<asio::io_context::executor_type> m_WorkGuard;
 
-		std::unique_ptr<asio::ip::tcp::acceptor> m_Acceptor;
+        std::unique_ptr<asio::ip::tcp::acceptor> m_Acceptor;
 
-		utility::SafeQueue<std::string> m_Inbox;
+        utility::SafeQueue<std::string> m_Inbox;
 
-		utility::SafeQueue<std::string> m_Outbox;
+        utility::SafeQueue<std::string> m_Outbox;
 
-		asio::streambuf m_ReadBuffer;
+        asio::streambuf m_ReadBuffer;
 
-		std::vector<std::shared_ptr<session::Session>> m_Sessions;
+        std::vector<std::shared_ptr<session::Session> > m_Sessions;
 
-		utility::SafeQueue<std::string> m_PendingUsernames;
+        utility::SafeQueue<std::string> m_PendingUsernames;
 
-		utility::SafeQueue<std::string> m_DisconnectedUsernames;
+        utility::SafeQueue<std::string> m_DisconnectedUsernames;
 
-		bool m_IsWriting;
-	};
+        bool m_IsWriting;
+    };
 }
 
 #endif

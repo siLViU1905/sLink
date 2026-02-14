@@ -12,7 +12,7 @@ namespace sLink::server::ui::layer
     public:
         void render() override;
 
-        component::UIPortSelect& getPortSelectPanel();
+        component::UIPortSelect &getPortSelectPanel();
 
     private:
         component::UIPortSelect m_PortSelect;
