@@ -2,7 +2,7 @@
 
 namespace sLink::client::ui::layer
 {
-    UIChatLayer::UIChatLayer() : m_ChatWindow(m_InfoPanel.getInfos())
+    UIChatLayer::UIChatLayer() : m_InfoPanel(0.f), m_ChatWindow(m_InfoPanel.getInfos())
     {
     }
 
