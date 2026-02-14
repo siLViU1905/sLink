@@ -69,4 +69,9 @@ namespace sLink::ui::component
     {
         m_Infos.emplace_back(content.data(), Info::Type::GENERAL);
     }
+
+    const std::vector<UIInfo::Info> & UIInfo::getInfos() const
+    {
+        return m_Infos;
+    }
 }
