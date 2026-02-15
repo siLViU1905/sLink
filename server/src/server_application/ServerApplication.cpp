@@ -21,6 +21,8 @@ namespace sLink::server_application
     ServerApplication::~ServerApplication()
     {
         m_IOContext.stop();
+
+        m_Database.close();
     }
 
     void ServerApplication::onUpdate()
