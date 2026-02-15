@@ -131,6 +131,8 @@ namespace sLink::client
     {
         message::Message joinMessage(protocol::Command::LOGIN_REQUEST, m_Username, "");
 
-        asio::write(m_Socket, asio::buffer(joinMessage.serialize()));
+        auto data = joinMessage.serialize() + "\n";
+
+        asio::write(m_Socket, asio::buffer(data));
     }
 }
