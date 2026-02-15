@@ -43,7 +43,7 @@ namespace sLink::message
 
         utility::Timestamp m_Timestamp;
 
-        static constexpr std::string_view s_JSONCommandSelector = "sender_name";
+        static constexpr std::string_view s_JSONCommandSelector = "command";
 
         static constexpr std::string_view s_JSONSenderNameSelector = "sender_name";
 
