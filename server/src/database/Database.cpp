@@ -12,18 +12,19 @@ namespace sLink::server::db
     {
         auto result = start();
 
-        m_InfoOutbox.push(result.value_or(result.error()));
+        m_InfoOutbox.push(result ? *result : result.error());
 
         if (!result)
             return;
 
         while (true)
         {
-            auto username = usernameInbox.tryPop();
+            if (auto username = usernameInbox.tryPop())
+            {
+                result = addUser(*username);
 
-            result = addUser(*username);
-
-            m_InfoOutbox.push(result.value_or(result.error()));
+                m_InfoOutbox.push(result ? *result : result.error());
+            }
         }
     }
 
