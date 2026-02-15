@@ -27,7 +27,7 @@ namespace sLink::server::ui::component
 
         void render() override;
 
-        void setOnPortInput(OnPortInputCallback&& callback);
+        void setOnPortInput(OnPortInputCallback &&callback);
 
     private:
         std::string m_InputPort;

@@ -7,7 +7,7 @@ namespace sLink::ui::layer
     {
     public:
         virtual void render() = 0;
-    
+
         virtual ~UILayer() = default;
     };
 }

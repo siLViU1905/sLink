@@ -19,8 +19,7 @@ namespace sLink::server
             onAccept();
 
             return {std::format("Server started on port {}", port)};
-        }
-        catch (const asio::system_error& e)
+        } catch (const asio::system_error &e)
         {
             return std::unexpected(std::format("Failed to start server on port {}", port));
         }

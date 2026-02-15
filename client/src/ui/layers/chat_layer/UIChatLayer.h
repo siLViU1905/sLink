@@ -7,22 +7,22 @@
 
 namespace sLink::client::ui::layer
 {
-	class UIChatLayer : public sLink::ui::layer::UILayer
-	{
-	public:
-		UIChatLayer();
+    class UIChatLayer : public sLink::ui::layer::UILayer
+    {
+    public:
+        UIChatLayer();
 
-		void render() override;
+        void render() override;
 
-		sLink::ui::component::UIInfo& getInfoPanel();
+        sLink::ui::component::UIInfo &getInfoPanel();
 
-		component::UIChatWindow& getChatWindow();
+        component::UIChatWindow &getChatWindow();
 
-	private:
-		sLink::ui::component::UIInfo m_InfoPanel;
+    private:
+        sLink::ui::component::UIInfo m_InfoPanel;
 
-		component::UIChatWindow m_ChatWindow;
-	};
+        component::UIChatWindow m_ChatWindow;
+    };
 }
 
 #endif

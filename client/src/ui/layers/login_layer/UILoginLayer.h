@@ -12,7 +12,7 @@ namespace sLink::client::ui::layer
     public:
         void render() override;
 
-        component::UIClientLogin& getClientLoginPanel();
+        component::UIClientLogin &getClientLoginPanel();
 
     private:
         component::UIClientLogin m_ClientLoginPanel;

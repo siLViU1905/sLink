@@ -11,15 +11,15 @@ namespace sLink::ui::component
     class UIInfo : public UIComponent
     {
     public:
-        static constexpr ImVec4 s_ColorSuccess = { 0.2f, 0.8f, 0.2f, 1.f };
-        static constexpr ImVec4 s_ColorFail    = { 1.f, 0.2f, 0.2f, 1.f };
-        static constexpr ImVec4 s_ColorGeneral    = { 0.2f, 0.6f, 1.f, 1.f };
+        static constexpr ImVec4 s_ColorSuccess = {0.2f, 0.8f, 0.2f, 1.f};
+        static constexpr ImVec4 s_ColorFail = {1.f, 0.2f, 0.2f, 1.f};
+        static constexpr ImVec4 s_ColorGeneral = {0.2f, 0.6f, 1.f, 1.f};
 
     private:
         static constexpr float s_FontScale = 1.1f;
         static constexpr float s_SidebarWidth = 300.f;
 
-        static constexpr ImVec4 s_ColorHeader  = { 0.8f, 0.8f, 0.f, 1.f };
+        static constexpr ImVec4 s_ColorHeader = {0.8f, 0.8f, 0.f, 1.f};
 
     public:
         UIInfo(float posX);
@@ -46,7 +46,7 @@ namespace sLink::ui::component
 
         void addGeneralInfo(std::string_view content);
 
-        const std::vector<Info>& getInfos() const;
+        const std::vector<Info> &getInfos() const;
 
     private:
         std::vector<Info> m_Infos;

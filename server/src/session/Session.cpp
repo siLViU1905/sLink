@@ -68,13 +68,11 @@ namespace sLink::session
 
                                            if (m_OnUsernameSentCallback)
                                                m_OnUsernameSentCallback(m_Username);
-                                       }
-                                       else
+                                       } else
                                            m_Inbox.push(msg);
 
                                        onRead();
-                                   }
-                                   else if (ec == asio::error::eof || ec == asio::error::connection_reset)
+                                   } else if (ec == asio::error::eof || ec == asio::error::connection_reset)
                                    {
                                        if (m_OnDisconnectCallback)
                                            m_OnDisconnectCallback(m_Username);

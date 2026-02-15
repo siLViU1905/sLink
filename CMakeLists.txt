@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 
 project(sLink
         VERSION 1.0
-        LANGUAGES CXX
+        LANGUAGES C CXX
 )
 
 set(CMAKE_CXX_STANDARD 23)
