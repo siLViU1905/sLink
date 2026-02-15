@@ -129,8 +129,8 @@ namespace sLink::client
 
     void Client::onJoin()
     {
-        auto joinMessage = "/" + m_Username + "\n";
+        message::Message joinMessage(protocol::Command::LOGIN_REQUEST, m_Username, "");
 
-        asio::write(m_Socket, asio::buffer(joinMessage));
+        asio::write(m_Socket, asio::buffer(joinMessage.serialize()));
     }
 }

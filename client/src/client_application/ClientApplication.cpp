@@ -57,6 +57,7 @@ namespace sLink::client_application
         m_ChatLayer->getChatWindow().setOnMessageSend([this](std::string_view content)
         {
             message::Message message(
+                protocol::Command::CHAT_MESSAGE,
                 m_Client.getUsername(),
                 content
             );
