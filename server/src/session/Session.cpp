@@ -1,5 +1,7 @@
 #include "Session.h"
 
+#include "message/Message.h"
+
 namespace sLink::session
 {
     Session::Session(asio::ip::tcp::socket &&socket, utility::SafeQueue<std::string> &inbox)
@@ -21,7 +23,7 @@ namespace sLink::session
         m_Socket.close(ec);
     }
 
-    void Session::send(const std::string &message)
+    void Session::send(const message::Message &message)
     {
         auto self(shared_from_this());
 
@@ -29,7 +31,7 @@ namespace sLink::session
         {
             bool idle = m_WriteQueue.empty();
 
-            m_WriteQueue.push(message + "\n");
+            m_WriteQueue.push(message.serialize() + "\n");
 
             if (idle)
                 onWrite();
@@ -65,20 +67,7 @@ namespace sLink::session
                                {
                                    if (!ec)
                                    {
-                                       std::istream is(&m_Buffer);
-
-                                       std::string msg;
-
-                                       std::getline(is, msg);
-
-                                       if (msg.front() == '/')
-                                       {
-                                           m_Username = msg.substr(1);
-
-                                           if (m_OnUsernameSentCallback)
-                                               m_OnUsernameSentCallback(m_Username);
-                                       } else
-                                           m_Inbox.push(msg);
+                                       handleMessage();
 
                                        onRead();
                                    } else if (ec == asio::error::eof || ec == asio::error::connection_reset)
@@ -104,5 +93,37 @@ namespace sLink::session
                                       onWrite();
                               }
                           });
+    }
+
+    void Session::handleMessage()
+    {
+        std::istream is(&m_Buffer);
+
+        std::string line;
+
+        while (std::getline(is, line))
+        {
+            auto message = message::Message::deserialize(line);
+
+            switch (message.getCommand())
+            {
+                case protocol::Command::LOGIN_REQUEST:
+                    m_Username = message.getSenderName();
+
+                    m_OnUsernameSentCallback(m_Username);
+                    break;
+                case protocol::Command::LOGIN_RESPONSE_REJECT:
+                    break;
+                case protocol::Command::LOGIN_RESPONSE_ACCEPT:
+                    break;
+                case protocol::Command::CHAT_MESSAGE:
+                    send(message);
+                    break;
+                case protocol::Command::USER_JOINED:
+                    break;
+                case protocol::Command::USER_LEFT:
+                    break;
+            }
+        }
     }
 }

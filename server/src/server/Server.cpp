@@ -26,7 +26,7 @@ namespace sLink::server
         }
     }
 
-    void Server::broadcast(const std::string &message)
+    void Server::broadcast(const message::Message &message)
     {
         for (auto &session: m_Sessions)
             session->send(message);
@@ -36,7 +36,7 @@ namespace sLink::server
     {
         while (auto message = m_Inbox.tryPop())
         {
-            broadcast(*message);
+            broadcast(message::Message::deserialize(*message));
 
             m_DbMessageInbox.push(*message);
         }
@@ -95,8 +95,6 @@ namespace sLink::server
     void Server::onClientConnected(const std::shared_ptr<session::Session> &session)
     {
         m_PendingUsernames.push(std::string(session->getUsername()));
-
-        m_DbUsernameInbox.push(std::string(session->getUsername()));
     }
 
     void Server::onClientDisconnected(const std::shared_ptr<session::Session> &session)
@@ -108,7 +106,9 @@ namespace sLink::server
 
     void Server::onClientRejected(const std::shared_ptr<session::Session> &session)
     {
-        session->send("AUTH_FAILED: User not found");
+        message::Message message(protocol::Command::LOGIN_RESPONSE_REJECT, "", "");
+
+        session->send(message);
 
         session->disconnect();
 
