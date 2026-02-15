@@ -4,7 +4,7 @@
 
 namespace sLink::server::db
 {
-    Database::Database() : m_DatabaseHandle(nullptr)
+    Database::Database() : m_DatabaseHandle(nullptr), m_Closed(false)
     {
     }
 
@@ -19,6 +19,12 @@ namespace sLink::server::db
 
         while (true)
         {
+            {
+                std::scoped_lock lock(m_CloseMutex);
+                if (m_Closed)
+                    break;
+            }
+
             if (auto username = usernameInbox.tryPop())
             {
                 result = addUser(*username);
@@ -26,6 +32,17 @@ namespace sLink::server::db
                 m_InfoOutbox.push(result ? *result : result.error());
             }
         }
+    }
+
+    utility::SafeQueue<std::string> &Database::getInfo()
+    {
+        return m_InfoOutbox;
+    }
+
+    void Database::close()
+    {
+        std::scoped_lock lock(m_CloseMutex);
+        m_Closed = true;
     }
 
     Database::ActionResult Database::start()

@@ -37,6 +37,10 @@ namespace sLink::server::db
 
         void run(utility::SafeQueue<std::string>& usernameInbox);
 
+        utility::SafeQueue<std::string>& getInfo();
+
+        void close();
+
         ~Database();
 
     private:
@@ -49,6 +53,10 @@ namespace sLink::server::db
         sqlite3* m_DatabaseHandle;
 
         utility::SafeQueue<std::string> m_InfoOutbox;
+
+        std::mutex m_CloseMutex;
+
+        bool m_Closed;
     };
 }
 
