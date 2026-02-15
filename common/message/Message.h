@@ -30,8 +30,6 @@ namespace sLink::message
         static Message deserialize(std::string_view raw);
 
     private:
-        static int64_t getTimeSinceEpochMS();
-
         std::string m_SenderName;
 
         std::string m_Content;
