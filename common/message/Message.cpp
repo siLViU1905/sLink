@@ -77,6 +77,6 @@ namespace sLink::message
 
         auto timestamp = js[s_JSONTimestampSelector].get<int64_t>();
 
-        return {senderName, content, timestamp};
+        return {command, senderName, content, timestamp};
     }
 }
