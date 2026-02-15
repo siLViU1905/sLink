@@ -2,7 +2,7 @@
 #define SLINK_PACKET_HEADER_H
 #include "Command.h"
 
-namespace slink::protocol
+namespace sLink::protocol
 {
     struct PacketHeader
     {
