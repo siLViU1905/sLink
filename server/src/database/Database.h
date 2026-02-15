@@ -7,6 +7,8 @@
 #include <string>
 #include <expected>
 
+#include "safe_queue/SafeQueue.h"
+
 namespace sLink::server::db
 {
     class Database
@@ -33,14 +35,20 @@ namespace sLink::server::db
     public:
         Database();
 
-        std::expected<std::string, std::string> start();
-
-        std::expected<std::string, std::string> addUser(std::string_view username);
+        void run(utility::SafeQueue<std::string>& usernameInbox);
 
         ~Database();
 
     private:
+        using ActionResult = std::expected<std::string, std::string>;
+
+        ActionResult start();
+
+        ActionResult addUser(std::string_view username);
+
         sqlite3* m_DatabaseHandle;
+
+        utility::SafeQueue<std::string> m_InfoOutbox;
     };
 }
 
