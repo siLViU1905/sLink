@@ -2,9 +2,10 @@
 
 namespace sLink::server
 {
-    Server::Server(asio::io_context &ctx) : m_IOContext(ctx),
-                                            m_WorkGuard(asio::make_work_guard(ctx)),
-                                            m_IsWriting(false)
+    Server::Server(asio::io_context &ctx, db::Database &database) : m_IOContext(ctx),
+                                                                    m_Database(database),
+                                                                    m_WorkGuard(asio::make_work_guard(ctx)),
+                                                                    m_IsWriting(false)
     {
     }
 
@@ -51,12 +52,12 @@ namespace sLink::server
         return m_DisconnectedUsernames;
     }
 
-    utility::SafeQueue<std::string> & Server::getDbUsernameInbox()
+    utility::SafeQueue<std::string> &Server::getDbUsernameInbox()
     {
         return m_DbUsernameInbox;
     }
 
-    utility::SafeQueue<std::string> & Server::getDbMessageInbox()
+    utility::SafeQueue<std::string> &Server::getDbMessageInbox()
     {
         return m_DbMessageInbox;
     }
@@ -71,11 +72,12 @@ namespace sLink::server
 
                 auto &session = m_Sessions.back();
 
-                session->setOnUsernameSentCallback([this](std::string_view username)
+                session->setOnUsernameSentCallback([this, session](std::string_view username)
                 {
-                    m_PendingUsernames.push(std::string(username));
-
-                    m_DbUsernameInbox.push(std::string(username));
+                    if (m_Database.findUser(username))
+                        onClientConnected(session);
+                    else
+                        onClientRejected(session);
                 });
 
                 session->setOnDisconnectCallback([this, session](std::string_view username)
@@ -90,10 +92,30 @@ namespace sLink::server
         });
     }
 
+    void Server::onClientConnected(const std::shared_ptr<session::Session> &session)
+    {
+        m_PendingUsernames.push(std::string(session->getUsername()));
+
+        m_DbUsernameInbox.push(std::string(session->getUsername()));
+    }
+
     void Server::onClientDisconnected(const std::shared_ptr<session::Session> &session)
     {
         m_DisconnectedUsernames.push(std::string(session->getUsername()));
 
         std::erase(m_Sessions, session);
+    }
+
+    void Server::onClientRejected(const std::shared_ptr<session::Session> &session)
+    {
+        session->send("AUTH_FAILED: User not found");
+
+        session->disconnect();
+
+        std::string username = session->getUsername().data();
+
+        std::erase(m_Sessions, session);
+
+        m_DisconnectedUsernames.push(std::format("Rejected: {}", username));
     }
 }

@@ -6,12 +6,14 @@
 #include "../session/Session.h"
 #include <expected>
 
+#include "../database/Database.h"
+
 namespace sLink::server
 {
     class Server
     {
     public:
-        Server(asio::io_context &ctx);
+        Server(asio::io_context &ctx, db::Database& database);
 
         std::expected<std::string, std::string> startHost(uint16_t port);
 
@@ -30,9 +32,15 @@ namespace sLink::server
     private:
         void onAccept();
 
+        void onClientConnected(const std::shared_ptr<session::Session> &session);
+
         void onClientDisconnected(const std::shared_ptr<session::Session> &session);
 
+        void onClientRejected(const std::shared_ptr<session::Session> &session);
+
         asio::io_context &m_IOContext;
+
+        db::Database& m_Database;
 
         asio::executor_work_guard<asio::io_context::executor_type> m_WorkGuard;
 
