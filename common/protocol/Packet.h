@@ -3,7 +3,7 @@
 #include "Packet_Header.h"
 #include <vector>
 
-namespace slink::protocol
+namespace sLink::protocol
 {
     struct Packet
     {

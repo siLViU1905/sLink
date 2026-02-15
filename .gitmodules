@@ -10,3 +10,6 @@
 [submodule "external/json"]
 	path = external/json
 	url = https://github.com/nlohmann/json.git
+[submodule "external/sqlite"]
+	path = external/sqlite
+	url = https://github.com/azadkuh/sqlite-amalgamation.git

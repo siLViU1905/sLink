@@ -17,7 +17,8 @@ namespace sLink::client::ui::component
         ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
         ImGui::SetNextWindowSize(ImVec2(s_WindowWidth, s_WindowHeight));
 
-        ImGui::Begin("Login to sLink", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+        ImGui::Begin("Login to sLink", nullptr,
+                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, s_InputPaddingY));
 
@@ -41,13 +42,11 @@ namespace sLink::client::ui::component
             {
                 m_ErrorMessage = "Username field is empty!";
                 m_ShowErrorPopup = true;
-            }
-            else if (portStr.empty())
+            } else if (portStr.empty())
             {
                 m_ErrorMessage = "Server Port field is empty!";
                 m_ShowErrorPopup = true;
-            }
-            else if (m_OnLoginDataInputCallback)
+            } else if (m_OnLoginDataInputCallback)
             {
                 m_OnLoginDataInputCallback(userStr, portStr);
             }

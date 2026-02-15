@@ -1,49 +1,56 @@
-#ifndef SLINK_MESSAGE_H 
+#ifndef SLINK_MESSAGE_H
 #define SLINK_MESSAGE_H 
 
 #include <string>
 #include <timestamp/Timestamp.h>
+#include <protocol/Command.h>
 
 namespace sLink::message
 {
-	class Message
-	{
-	public:
-		Message() = default;
+    class Message
+    {
+    public:
+        Message() = default;
 
-		Message(std::string_view senderName, std::string_view content);
+        Message(protocol::Command command, std::string_view senderName, std::string_view content);
 
-		Message(std::string_view senderName, std::string_view content, utility::Timestamp timestamp);
+        Message(protocol::Command command, std::string_view senderName, std::string_view content, utility::Timestamp timestamp);
 
-		void setSenderName(std::string_view name);
+        void setCommand(protocol::Command command);
 
-		void setContent(std::string_view content);
+        void setSenderName(std::string_view name);
 
-		std::string_view getSenderName() const;
+        void setContent(std::string_view content);
 
-		std::string_view getContent() const;
+        protocol::Command getCommand() const;
 
-		utility::Timestamp getTimestamp() const;
+        std::string_view getSenderName() const;
 
-		std::string serialize() const;
+        std::string_view getContent() const;
 
-		static Message deserialize(std::string_view raw);
+        utility::Timestamp getTimestamp() const;
 
-	private:
-		static int64_t getTimeSinceEpochMS();
+        std::string serialize() const;
 
-		std::string m_SenderName;
+        static Message deserialize(std::string_view raw);
 
-		std::string m_Content;
+    private:
+        protocol::Command m_Command;
 
-		utility::Timestamp m_Timestamp;
+        std::string m_SenderName;
 
-		static constexpr std::string_view s_JSONSenderNameSelector = "sender_name";
+        std::string m_Content;
 
-		static constexpr std::string_view s_JSONContentSelector = "content";
+        utility::Timestamp m_Timestamp;
 
-		static constexpr std::string_view s_JSONTimestampSelector = "time_stamp";
-	};
+        static constexpr std::string_view s_JSONCommandSelector = "sender_name";
+
+        static constexpr std::string_view s_JSONSenderNameSelector = "sender_name";
+
+        static constexpr std::string_view s_JSONContentSelector = "content";
+
+        static constexpr std::string_view s_JSONTimestampSelector = "time_stamp";
+    };
 }
 
 #endif

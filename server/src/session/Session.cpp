@@ -12,6 +12,15 @@ namespace sLink::session
         onRead();
     }
 
+    void Session::disconnect()
+    {
+        std::error_code ec;
+
+        m_Socket.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
+
+        m_Socket.close(ec);
+    }
+
     void Session::send(const std::string &message)
     {
         auto self(shared_from_this());
@@ -68,13 +77,11 @@ namespace sLink::session
 
                                            if (m_OnUsernameSentCallback)
                                                m_OnUsernameSentCallback(m_Username);
-                                       }
-                                       else
+                                       } else
                                            m_Inbox.push(msg);
 
                                        onRead();
-                                   }
-                                   else if (ec == asio::error::eof || ec == asio::error::connection_reset)
+                                   } else if (ec == asio::error::eof || ec == asio::error::connection_reset)
                                    {
                                        if (m_OnDisconnectCallback)
                                            m_OnDisconnectCallback(m_Username);

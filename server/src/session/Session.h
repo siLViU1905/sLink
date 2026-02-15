@@ -7,46 +7,48 @@
 
 namespace sLink::session
 {
-	class Session : public std::enable_shared_from_this<Session>
-	{
-	public:
-		using OnUsernameSentCallback = std::move_only_function<void(std::string_view)>;
+    class Session : public std::enable_shared_from_this<Session>
+    {
+    public:
+        using OnUsernameSentCallback = std::move_only_function<void(std::string_view)>;
 
-		using OnDisconnectCallback = std::move_only_function<void(std::string_view)>;
+        using OnDisconnectCallback = std::move_only_function<void(std::string_view)>;
 
-		Session(asio::ip::tcp::socket&& socket, utility::SafeQueue<std::string>& inbox);
+        Session(asio::ip::tcp::socket &&socket, utility::SafeQueue<std::string> &inbox);
 
-		void start();
+        void start();
 
-		void send(const std::string& message);
+        void disconnect();
 
-		void setUsername(std::string_view username);
+        void send(const std::string &message);
 
-		std::string_view getUsername() const;
+        void setUsername(std::string_view username);
 
-		void setOnUsernameSentCallback(OnUsernameSentCallback&& callback);
+        std::string_view getUsername() const;
 
-		void setOnDisconnectCallback(OnDisconnectCallback&& callback);
+        void setOnUsernameSentCallback(OnUsernameSentCallback &&callback);
 
-	private:
-		void onRead();
+        void setOnDisconnectCallback(OnDisconnectCallback &&callback);
 
-		void onWrite();
+    private:
+        void onRead();
 
-		std::string m_Username;
+        void onWrite();
 
-		asio::ip::tcp::socket m_Socket;
+        std::string m_Username;
 
-		asio::streambuf m_Buffer;
+        asio::ip::tcp::socket m_Socket;
 
-		utility::SafeQueue<std::string>& m_Inbox;
+        asio::streambuf m_Buffer;
 
-		std::queue<std::string> m_WriteQueue;
+        utility::SafeQueue<std::string> &m_Inbox;
 
-		OnUsernameSentCallback m_OnUsernameSentCallback;
+        std::queue<std::string> m_WriteQueue;
 
-		OnDisconnectCallback m_OnDisconnectCallback;
-	};
+        OnUsernameSentCallback m_OnUsernameSentCallback;
+
+        OnDisconnectCallback m_OnDisconnectCallback;
+    };
 }
 
 #endif

@@ -7,7 +7,7 @@ namespace sLink::client::ui::layer
         m_ClientLoginPanel.render();
     }
 
-    component::UIClientLogin & UILoginLayer::getClientLoginPanel()
+    component::UIClientLogin &UILoginLayer::getClientLoginPanel()
     {
         return m_ClientLoginPanel;
     }

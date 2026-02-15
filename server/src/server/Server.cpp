@@ -2,19 +2,28 @@
 
 namespace sLink::server
 {
-    Server::Server(asio::io_context &ctx) : m_IOContext(ctx),
-                                            m_WorkGuard(asio::make_work_guard(ctx)),
-                                            m_IsWriting(false)
+    Server::Server(asio::io_context &ctx, db::Database &database) : m_IOContext(ctx),
+                                                                    m_Database(database),
+                                                                    m_WorkGuard(asio::make_work_guard(ctx)),
+                                                                    m_IsWriting(false)
     {
     }
 
-    void Server::startHost(uint16_t port)
+    std::expected<std::string, std::string> Server::startHost(uint16_t port)
     {
-        m_Acceptor = std::make_unique<asio::ip::tcp::acceptor>(
-            m_IOContext, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)
-        );
+        try
+        {
+            m_Acceptor = std::make_unique<asio::ip::tcp::acceptor>(
+                m_IOContext, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)
+            );
 
-        onAccept();
+            onAccept();
+
+            return {std::format("Server started on port {}", port)};
+        } catch (const asio::system_error &e)
+        {
+            return std::unexpected(std::format("Failed to start server on port {}", port));
+        }
     }
 
     void Server::broadcast(const std::string &message)
@@ -26,7 +35,11 @@ namespace sLink::server
     void Server::update()
     {
         while (auto message = m_Inbox.tryPop())
+        {
             broadcast(*message);
+
+            m_DbMessageInbox.push(*message);
+        }
     }
 
     utility::SafeQueue<std::string> &Server::getPendingUsernames()
@@ -39,6 +52,16 @@ namespace sLink::server
         return m_DisconnectedUsernames;
     }
 
+    utility::SafeQueue<std::string> &Server::getDbUsernameInbox()
+    {
+        return m_DbUsernameInbox;
+    }
+
+    utility::SafeQueue<std::string> &Server::getDbMessageInbox()
+    {
+        return m_DbMessageInbox;
+    }
+
     void Server::onAccept()
     {
         m_Acceptor->async_accept([this](std::error_code ec, asio::ip::tcp::socket socket)
@@ -49,9 +72,12 @@ namespace sLink::server
 
                 auto &session = m_Sessions.back();
 
-                session->setOnUsernameSentCallback([this](std::string_view username)
+                session->setOnUsernameSentCallback([this, session](std::string_view username)
                 {
-                    m_PendingUsernames.push(std::string(username));
+                    if (m_Database.findUser(username))
+                        onClientConnected(session);
+                    else
+                        onClientRejected(session);
                 });
 
                 session->setOnDisconnectCallback([this, session](std::string_view username)
@@ -66,10 +92,30 @@ namespace sLink::server
         });
     }
 
+    void Server::onClientConnected(const std::shared_ptr<session::Session> &session)
+    {
+        m_PendingUsernames.push(std::string(session->getUsername()));
+
+        m_DbUsernameInbox.push(std::string(session->getUsername()));
+    }
+
     void Server::onClientDisconnected(const std::shared_ptr<session::Session> &session)
     {
         m_DisconnectedUsernames.push(std::string(session->getUsername()));
 
         std::erase(m_Sessions, session);
+    }
+
+    void Server::onClientRejected(const std::shared_ptr<session::Session> &session)
+    {
+        session->send("AUTH_FAILED: User not found");
+
+        session->disconnect();
+
+        std::string username = session->getUsername().data();
+
+        std::erase(m_Sessions, session);
+
+        m_DisconnectedUsernames.push(std::format("Rejected: {}", username));
     }
 }

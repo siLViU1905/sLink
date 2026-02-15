@@ -2,94 +2,113 @@
 
 namespace sLink::server_application
 {
-	ServerApplication::ServerApplication(int windowWidth, int windowHeight, std::string_view windowName) :
-		application::Application(windowWidth, windowHeight, windowName),
-		m_Server(m_IOContext)
-	{
-		initLayers();
+    ServerApplication::ServerApplication(int windowWidth, int windowHeight, std::string_view windowName)
+        : Application(windowWidth, windowHeight, windowName), m_Server(m_IOContext, m_Database)
+    {
+        initLayers();
 
-		m_NetworkThread = std::jthread([this]()
-			{
-				m_IOContext.run();
-			});
-	}
+        m_NetworkThread = std::jthread([this]()
+        {
+            m_IOContext.run();
+        });
 
-	ServerApplication::~ServerApplication()
-	{
-		m_IOContext.stop();
-	}
+        m_DbThread = std::jthread([this]()
+        {
+            m_Database.run(m_Server.getDbUsernameInbox(), m_Server.getDbMessageInbox());
+        });
+    }
 
-	void ServerApplication::onUpdate()
-	{
-		m_Server.update();
+    ServerApplication::~ServerApplication()
+    {
+        m_IOContext.stop();
 
-		onUpdateConnectedClients();
+        m_Database.close();
+    }
 
-		onUpdateDisconnectedClients();
-	}
+    void ServerApplication::onUpdate()
+    {
+        m_Server.update();
 
-	void ServerApplication::onRender()
-	{
-		m_Renderer.waitForFences();
+        onUpdateConnectedClients();
 
-		onRenderUI();
+        onUpdateDisconnectedClients();
 
-		m_Renderer.recordUIData(ui::UIBackend::get_ui_render_data());
+        onUpdateDbInfo();
+    }
 
-		m_Renderer.renderFrame();
-	}
+    void ServerApplication::onRender()
+    {
+        m_Renderer.waitForFences();
 
-	void ServerApplication::onRenderUI()
-	{
-		ui::UIBackend::begin_frame();
+        onRenderUI();
 
-		m_CurrentLayer->render();
+        m_Renderer.recordUIData(ui::UIBackend::get_ui_render_data());
 
-		ui::UIBackend::end_frame();
-	}
+        m_Renderer.renderFrame();
+    }
 
-	void ServerApplication::initLayers()
-	{
-		m_ClientsLayer = std::make_shared<server::ui::layer::UIClientsLayer>();
+    void ServerApplication::onRenderUI()
+    {
+        ui::UIBackend::begin_frame();
 
-		m_ServerPortLayer = std::make_shared<server::ui::layer::UIServerPortLayer>();
+        m_CurrentLayer->render();
 
-		m_ServerPortLayer->getPortSelectPanel().setOnPortInput([this](std::string_view port)
-		{
-			onPortSelected(port);
-		});
+        ui::UIBackend::end_frame();
+    }
 
-		m_CurrentLayer = m_ServerPortLayer;
-	}
+    void ServerApplication::initLayers()
+    {
+        m_ClientsLayer = std::make_shared<server::ui::layer::UIClientsLayer>();
 
-	void ServerApplication::onPortSelected(std::string_view port)
-	{
-		uint16_t portNumber = 0;
+        m_ServerPortLayer = std::make_shared<server::ui::layer::UIServerPortLayer>();
 
-		std::from_chars(port.data(), port.data() + port.size(), portNumber);
+        m_ServerPortLayer->getPortSelectPanel().setOnPortInput([this](std::string_view port)
+        {
+            onPortSelected(port);
+        });
 
-		m_Server.startHost(portNumber);
+        m_CurrentLayer = m_ServerPortLayer;
+    }
 
-		m_CurrentLayer = m_ClientsLayer;
-	}
+    void ServerApplication::onPortSelected(std::string_view port)
+    {
+        uint16_t portNumber = 0;
 
-	void ServerApplication::onUpdateConnectedClients()
-	{
-		while (auto pendingUsername = m_Server.getPendingUsernames().tryPop())
-		{
-			m_ClientsLayer->getClientsPanel().addUsername(*pendingUsername);
+        std::from_chars(port.data(), port.data() + port.size(), portNumber);
 
-			m_ClientsLayer->getClientLogger().logClientConnected(*pendingUsername);
-		}
-	}
+        auto result = m_Server.startHost(portNumber);
 
-	void ServerApplication::onUpdateDisconnectedClients()
-	{
-		while (auto disconnectedUsername = m_Server.getDisconnectedUsernames().tryPop())
-		{
-			m_ClientsLayer->getClientsPanel().removeUsername(*disconnectedUsername);
+        if (result)
+            m_ClientsLayer->getInfoPanel().addSuccessInfo(*result);
+        else
+            m_ClientsLayer->getInfoPanel().addFailInfo(*result);
 
-			m_ClientsLayer->getClientLogger().logClientDisconnected(*disconnectedUsername);
-		}
-	}
+        m_CurrentLayer = m_ClientsLayer;
+    }
+
+    void ServerApplication::onUpdateConnectedClients()
+    {
+        while (auto pendingUsername = m_Server.getPendingUsernames().tryPop())
+        {
+            m_ClientsLayer->getClientsPanel().addUsername(*pendingUsername);
+
+            m_ClientsLayer->getClientLogger().logClientConnected(*pendingUsername);
+        }
+    }
+
+    void ServerApplication::onUpdateDisconnectedClients()
+    {
+        while (auto disconnectedUsername = m_Server.getDisconnectedUsernames().tryPop())
+        {
+            m_ClientsLayer->getClientsPanel().removeUsername(*disconnectedUsername);
+
+            m_ClientsLayer->getClientLogger().logClientDisconnected(*disconnectedUsername);
+        }
+    }
+
+    void ServerApplication::onUpdateDbInfo()
+    {
+        while (auto info = m_Database.getInfo().tryPop())
+            m_ClientsLayer->getInfoPanel().addGeneralInfo("[DB] " + *info);
+    }
 }

@@ -16,16 +16,16 @@ namespace sLink::ui
 
         static void end_frame();
 
-        static UIRenderData* get_ui_render_data();
+        static UIRenderData *get_ui_render_data();
 
         void updateDisplay(int width, int height);
 
         ~UIBackend();
 
     private:
-        ImGuiContext* m_Context;
+        ImGuiContext *m_Context;
 
-        ImGuiIO* m_Io;
+        ImGuiIO *m_Io;
     };
 }
 

@@ -11,6 +11,7 @@ namespace sLink::application
         Application(int windowWidth, int windowHeight, std::string_view windowName);
 
         void run();
+
     protected:
         window::Window m_Window;
 
@@ -23,6 +24,7 @@ namespace sLink::application
         virtual void onRender() = 0;
 
         virtual void onRenderUI() = 0;
+
     private:
         void handleWindowResize();
     };
