@@ -6,12 +6,12 @@
 namespace sLink::message
 {
     Message::Message(protocol::Command command, std::string_view senderName, std::string_view content)
-        : m_SenderName(senderName), m_Content(content)
+        : m_Command(command), m_SenderName(senderName), m_Content(content)
     {
     }
 
     Message::Message(protocol::Command command, std::string_view senderName, std::string_view content, utility::Timestamp timestamp)
-        : m_SenderName(senderName), m_Content(content), m_Timestamp(timestamp)
+        : m_Command(command), m_SenderName(senderName), m_Content(content), m_Timestamp(timestamp)
     {
     }
 
