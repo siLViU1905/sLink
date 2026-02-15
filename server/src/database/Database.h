@@ -45,6 +45,8 @@ namespace sLink::server::db
 
         utility::SafeQueue<std::string>& getInfo();
 
+        bool findUser(std::string_view username) const;
+
         void close();
 
         ~Database();
