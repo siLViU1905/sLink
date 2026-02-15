@@ -34,7 +34,11 @@ namespace sLink::server
     void Server::update()
     {
         while (auto message = m_Inbox.tryPop())
+        {
             broadcast(*message);
+
+            m_DbMessageInbox.push(*message);
+        }
     }
 
     utility::SafeQueue<std::string> &Server::getPendingUsernames()
@@ -50,6 +54,11 @@ namespace sLink::server
     utility::SafeQueue<std::string> & Server::getDbUsernameInbox()
     {
         return m_DbUsernameInbox;
+    }
+
+    utility::SafeQueue<std::string> & Server::getDbMessageInbox()
+    {
+        return m_DbMessageInbox;
     }
 
     void Server::onAccept()
