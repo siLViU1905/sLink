@@ -12,6 +12,15 @@ namespace sLink::session
         onRead();
     }
 
+    void Session::disconnect()
+    {
+        std::error_code ec;
+
+        m_Socket.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
+
+        m_Socket.close(ec);
+    }
+
     void Session::send(const std::string &message)
     {
         auto self(shared_from_this());

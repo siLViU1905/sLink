@@ -18,6 +18,8 @@ namespace sLink::session
 
         void start();
 
+        void disconnect();
+
         void send(const std::string &message);
 
         void setUsername(std::string_view username);
