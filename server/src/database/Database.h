@@ -27,7 +27,7 @@ namespace sLink::server::db
             "CREATE TABLE IF NOT EXISTS messages ("
             "id INTEGER PRIMARY KEY AUTOINCREMENT, "
             "content VARCHAR(255), "
-            "timestamp BIG INT, "
+            "timestamp BIGINT, "
             "user_id INTEGER, "
             "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
             ");";
@@ -36,7 +36,7 @@ namespace sLink::server::db
 
         static constexpr std::string_view s_GetUserIdQuery = "SELECT id FROM users WHERE username = ?;";
 
-        static constexpr std::string_view s_InsertMessageQuery = "INSERT INTO users (username) VALUES (?, ?, ?);";
+        static constexpr std::string_view s_InsertMessageQuery = "INSERT INTO messages (content, timestamp, user_id) VALUES (?, ?, ?);";
 
     public:
         Database();
