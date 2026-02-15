@@ -82,6 +82,54 @@ namespace sLink::server::db
         return {std::format("User '{}' successfully added", username)};
     }
 
+    std::optional<int> Database::getUserId(std::string_view username) const
+    {
+        sqlite3_stmt *stmt;
+
+        if (sqlite3_prepare_v2(m_DatabaseHandle, s_GetUserIdQuery.data(), -1, &stmt, nullptr) != SQLITE_OK)
+            return std::nullopt;
+
+        sqlite3_bind_text(stmt, 1, username.data(), -1, SQLITE_TRANSIENT);
+
+        std::optional<int> userId;
+
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+            userId = sqlite3_column_int(stmt, 0);
+
+        sqlite3_finalize(stmt);
+
+        return userId;
+    }
+
+    Database::ActionResult Database::addMesssage(const message::Message &message)
+    {
+        sqlite3_stmt *stmt;
+
+        if (sqlite3_prepare_v2(m_DatabaseHandle, s_InsertMessageQuery.data(), -1, &stmt, nullptr) != SQLITE_OK)
+            return std::unexpected(std::format("Failed to prepare insert message query"));
+
+        if (auto userId = getUserId(message.getSenderName()))
+        {
+            sqlite3_bind_text(stmt, 1, message.getContent().data(), -1, SQLITE_TRANSIENT);
+
+            sqlite3_bind_int64(stmt, 2, message.getTimestamp().getMs());
+
+            sqlite3_bind_int(stmt, 3, *userId);
+        } else
+            return std::unexpected(std::format("Sender {} not found", message.getSenderName()));
+
+        if (sqlite3_step(stmt) != SQLITE_DONE)
+        {
+            sqlite3_finalize(stmt);
+
+            return std::unexpected("Failed to add message");
+        }
+
+        sqlite3_finalize(stmt);
+
+        return {"Message successfully added"};
+    }
+
     Database::~Database()
     {
         if (m_DatabaseHandle)

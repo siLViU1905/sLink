@@ -7,6 +7,7 @@
 #include <string>
 #include <expected>
 
+#include "message/Message.h"
 #include "safe_queue/SafeQueue.h"
 
 namespace sLink::server::db
@@ -26,11 +27,16 @@ namespace sLink::server::db
             "CREATE TABLE IF NOT EXISTS messages ("
             "id INTEGER PRIMARY KEY AUTOINCREMENT, "
             "content VARCHAR(255), "
+            "timestamp BIG INT, "
             "user_id INTEGER, "
             "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
             ");";
 
         static constexpr std::string_view s_InsertUserQuery = "INSERT INTO users (username) VALUES (?);";
+
+        static constexpr std::string_view s_GetUserIdQuery = "SELECT id FROM users WHERE username = ?;";
+
+        static constexpr std::string_view s_InsertMessageQuery = "INSERT INTO users (username) VALUES (?, ?, ?);";
 
     public:
         Database();
@@ -49,6 +55,10 @@ namespace sLink::server::db
         ActionResult start();
 
         ActionResult addUser(std::string_view username);
+
+        std::optional<int> getUserId(std::string_view username) const;
+
+        ActionResult addMesssage(const message::Message& message);
 
         sqlite3* m_DatabaseHandle;
 
