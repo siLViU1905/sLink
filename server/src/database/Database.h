@@ -41,7 +41,7 @@ namespace sLink::server::db
     public:
         Database();
 
-        void run(utility::SafeQueue<std::string>& usernameInbox);
+        void run(utility::SafeQueue<std::string>& usernameInbox, utility::SafeQueue<std::string>& rawMessageInbox);
 
         utility::SafeQueue<std::string>& getInfo();
 

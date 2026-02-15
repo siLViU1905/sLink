@@ -8,7 +8,7 @@ namespace sLink::server::db
     {
     }
 
-    void Database::run(utility::SafeQueue<std::string> &usernameInbox)
+    void Database::run(utility::SafeQueue<std::string> &usernameInbox, utility::SafeQueue<std::string>& rawMessageInbox)
     {
         auto result = start();
 
@@ -28,6 +28,13 @@ namespace sLink::server::db
             if (auto username = usernameInbox.tryPop())
             {
                 result = addUser(*username);
+
+                m_InfoOutbox.push(result ? *result : result.error());
+            }
+
+            if (auto rawMessage = rawMessageInbox.tryPop())
+            {
+                result = addMesssage(message::Message::deserialize(*rawMessage));
 
                 m_InfoOutbox.push(result ? *result : result.error());
             }
