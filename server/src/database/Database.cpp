@@ -108,6 +108,11 @@ namespace sLink::server::db
         return userId;
     }
 
+    bool Database::findUser(std::string_view username) const
+    {
+        return getUserId(username).has_value();
+    }
+
     Database::ActionResult Database::addMesssage(const message::Message &message)
     {
         sqlite3_stmt *stmt;
