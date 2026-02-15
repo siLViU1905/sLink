@@ -47,6 +47,11 @@ namespace sLink::server
         return m_DisconnectedUsernames;
     }
 
+    utility::SafeQueue<std::string> & Server::getDbUsernameInbox()
+    {
+        return m_DbUsernameInbox;
+    }
+
     void Server::onAccept()
     {
         m_Acceptor->async_accept([this](std::error_code ec, asio::ip::tcp::socket socket)
@@ -60,6 +65,8 @@ namespace sLink::server
                 session->setOnUsernameSentCallback([this](std::string_view username)
                 {
                     m_PendingUsernames.push(std::string(username));
+
+                    m_DbUsernameInbox.push(std::string(username));
                 });
 
                 session->setOnDisconnectCallback([this, session](std::string_view username)

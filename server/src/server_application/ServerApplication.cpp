@@ -2,10 +2,8 @@
 
 namespace sLink::server_application
 {
-    ServerApplication::ServerApplication(int windowWidth, int windowHeight,
-                                         std::string_view windowName) : application::Application(
-                                                                            windowWidth, windowHeight, windowName),
-                                                                        m_Server(m_IOContext)
+    ServerApplication::ServerApplication(int windowWidth, int windowHeight, std::string_view windowName)
+        : Application(windowWidth, windowHeight, windowName), m_Server(m_IOContext)
     {
         initLayers();
 
@@ -13,11 +11,18 @@ namespace sLink::server_application
         {
             m_IOContext.run();
         });
+
+        m_DbThread = std::jthread([this]()
+        {
+            m_Database.run(m_Server.getDbUsernameInbox());
+        });
     }
 
     ServerApplication::~ServerApplication()
     {
         m_IOContext.stop();
+
+        m_Database.close();
     }
 
     void ServerApplication::onUpdate()
@@ -27,6 +32,8 @@ namespace sLink::server_application
         onUpdateConnectedClients();
 
         onUpdateDisconnectedClients();
+
+        onUpdateDbInfo();
     }
 
     void ServerApplication::onRender()
@@ -97,5 +104,11 @@ namespace sLink::server_application
 
             m_ClientsLayer->getClientLogger().logClientDisconnected(*disconnectedUsername);
         }
+    }
+
+    void ServerApplication::onUpdateDbInfo()
+    {
+        while (auto info = m_Database.getInfo().tryPop())
+            m_ClientsLayer->getInfoPanel().addGeneralInfo("[DB] " + *info);
     }
 }
