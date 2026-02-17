@@ -17,7 +17,7 @@ namespace sLink::server
 
         std::expected<std::string, std::string> startHost(uint16_t port);
 
-        void broadcast(const std::string &message);
+        void broadcast(const message::Message &message);
 
         void update();
 

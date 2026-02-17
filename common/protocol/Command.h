@@ -7,7 +7,8 @@ namespace sLink::protocol
     enum class Command : uint8_t
     {
         LOGIN_REQUEST,
-        LOGIN_RESPONSE,
+        LOGIN_RESPONSE_REJECT,
+        LOGIN_RESPONSE_ACCEPT,
         CHAT_MESSAGE,
         USER_JOINED,
         USER_LEFT
