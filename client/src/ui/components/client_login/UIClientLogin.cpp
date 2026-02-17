@@ -4,11 +4,11 @@
 
 namespace sLink::client::ui::component
 {
-    UIClientLogin::UIClientLogin()
+    UIClientLogin::UIClientLogin() : m_ShowAuthIncorrectInfoErrorPopup(false), m_ShowLoginFailedPopup(false)
     {
-        m_InputUsername.reserve(25);
+        m_InputUsername.resize(25);
 
-        m_InputServerPort.reserve(5);
+        m_InputServerPort.resize(5);
     }
 
     void UIClientLogin::render()
@@ -35,36 +35,46 @@ namespace sLink::client::ui::component
 
         if (ImGui::Button("Connect", ImVec2(-1, 40)))
         {
-            std::string userStr(m_InputUsername.c_str());
-            std::string portStr(m_InputServerPort.c_str());
-
-            if (userStr.empty())
+            if (m_InputUsername.empty())
             {
-                m_ErrorMessage = "Username field is empty!";
-                m_ShowErrorPopup = true;
-            } else if (portStr.empty())
+                m_AuthInfoErrorMessage = "Username field is empty!";
+                m_ShowAuthIncorrectInfoErrorPopup = true;
+            } else if (m_InputServerPort.empty())
             {
-                m_ErrorMessage = "Server Port field is empty!";
-                m_ShowErrorPopup = true;
+                m_AuthInfoErrorMessage = "Server Port field is empty!";
+                m_ShowAuthIncorrectInfoErrorPopup = true;
             } else if (m_OnLoginDataInputCallback)
-            {
-                m_OnLoginDataInputCallback(userStr, portStr);
-            }
+                m_OnLoginDataInputCallback(m_InputUsername, m_InputServerPort);
         }
 
-        if (m_ShowErrorPopup)
-        {
-            ImGui::OpenPopup("Login Error");
-        }
+        if (m_ShowAuthIncorrectInfoErrorPopup)
+            ImGui::OpenPopup("Auth Info Error");
 
-        if (ImGui::BeginPopupModal("Login Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        if (ImGui::BeginPopupModal("Auth Info Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
-            ImGui::Text("%s", m_ErrorMessage.c_str());
+            ImGui::Text("%s", m_AuthInfoErrorMessage.c_str());
             ImGui::Separator();
 
             if (ImGui::Button("OK", ImVec2(120, 0)))
             {
-                m_ShowErrorPopup = false;
+                m_ShowAuthIncorrectInfoErrorPopup = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
+
+        if (m_ShowLoginFailedPopup)
+            ImGui::OpenPopup("Login Fail Error");
+
+        if (ImGui::BeginPopupModal("Login Fail Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("%s", m_LoginFailMessage.c_str());
+            ImGui::Separator();
+
+            if (ImGui::Button("OK", ImVec2(120, 0)))
+            {
+                m_ShowLoginFailedPopup = false;
                 ImGui::CloseCurrentPopup();
             }
             ImGui::EndPopup();
@@ -76,5 +86,12 @@ namespace sLink::client::ui::component
     void UIClientLogin::setOnLoginDataInput(OnLoginDataInputCallback &&callback)
     {
         m_OnLoginDataInputCallback = std::move(callback);
+    }
+
+    void UIClientLogin::notifyLoginFailed(std::string_view message)
+    {
+        m_LoginFailMessage = message;
+
+        m_ShowLoginFailedPopup = true;
     }
 }

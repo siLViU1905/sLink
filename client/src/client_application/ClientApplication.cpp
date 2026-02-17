@@ -31,12 +31,16 @@ namespace sLink::client_application
                 case protocol::Command::LOGIN_RESPONSE_REJECT:
                 {
                     m_CurrentLayer = m_LoginLayer;
+
+                    m_LoginLayer->getClientLoginPanel().notifyLoginFailed(message.getContent());
                     break;
                 }
 
                 case protocol::Command::LOGIN_RESPONSE_ACCEPT:
                 {
                     m_CurrentLayer = m_ChatLayer;
+
+                    m_ChatLayer->getInfoPanel().addSuccessInfo(message.getContent());
                     break;
                 }
 
@@ -49,8 +53,6 @@ namespace sLink::client_application
                 default:
                     break;
             }
-
-            m_ChatLayer->getChatWindow().addMessage(message);
         }
     }
 
@@ -107,11 +109,7 @@ namespace sLink::client_application
 
         auto result = m_Client.connect("127.0.0.1", serverPort);
 
-        if (result)
-            m_ChatLayer->getInfoPanel().addSuccessInfo(*result);
-        else
+        if (!result)
             m_ChatLayer->getInfoPanel().addFailInfo(result.error());
-
-        m_CurrentLayer = m_ChatLayer;
     }
 }
