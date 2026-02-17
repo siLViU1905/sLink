@@ -26,6 +26,30 @@ namespace sLink::client_application
         {
             auto message = message::Message::deserialize(*raw_message);
 
+            switch (message.getCommand())
+            {
+                case protocol::Command::LOGIN_RESPONSE_REJECT:
+                {
+                    m_CurrentLayer = m_LoginLayer;
+                    break;
+                }
+
+                case protocol::Command::LOGIN_RESPONSE_ACCEPT:
+                {
+                    m_CurrentLayer = m_ChatLayer;
+                    break;
+                }
+
+                case protocol::Command::CHAT_MESSAGE:
+                {
+                    m_ChatLayer->getChatWindow().addMessage(message);
+                    break;
+                }
+
+                default:
+                    break;
+            }
+
             m_ChatLayer->getChatWindow().addMessage(message);
         }
     }
