@@ -5,7 +5,7 @@
 namespace sLink::session
 {
     Session::Session(asio::ip::tcp::socket &&socket, utility::SafeQueue<std::string> &inbox)
-        : m_Socket(std::move(socket)), m_Inbox(inbox)
+        : m_Socket(std::move(socket)), m_Inbox(inbox), m_ShouldDisconnectAfterWrite(false)
     {
     }
 
@@ -21,6 +21,18 @@ namespace sLink::session
         m_Socket.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
 
         m_Socket.close(ec);
+    }
+
+    void Session::disconnectAfterWrite()
+    {
+        auto self(shared_from_this());
+        asio::post(m_Socket.get_executor(), [this, self]()
+        {
+            m_ShouldDisconnectAfterWrite = true;
+
+            if (m_WriteQueue.empty())
+                disconnect();
+        });
     }
 
     void Session::send(const message::Message &message)
@@ -91,6 +103,8 @@ namespace sLink::session
 
                                   if (!m_WriteQueue.empty())
                                       onWrite();
+                                  else if (m_ShouldDisconnectAfterWrite)
+                                      disconnect();
                               }
                           });
     }
