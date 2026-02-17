@@ -3,6 +3,7 @@
 
 #include <string>
 #include <timestamp/Timestamp.h>
+#include <protocol/Command.h>
 
 namespace sLink::message
 {
@@ -11,13 +12,17 @@ namespace sLink::message
     public:
         Message() = default;
 
-        Message(std::string_view senderName, std::string_view content);
+        Message(protocol::Command command, std::string_view senderName, std::string_view content);
 
-        Message(std::string_view senderName, std::string_view content, utility::Timestamp timestamp);
+        Message(protocol::Command command, std::string_view senderName, std::string_view content, utility::Timestamp timestamp);
+
+        void setCommand(protocol::Command command);
 
         void setSenderName(std::string_view name);
 
         void setContent(std::string_view content);
+
+        protocol::Command getCommand() const;
 
         std::string_view getSenderName() const;
 
@@ -30,11 +35,15 @@ namespace sLink::message
         static Message deserialize(std::string_view raw);
 
     private:
+        protocol::Command m_Command;
+
         std::string m_SenderName;
 
         std::string m_Content;
 
         utility::Timestamp m_Timestamp;
+
+        static constexpr std::string_view s_JSONCommandSelector = "command";
 
         static constexpr std::string_view s_JSONSenderNameSelector = "sender_name";
 

@@ -27,6 +27,8 @@ namespace sLink::client::ui::component
 
         void setOnLoginDataInput(OnLoginDataInputCallback &&callback);
 
+        void notifyLoginFailed(std::string_view message);
+
     private:
         std::string m_InputUsername;
 
@@ -34,9 +36,13 @@ namespace sLink::client::ui::component
 
         OnLoginDataInputCallback m_OnLoginDataInputCallback;
 
-        bool m_ShowErrorPopup;
+        bool m_ShowAuthIncorrectInfoErrorPopup;
 
-        std::string m_ErrorMessage;
+        bool m_ShowLoginFailedPopup;
+
+        std::string m_AuthInfoErrorMessage;
+
+        std::string m_LoginFailMessage;
     };
 }
 

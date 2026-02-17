@@ -5,14 +5,19 @@
 
 namespace sLink::message
 {
-    Message::Message(std::string_view senderName, std::string_view content)
-        : m_SenderName(senderName), m_Content(content)
+    Message::Message(protocol::Command command, std::string_view senderName, std::string_view content)
+        : m_Command(command), m_SenderName(senderName), m_Content(content)
     {
     }
 
-    Message::Message(std::string_view senderName, std::string_view content, utility::Timestamp timestamp)
-        : m_SenderName(senderName), m_Content(content), m_Timestamp(timestamp)
+    Message::Message(protocol::Command command, std::string_view senderName, std::string_view content, utility::Timestamp timestamp)
+        : m_Command(command), m_SenderName(senderName), m_Content(content), m_Timestamp(timestamp)
     {
+    }
+
+    void Message::setCommand(protocol::Command command)
+    {
+        m_Command = command;
     }
 
     void Message::setSenderName(std::string_view name)
@@ -23,6 +28,11 @@ namespace sLink::message
     void Message::setContent(std::string_view content)
     {
         m_Content = content;
+    }
+
+    protocol::Command Message::getCommand() const
+    {
+        return m_Command;
     }
 
     std::string_view Message::getSenderName() const
@@ -44,6 +54,8 @@ namespace sLink::message
     {
         nlohmann::json js;
 
+        js[s_JSONCommandSelector] = m_Command;
+
         js[s_JSONSenderNameSelector] = m_SenderName;
 
         js[s_JSONContentSelector] = m_Content;
@@ -57,12 +69,14 @@ namespace sLink::message
     {
         auto js = nlohmann::json::parse(raw);
 
+        auto command = js[s_JSONCommandSelector].get<protocol::Command>();
+
         auto senderName = js[s_JSONSenderNameSelector].get<std::string>();
 
         auto content = js[s_JSONContentSelector].get<std::string>();
 
         auto timestamp = js[s_JSONTimestampSelector].get<int64_t>();
 
-        return {senderName, content, timestamp};
+        return {command, senderName, content, timestamp};
     }
 }

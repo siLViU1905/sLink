@@ -2,16 +2,16 @@
 #define SLINK_COMMAND_H
 #include <cstdint>
 
-namespace slink::protocol
+namespace sLink::protocol
 {
     enum class Command : uint8_t
     {
-        LoginRequest,
-        LoginResponse,
-        ChatMessage,
-        Heartbeat,
-        UserJoined,
-        UserLeft
+        LOGIN_REQUEST,
+        LOGIN_RESPONSE_REJECT,
+        LOGIN_RESPONSE_ACCEPT,
+        CHAT_MESSAGE,
+        USER_JOINED,
+        USER_LEFT
     };
 }
 
