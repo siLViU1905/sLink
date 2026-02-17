@@ -32,11 +32,11 @@ namespace sLink::server
     private:
         void onAccept();
 
-        void onClientConnected(const std::shared_ptr<session::Session> &session);
+        void onClientAccept(const std::shared_ptr<session::Session> &session);
 
         void onClientDisconnected(const std::shared_ptr<session::Session> &session);
 
-        void onClientRejected(const std::shared_ptr<session::Session> &session);
+        void onClientReject(const std::shared_ptr<session::Session> &session);
 
         asio::io_context &m_IOContext;
 

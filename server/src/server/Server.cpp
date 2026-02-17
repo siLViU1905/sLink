@@ -75,9 +75,9 @@ namespace sLink::server
                 session->setOnUsernameSentCallback([this, session](std::string_view username)
                 {
                     if (m_Database.findUser(username))
-                        onClientConnected(session);
+                        onClientAccept(session);
                     else
-                        onClientRejected(session);
+                        onClientReject(session);
                 });
 
                 session->setOnDisconnectCallback([this, session](std::string_view username)
@@ -92,9 +92,11 @@ namespace sLink::server
         });
     }
 
-    void Server::onClientConnected(const std::shared_ptr<session::Session> &session)
+    void Server::onClientAccept(const std::shared_ptr<session::Session> &session)
     {
         m_PendingUsernames.push(std::string(session->getUsername()));
+
+        session->send({protocol::Command::LOGIN_RESPONSE_ACCEPT, "", "Successfully connected to the server"});
     }
 
     void Server::onClientDisconnected(const std::shared_ptr<session::Session> &session)
@@ -104,9 +106,9 @@ namespace sLink::server
         std::erase(m_Sessions, session);
     }
 
-    void Server::onClientRejected(const std::shared_ptr<session::Session> &session)
+    void Server::onClientReject(const std::shared_ptr<session::Session> &session)
     {
-        message::Message message(protocol::Command::LOGIN_RESPONSE_REJECT, "", "");
+        message::Message message(protocol::Command::LOGIN_RESPONSE_REJECT, "", "Username not found");
 
         session->send(message);
 
