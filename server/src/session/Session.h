@@ -21,6 +21,8 @@ namespace sLink::session
 
         void disconnect();
 
+        void disconnectAfterWrite();
+
         void send(const message::Message &message);
 
         void setUsername(std::string_view username);
@@ -51,6 +53,8 @@ namespace sLink::session
         OnUsernameSentCallback m_OnUsernameSentCallback;
 
         OnDisconnectCallback m_OnDisconnectCallback;
+
+        bool m_ShouldDisconnectAfterWrite;
     };
 }
 

@@ -110,7 +110,7 @@ namespace sLink::server
 
         session->send(message);
 
-        session->disconnect();
+        session->disconnectAfterWrite();
 
         std::string username = session->getUsername().data();
 
