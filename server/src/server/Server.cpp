@@ -57,9 +57,9 @@ namespace sLink::server
         return m_DisconnectedUsernames;
     }
 
-    utility::SafeQueue<std::string> &Server::getDbUsernameInbox()
+    utility::SafeQueue<user::User> &Server::getDbUsernameInbox()
     {
-        return m_DbUsernameInbox;
+        return m_DbUserInbox;
     }
 
     utility::SafeQueue<std::string> &Server::getDbMessageInbox()
@@ -79,15 +79,15 @@ namespace sLink::server
 
                 auto &session = m_Sessions.back();
 
-                session->setOnUsernameSentCallback([this, session](std::string_view username)
+                session->setOnAuthInfoSentCallback([this, session](const user::User& user)
                 {
-                    if (m_Database.findUser(username))
+                    if (m_Database.checkUserAuthInfo(user))
                         onClientAccept(session);
                     else
                         onClientReject(session);
                 });
 
-                session->setOnDisconnectCallback([this, session](std::string_view username)
+                session->setOnDisconnectCallback([this, session]()
                 {
                     onClientDisconnected(session);
                 });
@@ -103,14 +103,14 @@ namespace sLink::server
 
     void Server::onClientAccept(const std::shared_ptr<session::Session> &session)
     {
-        m_PendingUsernames.push(std::string(session->getUsername()));
+        m_PendingUsernames.push(std::string(session->getUser().getUsername()));
 
         session->send({protocol::Command::LOGIN_RESPONSE_ACCEPT, "", "Successfully connected to the server"});
     }
 
     void Server::onClientDisconnected(const std::shared_ptr<session::Session> &session)
     {
-        m_DisconnectedUsernames.push(std::string(session->getUsername()));
+        m_DisconnectedUsernames.push(std::string(session->getUser().getUsername()));
 
         std::erase(m_Sessions, session);
     }
@@ -123,7 +123,7 @@ namespace sLink::server
 
         session->disconnectAfterWrite();
 
-        std::string username = session->getUsername().data();
+        std::string username = session->getUser().getUsername().data();
 
         std::erase(m_Sessions, session);
 

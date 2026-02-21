@@ -29,7 +29,7 @@ namespace sLink::server
 
         utility::SafeQueue<std::string> &getDisconnectedUsernames();
 
-        utility::SafeQueue<std::string> &getDbUsernameInbox();
+        utility::SafeQueue<user::User> &getDbUsernameInbox();
 
         utility::SafeQueue<std::string> &getDbMessageInbox();
 
@@ -62,7 +62,7 @@ namespace sLink::server
 
         utility::SafeQueue<std::string> m_DisconnectedUsernames;
 
-        utility::SafeQueue<std::string> m_DbUsernameInbox;
+        utility::SafeQueue<user::User> m_DbUserInbox;
 
         utility::SafeQueue<std::string> m_DbMessageInbox;
 
