@@ -5,11 +5,15 @@
 
 #include "message/Message.h"
 #include "safe_queue/SafeQueue.h"
+#include <utility/benchmark/Benchmark.h>
 
 namespace sLink::session
 {
     class Session : public std::enable_shared_from_this<Session>
     {
+    private:
+        static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_RED;
+
     public:
         using OnUsernameSentCallback = std::move_only_function<void(std::string_view)>;
 

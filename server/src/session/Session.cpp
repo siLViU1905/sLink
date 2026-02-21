@@ -1,7 +1,6 @@
 #include "Session.h"
 
 #include "message/Message.h"
-#include <utility/benchmark/Benchmark.h>
 
 namespace sLink::session
 {
@@ -52,7 +51,7 @@ namespace sLink::session
                 onWrite();
         });
 
-        SLINK_END_BENCHMARK("[Session]", "send")
+        SLINK_END_BENCHMARK("[Session]", "send", s_BenchmarkOutputColor)
     }
 
     void Session::setUsername(std::string_view username)
@@ -147,6 +146,6 @@ namespace sLink::session
             }
         }
 
-        SLINK_END_BENCHMARK("[Session]", "handleMessage")
+        SLINK_END_BENCHMARK("[Session]", "handleMessage", s_BenchmarkOutputColor)
     }
 }
