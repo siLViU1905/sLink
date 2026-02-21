@@ -47,8 +47,6 @@ namespace sLink::server::db
         static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_YELLOW;
 
     public:
-        using ActionResult = std::expected<std::string, std::string>;
-
         Database();
 
         void run(utility::SafeQueue<user::User>& usernameInbox, utility::SafeQueue<std::string>& rawMessageInbox);
@@ -57,13 +55,15 @@ namespace sLink::server::db
 
         bool findUser(const user::User& user) const;
 
-        ActionResult checkUserAuthInfo(const user::User& user) const;
+        bool checkUserAuthInfo(const user::User& user);
 
         void close();
 
         ~Database();
 
     private:
+        using ActionResult = std::expected<std::string, std::string>;
+
         ActionResult start();
 
         ActionResult addUser(const user::User& user);

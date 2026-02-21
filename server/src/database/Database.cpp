@@ -127,7 +127,7 @@ namespace sLink::server::db
         return getUserId(user).has_value();
     }
 
-    Database::ActionResult Database::checkUserAuthInfo(const user::User &user) const
+    bool Database::checkUserAuthInfo(const user::User &user)
     {
         SLINK_START_BENCHMARK
 
@@ -138,14 +138,22 @@ namespace sLink::server::db
             SLINK_END_BENCHMARK("[Database]", "checkUserAuthInfo", s_BenchmarkOutputColor);
 
             if (result)
-                return result;
+            {
+                m_InfoOutbox.push(*result);
 
-            return std::unexpected(result.error());
+                return true;
+            }
+
+            m_InfoOutbox.push(result.error());
+
+            return false;
         }
 
         SLINK_END_BENCHMARK("[Database]", "checkUserAuthInfo", s_BenchmarkOutputColor);
 
-        return std::unexpected(std::format("User {} could not be found", user.getUsername()));
+        m_InfoOutbox.push(std::format("User {} could not be found", user.getUsername()));
+
+        return false;
     }
 
     Database::ActionResult Database::checkUserPassword(int userId, const user::User &user) const
@@ -166,7 +174,13 @@ namespace sLink::server::db
             const unsigned char *storedPassword = sqlite3_column_text(stmt, 0);
 
             if (storedPassword != nullptr)
-                passwordMatches = (user.getPassword() == reinterpret_cast<const char *>(storedPassword));
+            {
+                std::string stored = reinterpret_cast<const char *>(storedPassword);
+
+                std::string provided = user.getPassword().data();
+
+                passwordMatches = (provided == stored);
+            }
         }
 
         sqlite3_finalize(stmt);
