@@ -11,6 +11,8 @@
 #include "safe_queue/SafeQueue.h"
 #include <utility/benchmark/Benchmark.h>
 
+#include "../user/User.h"
+
 namespace sLink::server::db
 {
     class Database
@@ -47,7 +49,7 @@ namespace sLink::server::db
     public:
         Database();
 
-        void run(utility::SafeQueue<std::string>& usernameInbox, utility::SafeQueue<std::string>& rawMessageInbox);
+        void run(utility::SafeQueue<user::User>& usernameInbox, utility::SafeQueue<std::string>& rawMessageInbox);
 
         utility::SafeQueue<std::string>& getInfo();
 
@@ -66,7 +68,7 @@ namespace sLink::server::db
 
         ActionResult start();
 
-        ActionResult addUser(std::string_view username, std::string_view password);
+        ActionResult addUser(const user::User& user);
 
         ActionResult addMessage(const message::Message& message);
 

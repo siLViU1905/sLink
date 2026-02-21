@@ -8,7 +8,7 @@ namespace sLink::server::db
     {
     }
 
-    void Database::run(utility::SafeQueue<std::string> &usernameInbox, utility::SafeQueue<std::string> &rawMessageInbox)
+    void Database::run(utility::SafeQueue<user::User> &userInbox, utility::SafeQueue<std::string> &rawMessageInbox)
     {
         auto result = start();
 
@@ -25,9 +25,9 @@ namespace sLink::server::db
                     break;
             }
 
-            if (auto username = usernameInbox.tryPop())
+            if (auto user = userInbox.tryPop())
             {
-                result = addUser(*username, "TODO");
+                result = addUser(*user);
 
                 m_InfoOutbox.push(result ? *result : result.error());
             }
@@ -72,7 +72,7 @@ namespace sLink::server::db
         return {"Database successfully started"};
     }
 
-    Database::ActionResult Database::addUser(std::string_view username, std::string_view password)
+    Database::ActionResult Database::addUser(const user::User& user)
     {
         SLINK_START_BENCHMARK
 
@@ -81,22 +81,22 @@ namespace sLink::server::db
         if (sqlite3_prepare_v2(m_DatabaseHandle, s_InsertUserQuery.data(), -1, &stmt, nullptr) != SQLITE_OK)
             return std::unexpected(std::format("Failed to prepare insert user query"));
 
-        sqlite3_bind_text(stmt, 1, username.data(), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(stmt, 1, user.getUsername().data(), -1, SQLITE_TRANSIENT);
 
-        sqlite3_bind_text(stmt, 2, password.data(), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(stmt, 2, user.getPassword().data(), -1, SQLITE_TRANSIENT);
 
         if (sqlite3_step(stmt) != SQLITE_DONE)
         {
             sqlite3_finalize(stmt);
 
-            return std::unexpected(std::format("Failed to add user '{}'", username));
+            return std::unexpected(std::format("Failed to add user '{}'", user.getUsername()));
         }
 
         sqlite3_finalize(stmt);
 
         SLINK_END_BENCHMARK("[Database]", "addUser", s_BenchmarkOutputColor)
 
-        return {std::format("User '{}' successfully added", username)};
+        return {std::format("User '{}' successfully added", user.getUsername())};
     }
 
     std::optional<int> Database::getUserId(std::string_view username) const
