@@ -1,4 +1,5 @@
 #include "Server.h"
+#include <utility/benchmark/Benchmark.h>
 
 namespace sLink::server
 {
@@ -28,8 +29,12 @@ namespace sLink::server
 
     void Server::broadcast(const message::Message &message)
     {
+        SLINK_START_BENCHMARK
+
         for (auto &session: m_Sessions)
             session->send(message);
+
+        SLINK_END_BENCHMARK("[Server]", "broadcast")
     }
 
     void Server::update()
@@ -64,6 +69,8 @@ namespace sLink::server
 
     void Server::onAccept()
     {
+        SLINK_START_BENCHMARK
+
         m_Acceptor->async_accept([this](std::error_code ec, asio::ip::tcp::socket socket)
         {
             if (!ec)
@@ -90,6 +97,8 @@ namespace sLink::server
 
             onAccept();
         });
+
+        SLINK_END_BENCHMARK("[Server]", "onAccept")
     }
 
     void Server::onClientAccept(const std::shared_ptr<session::Session> &session)
