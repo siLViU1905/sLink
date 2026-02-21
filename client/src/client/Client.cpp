@@ -1,5 +1,4 @@
 #include "Client.h"
-#include <utility/benchmark/Benchmark.h>
 
 namespace sLink::client
 {
@@ -108,7 +107,7 @@ namespace sLink::client
                               }
                           });
 
-        SLINK_END_BENCHMARK("[CLIENT]", "onWrite")
+        SLINK_END_BENCHMARK("[CLIENT]", "onWrite", s_BenchmarkOutputColor)
     }
 
     void Client::onRead()
@@ -133,7 +132,7 @@ namespace sLink::client
                                        m_Socket.close();
                                });
 
-        SLINK_END_BENCHMARK("[CLIENT]", "onRead")
+        SLINK_END_BENCHMARK("[CLIENT]", "onRead", s_BenchmarkOutputColor)
     }
 
     void Client::onJoin()

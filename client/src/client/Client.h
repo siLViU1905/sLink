@@ -6,11 +6,15 @@
 #include <utility/safe_queue/SafeQueue.h>
 
 #include "message/Message.h"
+#include <utility/benchmark/Benchmark.h>
 
 namespace sLink::client
 {
     class Client
     {
+    private:
+        static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_GREEN;
+
     public:
         Client(asio::io_context &ctx);
 
