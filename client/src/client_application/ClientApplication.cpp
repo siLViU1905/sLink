@@ -107,6 +107,8 @@ namespace sLink::client_application
     {
         m_Client.setUsername(username);
 
+        m_Client.setPassword(password);
+
         auto result = m_Client.connect("127.0.0.1", serverPort);
 
         if (!result)
