@@ -79,7 +79,7 @@ namespace sLink::server::session
                                    } else if (ec == asio::error::eof || ec == asio::error::connection_reset)
                                    {
                                        if (m_OnDisconnectCallback)
-                                           m_OnDisconnectCallback(m_User.getUsername());
+                                           m_OnDisconnectCallback();
                                    }
                                });
     }
@@ -118,7 +118,9 @@ namespace sLink::server::session
             switch (message.getCommand())
             {
                 case protocol::Command::LOGIN_REQUEST:
-                    m_OnAuthInfoSentCallback({message.getSenderName(), message.getContent()});
+                    m_User = {message.getSenderName(), message.getContent()};
+
+                    m_OnAuthInfoSentCallback(m_User);
                     break;
                 case protocol::Command::LOGIN_RESPONSE_REJECT:
                     break;
