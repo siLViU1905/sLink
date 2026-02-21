@@ -4,6 +4,7 @@
 #include <string>
 #include <timestamp/Timestamp.h>
 #include <protocol/Command.h>
+#include <utility/benchmark/Benchmark.h>
 
 namespace sLink::message
 {
@@ -50,6 +51,8 @@ namespace sLink::message
         static constexpr std::string_view s_JSONContentSelector = "content";
 
         static constexpr std::string_view s_JSONTimestampSelector = "time_stamp";
+
+        static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_CYAN;
     };
 }
 
