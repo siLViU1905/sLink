@@ -1,6 +1,7 @@
 #include "Session.h"
 
 #include "message/Message.h"
+#include <utility/benchmark/Benchmark.h>
 
 namespace sLink::session
 {
@@ -37,6 +38,8 @@ namespace sLink::session
 
     void Session::send(const message::Message &message)
     {
+        SLINK_START_BENCHMARK
+
         auto self(shared_from_this());
 
         asio::post(m_Socket.get_executor(), [this, self, message]()
@@ -48,6 +51,8 @@ namespace sLink::session
             if (idle)
                 onWrite();
         });
+
+        SLINK_END_BENCHMARK("[Session]", "send")
     }
 
     void Session::setUsername(std::string_view username)
@@ -111,6 +116,8 @@ namespace sLink::session
 
     void Session::handleMessage()
     {
+        SLINK_START_BENCHMARK
+
         std::istream is(&m_Buffer);
 
         std::string line;
@@ -139,5 +146,7 @@ namespace sLink::session
                     break;
             }
         }
+
+        SLINK_END_BENCHMARK("[Session]", "handleMessage")
     }
 }
