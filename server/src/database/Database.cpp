@@ -8,7 +8,7 @@ namespace sLink::server::db
     {
     }
 
-    void Database::run(utility::SafeQueue<user::User> &userInbox, utility::SafeQueue<std::string> &rawMessageInbox)
+    void Database::run(utility::SafeQueue<std::string> &rawMessageInbox)
     {
         auto result = start();
 
@@ -25,9 +25,19 @@ namespace sLink::server::db
                     break;
             }
 
-            if (auto user = userInbox.tryPop())
+            if (auto request = m_Requests.tryPop())
             {
-                result = addUser(*user);
+                if (request->m_Type == UserRequest::RequestType::LOGIN)
+                {
+                    result = checkUserLoginInfo(request->m_User);
+
+                    if (result)
+                        m_Responses.push({request->m_User.getUsername().data(), "", Response::ResponseType::LOGIN_SUCCESS});
+                    else
+                        m_Responses.push({request->m_User.getUsername().data(), result.error(), Response::ResponseType::LOGIN_FAIL});
+                }
+
+                //result = addUser(*user);
 
                 m_InfoOutbox.push(result ? *result : result.error());
             }
@@ -39,6 +49,11 @@ namespace sLink::server::db
                 m_InfoOutbox.push(result ? *result : result.error());
             }
         }
+    }
+
+    utility::SafeQueue<Database::Response> & Database::getUserResponses()
+    {
+        return m_Responses;
     }
 
     utility::SafeQueue<std::string> &Database::getInfo()
@@ -127,7 +142,12 @@ namespace sLink::server::db
         return getUserId(user).has_value();
     }
 
-    bool Database::checkUserAuthInfo(const user::User &user)
+    void Database::requestUserLogin(const user::User &user)
+    {
+        m_Requests.push({user, UserRequest::RequestType::LOGIN});
+    }
+
+    Database::ActionResult Database::checkUserLoginInfo(const user::User &user)
     {
         SLINK_START_BENCHMARK
 
@@ -135,25 +155,17 @@ namespace sLink::server::db
         {
             auto result = checkUserPassword(*userId, user);
 
-            SLINK_END_BENCHMARK("[Database]", "checkUserAuthInfo", s_BenchmarkOutputColor);
+            SLINK_END_BENCHMARK("[Database]", "checkUserLoginInfo", s_BenchmarkOutputColor);
 
             if (result)
-            {
-                m_InfoOutbox.push(*result);
+                return {*result};
 
-                return true;
-            }
-
-            m_InfoOutbox.push(result.error());
-
-            return false;
+            return std::unexpected(result.error());
         }
 
-        SLINK_END_BENCHMARK("[Database]", "checkUserAuthInfo", s_BenchmarkOutputColor);
+        SLINK_END_BENCHMARK("[Database]", "checkUserLoginInfo", s_BenchmarkOutputColor);
 
-        m_InfoOutbox.push(std::format("User {} could not be found", user.getUsername()));
-
-        return false;
+        return std::unexpected(std::format("User {} could not be found", user.getUsername()));
     }
 
     Database::ActionResult Database::checkUserPassword(int userId, const user::User &user) const
