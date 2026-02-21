@@ -95,17 +95,19 @@ namespace sLink::client_application
         m_LoginLayer = std::make_shared<client::ui::layer::UILoginLayer>();
 
         m_LoginLayer->getClientLoginPanel().setOnLoginDataInput(
-            [this](std::string_view username, std::string_view serverPort)
+            [this](std::string_view username, std::string_view password, std::string_view serverPort)
             {
-                onConnect(username, serverPort);
+                onConnect(username, password, serverPort);
             });
 
         m_CurrentLayer = m_LoginLayer;
     }
 
-    void ClientApplication::onConnect(std::string_view username, std::string_view serverPort)
+    void ClientApplication::onConnect(std::string_view username, std::string_view password, std::string_view serverPort)
     {
         m_Client.setUsername(username);
+
+        m_Client.setPassword(password);
 
         auto result = m_Client.connect("127.0.0.1", serverPort);
 

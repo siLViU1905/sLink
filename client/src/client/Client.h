@@ -6,15 +6,21 @@
 #include <utility/safe_queue/SafeQueue.h>
 
 #include "message/Message.h"
+#include <utility/benchmark/Benchmark.h>
 
 namespace sLink::client
 {
     class Client
     {
+    private:
+        static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_GREEN;
+
     public:
         Client(asio::io_context &ctx);
 
         void setUsername(std::string_view name);
+
+        void setPassword(std::string_view password);
 
         std::string_view getUsername() const;
 
@@ -36,6 +42,8 @@ namespace sLink::client
         void onJoin();
 
         std::string m_Username;
+
+        std::string m_Password;
 
         asio::io_context &m_IOContext;
 

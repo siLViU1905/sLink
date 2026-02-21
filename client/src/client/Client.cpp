@@ -16,6 +16,11 @@ namespace sLink::client
         m_Username = name;
     }
 
+    void Client::setPassword(std::string_view password)
+    {
+        m_Password = password;
+    }
+
     std::string_view Client::getUsername() const
     {
         return m_Username;
@@ -81,6 +86,8 @@ namespace sLink::client
 
     void Client::onWrite()
     {
+        SLINK_START_BENCHMARK
+
         auto msg = m_Outbox.tryPop();
 
         if (!msg)
@@ -104,10 +111,14 @@ namespace sLink::client
                                   m_Socket.close();
                               }
                           });
+
+        SLINK_END_BENCHMARK("[CLIENT]", "onWrite", s_BenchmarkOutputColor)
     }
 
     void Client::onRead()
     {
+        SLINK_START_BENCHMARK
+
         asio::async_read_until(m_Socket, m_ReadBuffer, '\n',
                                [this](std::error_code ec, size_t length)
                                {
@@ -125,11 +136,13 @@ namespace sLink::client
                                    } else
                                        m_Socket.close();
                                });
+
+        SLINK_END_BENCHMARK("[CLIENT]", "onRead", s_BenchmarkOutputColor)
     }
 
     void Client::onJoin()
     {
-        message::Message joinMessage(protocol::Command::LOGIN_REQUEST, m_Username, "");
+        message::Message joinMessage(protocol::Command::LOGIN_REQUEST, m_Username, m_Password);
 
         auto data = joinMessage.serialize() + "\n";
 

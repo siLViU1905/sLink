@@ -2,7 +2,7 @@
 
 #include "message/Message.h"
 
-namespace sLink::session
+namespace sLink::server::session
 {
     Session::Session(asio::ip::tcp::socket &&socket, utility::SafeQueue<std::string> &inbox)
         : m_Socket(std::move(socket)), m_Inbox(inbox), m_ShouldDisconnectAfterWrite(false)
@@ -37,6 +37,8 @@ namespace sLink::session
 
     void Session::send(const message::Message &message)
     {
+        SLINK_START_BENCHMARK
+
         auto self(shared_from_this());
 
         asio::post(m_Socket.get_executor(), [this, self, message]()
@@ -48,21 +50,13 @@ namespace sLink::session
             if (idle)
                 onWrite();
         });
+
+        SLINK_END_BENCHMARK("[Session]", "send", s_BenchmarkOutputColor)
     }
 
-    void Session::setUsername(std::string_view username)
+    void Session::setOnAuthInfoSentCallback(OnAuthInfoSentCallback &&callback)
     {
-        m_Username = username;
-    }
-
-    std::string_view Session::getUsername() const
-    {
-        return m_Username;
-    }
-
-    void Session::setOnUsernameSentCallback(OnUsernameSentCallback &&callback)
-    {
-        m_OnUsernameSentCallback = std::move(callback);
+        m_OnAuthInfoSentCallback = std::move(callback);
     }
 
     void Session::setOnDisconnectCallback(OnDisconnectCallback &&callback)
@@ -85,7 +79,7 @@ namespace sLink::session
                                    } else if (ec == asio::error::eof || ec == asio::error::connection_reset)
                                    {
                                        if (m_OnDisconnectCallback)
-                                           m_OnDisconnectCallback(m_Username);
+                                           m_OnDisconnectCallback(m_User.getUsername());
                                    }
                                });
     }
@@ -111,6 +105,8 @@ namespace sLink::session
 
     void Session::handleMessage()
     {
+        SLINK_START_BENCHMARK
+
         std::istream is(&m_Buffer);
 
         std::string line;
@@ -122,9 +118,7 @@ namespace sLink::session
             switch (message.getCommand())
             {
                 case protocol::Command::LOGIN_REQUEST:
-                    m_Username = message.getSenderName();
-
-                    m_OnUsernameSentCallback(m_Username);
+                    m_OnAuthInfoSentCallback({message.getSenderName(), message.getContent()});
                     break;
                 case protocol::Command::LOGIN_RESPONSE_REJECT:
                     break;
@@ -139,5 +133,7 @@ namespace sLink::session
                     break;
             }
         }
+
+        SLINK_END_BENCHMARK("[Session]", "handleMessage", s_BenchmarkOutputColor)
     }
 }
