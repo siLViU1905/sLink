@@ -20,6 +20,8 @@ namespace sLink::client
 
         void setUsername(std::string_view name);
 
+        void setPassword(std::string_view password);
+
         std::string_view getUsername() const;
 
         std::expected<std::string, std::string> connect(std::string_view host, std::string_view port);
@@ -40,6 +42,8 @@ namespace sLink::client
         void onJoin();
 
         std::string m_Username;
+
+        std::string m_Password;
 
         asio::io_context &m_IOContext;
 

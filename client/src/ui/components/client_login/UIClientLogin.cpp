@@ -8,6 +8,8 @@ namespace sLink::client::ui::component
     {
         m_InputUsername.resize(25);
 
+        m_InputPassword.resize(32);
+
         m_InputServerPort.resize(5);
     }
 
@@ -25,6 +27,10 @@ namespace sLink::client::ui::component
         ImGui::Text("Username:");
         ImGui::InputText("##username", m_InputUsername.data(), 26);
 
+        ImGui::Text("Password:");
+        ImGui::InputText("##password", m_InputPassword.data(), 33, ImGuiInputTextFlags_Password);
+        ImGui::Dummy(ImVec2(0, 5));
+
         ImGui::Dummy(ImVec2(0, s_ItemSpacing));
 
         ImGui::Text("Server Port:");
@@ -39,12 +45,16 @@ namespace sLink::client::ui::component
             {
                 m_AuthInfoErrorMessage = "Username field is empty!";
                 m_ShowAuthIncorrectInfoErrorPopup = true;
+            } else if (m_InputPassword.empty())
+            {
+                m_AuthInfoErrorMessage = "Password field is empty!";
+                m_ShowAuthIncorrectInfoErrorPopup = true;
             } else if (m_InputServerPort.empty())
             {
                 m_AuthInfoErrorMessage = "Server Port field is empty!";
                 m_ShowAuthIncorrectInfoErrorPopup = true;
             } else if (m_OnLoginDataInputCallback)
-                m_OnLoginDataInputCallback(m_InputUsername, m_InputServerPort);
+                m_OnLoginDataInputCallback(m_InputUsername, m_InputPassword, m_InputServerPort);
         }
 
         if (m_ShowAuthIncorrectInfoErrorPopup)
