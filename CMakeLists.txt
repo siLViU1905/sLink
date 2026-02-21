@@ -31,3 +31,5 @@ add_subdirectory(client)
 add_subdirectory(server)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+add_subdirectory(tests)
