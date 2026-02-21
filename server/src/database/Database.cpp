@@ -34,7 +34,7 @@ namespace sLink::server::db
 
             if (auto rawMessage = rawMessageInbox.tryPop())
             {
-                result = addMesssage(message::Message::deserialize(*rawMessage));
+                result = addMessage(message::Message::deserialize(*rawMessage));
 
                 m_InfoOutbox.push(result ? *result : result.error());
             }
@@ -54,6 +54,8 @@ namespace sLink::server::db
 
     Database::ActionResult Database::start()
     {
+        SLINK_START_BENCHMARK
+
         if (sqlite3_open(s_DatabaseName.data(), &m_DatabaseHandle) != SQLITE_OK)
             return std::unexpected(std::format("Failed to start database {}", s_DatabaseName));
 
@@ -65,11 +67,15 @@ namespace sLink::server::db
         if (sqlite3_exec(m_DatabaseHandle, s_CreateMessagesTableQuery.data(), nullptr, nullptr, &err) != SQLITE_OK)
             return std::unexpected(std::format("Failed to create messages table. Error: {}", err));
 
+        SLINK_END_BENCHMARK("[Database]", "start", s_BenchmarkOutputColor)
+
         return {"Database successfully started"};
     }
 
     Database::ActionResult Database::addUser(std::string_view username)
     {
+        SLINK_START_BENCHMARK
+
         sqlite3_stmt *stmt;
 
         if (sqlite3_prepare_v2(m_DatabaseHandle, s_InsertUserQuery.data(), -1, &stmt, nullptr) != SQLITE_OK)
@@ -86,11 +92,15 @@ namespace sLink::server::db
 
         sqlite3_finalize(stmt);
 
+        SLINK_END_BENCHMARK("[Database]", "addUser", s_BenchmarkOutputColor)
+
         return {std::format("User '{}' successfully added", username)};
     }
 
     std::optional<int> Database::getUserId(std::string_view username) const
     {
+        SLINK_START_BENCHMARK
+
         sqlite3_stmt *stmt;
 
         if (sqlite3_prepare_v2(m_DatabaseHandle, s_GetUserIdQuery.data(), -1, &stmt, nullptr) != SQLITE_OK)
@@ -105,6 +115,8 @@ namespace sLink::server::db
 
         sqlite3_finalize(stmt);
 
+        SLINK_END_BENCHMARK("[Database]", "getUserId", s_BenchmarkOutputColor)
+
         return userId;
     }
 
@@ -113,8 +125,10 @@ namespace sLink::server::db
         return getUserId(username).has_value();
     }
 
-    Database::ActionResult Database::addMesssage(const message::Message &message)
+    Database::ActionResult Database::addMessage(const message::Message &message)
     {
+        SLINK_START_BENCHMARK
+
         sqlite3_stmt *stmt;
 
         if (sqlite3_prepare_v2(m_DatabaseHandle, s_InsertMessageQuery.data(), -1, &stmt, nullptr) != SQLITE_OK)
@@ -138,6 +152,8 @@ namespace sLink::server::db
         }
 
         sqlite3_finalize(stmt);
+
+        SLINK_END_BENCHMARK("[Database]", "addMessage", s_BenchmarkOutputColor)
 
         return {"Message successfully added"};
     }

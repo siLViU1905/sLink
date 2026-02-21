@@ -81,6 +81,8 @@ namespace sLink::client
 
     void Client::onWrite()
     {
+        SLINK_START_BENCHMARK
+
         auto msg = m_Outbox.tryPop();
 
         if (!msg)
@@ -104,10 +106,14 @@ namespace sLink::client
                                   m_Socket.close();
                               }
                           });
+
+        SLINK_END_BENCHMARK("[CLIENT]", "onWrite", s_BenchmarkOutputColor)
     }
 
     void Client::onRead()
     {
+        SLINK_START_BENCHMARK
+
         asio::async_read_until(m_Socket, m_ReadBuffer, '\n',
                                [this](std::error_code ec, size_t length)
                                {
@@ -125,6 +131,8 @@ namespace sLink::client
                                    } else
                                        m_Socket.close();
                                });
+
+        SLINK_END_BENCHMARK("[CLIENT]", "onRead", s_BenchmarkOutputColor)
     }
 
     void Client::onJoin()
