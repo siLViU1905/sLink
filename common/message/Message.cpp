@@ -2,7 +2,6 @@
 
 #include <chrono>
 #include <nlohmann/json.hpp>
-#include <utility/benchmark/Benchmark.h>
 
 namespace sLink::message
 {
@@ -65,7 +64,7 @@ namespace sLink::message
 
         js[s_JSONTimestampSelector] = m_Timestamp.getMs();
 
-        SLINK_END_BENCHMARK("[Message]", "serialize")
+        SLINK_END_BENCHMARK("[Message]", "serialize", s_BenchmarkOutputColor)
 
         return js.dump();
     }
@@ -84,7 +83,7 @@ namespace sLink::message
 
         auto timestamp = js[s_JSONTimestampSelector].get<int64_t>();
 
-        SLINK_END_BENCHMARK("[Message]", "deserialize")
+        SLINK_END_BENCHMARK("[Message]", "deserialize", s_BenchmarkOutputColor)
 
         return {command, senderName, content, timestamp};
     }
