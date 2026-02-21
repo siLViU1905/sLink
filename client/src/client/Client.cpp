@@ -16,6 +16,11 @@ namespace sLink::client
         m_Username = name;
     }
 
+    void Client::setPassword(std::string_view password)
+    {
+        m_Password = password;
+    }
+
     std::string_view Client::getUsername() const
     {
         return m_Username;
@@ -137,7 +142,7 @@ namespace sLink::client
 
     void Client::onJoin()
     {
-        message::Message joinMessage(protocol::Command::LOGIN_REQUEST, m_Username, "");
+        message::Message joinMessage(protocol::Command::LOGIN_REQUEST, m_Username, m_Password);
 
         auto data = joinMessage.serialize() + "\n";
 

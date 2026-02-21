@@ -25,7 +25,7 @@ namespace sLink::client_application
     private:
         void initLayers();
 
-        void onConnect(std::string_view username, std::string_view serverPort);
+        void onConnect(std::string_view username, std::string_view password, std::string_view serverPort);
 
         asio::io_context m_IOContext;
 

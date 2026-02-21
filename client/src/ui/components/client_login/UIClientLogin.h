@@ -12,14 +12,14 @@ namespace sLink::client::ui::component
     private:
         static constexpr float s_WindowWidth = 350.f;
 
-        static constexpr float s_WindowHeight = 220.f;
+        static constexpr float s_WindowHeight = 300.f;
 
         static constexpr float s_InputPaddingY = 8.f;
 
         static constexpr float s_ItemSpacing = 15.0f;
 
     public:
-        using OnLoginDataInputCallback = std::move_only_function<void(std::string_view, std::string_view)>;
+        using OnLoginDataInputCallback = std::move_only_function<void(std::string_view, std::string_view, std::string_view)>;
 
         UIClientLogin();
 
@@ -31,6 +31,8 @@ namespace sLink::client::ui::component
 
     private:
         std::string m_InputUsername;
+
+        std::string m_InputPassword;
 
         std::string m_InputServerPort;
 
