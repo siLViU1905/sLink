@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <nlohmann/json.hpp>
+#include <utility/benchmark/Benchmark.h>
 
 namespace sLink::message
 {
@@ -52,6 +53,8 @@ namespace sLink::message
 
     std::string Message::serialize() const
     {
+        SLINK_START_BENCHMARK;
+
         nlohmann::json js;
 
         js[s_JSONCommandSelector] = m_Command;
@@ -62,11 +65,15 @@ namespace sLink::message
 
         js[s_JSONTimestampSelector] = m_Timestamp.getMs();
 
+        SLINK_END_BENCHMARK("[Message]", "serialize")
+
         return js.dump();
     }
 
     Message Message::deserialize(std::string_view raw)
     {
+        SLINK_START_BENCHMARK
+
         auto js = nlohmann::json::parse(raw);
 
         auto command = js[s_JSONCommandSelector].get<protocol::Command>();
@@ -76,6 +83,8 @@ namespace sLink::message
         auto content = js[s_JSONContentSelector].get<std::string>();
 
         auto timestamp = js[s_JSONTimestampSelector].get<int64_t>();
+
+        SLINK_END_BENCHMARK("[Message]", "deserialize")
 
         return {command, senderName, content, timestamp};
     }
