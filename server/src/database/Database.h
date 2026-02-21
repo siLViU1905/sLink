@@ -9,6 +9,7 @@
 
 #include "message/Message.h"
 #include "safe_queue/SafeQueue.h"
+#include <utility/benchmark/Benchmark.h>
 
 namespace sLink::server::db
 {
@@ -37,6 +38,8 @@ namespace sLink::server::db
         static constexpr std::string_view s_GetUserIdQuery = "SELECT id FROM users WHERE username = ?;";
 
         static constexpr std::string_view s_InsertMessageQuery = "INSERT INTO messages (content, timestamp, user_id) VALUES (?, ?, ?);";
+
+        static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_YELLOW;
 
     public:
         Database();

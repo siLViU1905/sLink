@@ -1,7 +1,6 @@
 #include "Database.h"
 
 #include <format>
-#include <utility/benchmark/Benchmark.h>
 
 namespace sLink::server::db
 {
@@ -68,7 +67,7 @@ namespace sLink::server::db
         if (sqlite3_exec(m_DatabaseHandle, s_CreateMessagesTableQuery.data(), nullptr, nullptr, &err) != SQLITE_OK)
             return std::unexpected(std::format("Failed to create messages table. Error: {}", err));
 
-        SLINK_END_BENCHMARK("[Database]", "start")
+        SLINK_END_BENCHMARK("[Database]", "start", s_BenchmarkOutputColor)
 
         return {"Database successfully started"};
     }
@@ -93,7 +92,7 @@ namespace sLink::server::db
 
         sqlite3_finalize(stmt);
 
-        SLINK_END_BENCHMARK("[Database]", "addUser")
+        SLINK_END_BENCHMARK("[Database]", "addUser", s_BenchmarkOutputColor)
 
         return {std::format("User '{}' successfully added", username)};
     }
@@ -116,7 +115,7 @@ namespace sLink::server::db
 
         sqlite3_finalize(stmt);
 
-        SLINK_END_BENCHMARK("[Database]", "getUserId")
+        SLINK_END_BENCHMARK("[Database]", "getUserId", s_BenchmarkOutputColor)
 
         return userId;
     }
@@ -154,7 +153,7 @@ namespace sLink::server::db
 
         sqlite3_finalize(stmt);
 
-        SLINK_END_BENCHMARK("[Database]", "addMessage")
+        SLINK_END_BENCHMARK("[Database]", "addMessage", s_BenchmarkOutputColor)
 
         return {"Message successfully added"};
     }
