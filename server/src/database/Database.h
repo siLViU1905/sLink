@@ -11,6 +11,8 @@
 #include "safe_queue/SafeQueue.h"
 #include <utility/benchmark/Benchmark.h>
 
+#include "../user/User.h"
+
 namespace sLink::server::db
 {
     class Database
@@ -21,7 +23,8 @@ namespace sLink::server::db
         static constexpr std::string_view s_CreateUsersTableQuery =
             "CREATE TABLE IF NOT EXISTS users ("
             "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-            "username VARCHAR(25) NOT NULL"
+            "username VARCHAR(25) NOT NULL,"
+            "password VARCHAR(32) NOT NULL"
             ");";
 
         static constexpr std::string_view s_CreateMessagesTableQuery =
@@ -33,9 +36,11 @@ namespace sLink::server::db
             "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
             ");";
 
-        static constexpr std::string_view s_InsertUserQuery = "INSERT INTO users (username) VALUES (?);";
+        static constexpr std::string_view s_InsertUserQuery = "INSERT INTO users (username, password) VALUES (?, ?);";
 
         static constexpr std::string_view s_GetUserIdQuery = "SELECT id FROM users WHERE username = ?;";
+
+        static constexpr std::string_view s_GetUserPasswordQuery = "SELECT password FROM users WHERE id = ?;";
 
         static constexpr std::string_view s_InsertMessageQuery = "INSERT INTO messages (content, timestamp, user_id) VALUES (?, ?, ?);";
 
@@ -44,11 +49,13 @@ namespace sLink::server::db
     public:
         Database();
 
-        void run(utility::SafeQueue<std::string>& usernameInbox, utility::SafeQueue<std::string>& rawMessageInbox);
+        void run(utility::SafeQueue<user::User>& usernameInbox, utility::SafeQueue<std::string>& rawMessageInbox);
 
         utility::SafeQueue<std::string>& getInfo();
 
-        bool findUser(std::string_view username) const;
+        bool findUser(const user::User& user) const;
+
+        bool checkUserAuthInfo(const user::User& user);
 
         void close();
 
@@ -59,11 +66,13 @@ namespace sLink::server::db
 
         ActionResult start();
 
-        ActionResult addUser(std::string_view username);
-
-        std::optional<int> getUserId(std::string_view username) const;
+        ActionResult addUser(const user::User& user);
 
         ActionResult addMessage(const message::Message& message);
+
+        std::optional<int> getUserId(const user::User &user) const;
+
+        ActionResult checkUserPassword(int userId, const user::User &user) const;
 
         sqlite3* m_DatabaseHandle;
 

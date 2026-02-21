@@ -9,6 +9,7 @@ add_executable(sLink_Server
         src/ui/components/port_select/UIPortSelect.cpp
         src/ui/layers/server_port/UIServerPortLayer.cpp
         src/database/Database.cpp
+        src/user/User.cpp
 )
 
 target_link_libraries(sLink_Server

@@ -7,7 +7,9 @@
 #include "safe_queue/SafeQueue.h"
 #include <utility/benchmark/Benchmark.h>
 
-namespace sLink::session
+#include "../user/User.h"
+
+namespace sLink::server::session
 {
     class Session : public std::enable_shared_from_this<Session>
     {
@@ -15,9 +17,9 @@ namespace sLink::session
         static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_RED;
 
     public:
-        using OnUsernameSentCallback = std::move_only_function<void(std::string_view)>;
+        using OnAuthInfoSentCallback = std::move_only_function<void(const user::User&)>;
 
-        using OnDisconnectCallback = std::move_only_function<void(std::string_view)>;
+        using OnDisconnectCallback = std::move_only_function<void()>;
 
         Session(asio::ip::tcp::socket &&socket, utility::SafeQueue<std::string> &inbox);
 
@@ -29,11 +31,12 @@ namespace sLink::session
 
         void send(const message::Message &message);
 
-        void setUsername(std::string_view username);
+        auto getUser(this auto&& self)
+        {
+            return self.m_User;
+        }
 
-        std::string_view getUsername() const;
-
-        void setOnUsernameSentCallback(OnUsernameSentCallback &&callback);
+        void setOnAuthInfoSentCallback(OnAuthInfoSentCallback &&callback);
 
         void setOnDisconnectCallback(OnDisconnectCallback &&callback);
 
@@ -44,7 +47,7 @@ namespace sLink::session
 
         void handleMessage();
 
-        std::string m_Username;
+        user::User m_User;
 
         asio::ip::tcp::socket m_Socket;
 
@@ -54,7 +57,7 @@ namespace sLink::session
 
         std::queue<std::string> m_WriteQueue;
 
-        OnUsernameSentCallback m_OnUsernameSentCallback;
+        OnAuthInfoSentCallback m_OnAuthInfoSentCallback;
 
         OnDisconnectCallback m_OnDisconnectCallback;
 
