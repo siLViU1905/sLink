@@ -72,7 +72,7 @@ namespace sLink::server::db
         return {"Database successfully started"};
     }
 
-    Database::ActionResult Database::addUser(const user::User& user)
+    Database::ActionResult Database::addUser(const user::User &user)
     {
         SLINK_START_BENCHMARK
 
@@ -99,7 +99,7 @@ namespace sLink::server::db
         return {std::format("User '{}' successfully added", user.getUsername())};
     }
 
-    std::optional<int> Database::getUserId(std::string_view username) const
+    std::optional<int> Database::getUserId(const user::User &user) const
     {
         SLINK_START_BENCHMARK
 
@@ -108,7 +108,7 @@ namespace sLink::server::db
         if (sqlite3_prepare_v2(m_DatabaseHandle, s_GetUserIdQuery.data(), -1, &stmt, nullptr) != SQLITE_OK)
             return std::nullopt;
 
-        sqlite3_bind_text(stmt, 1, username.data(), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(stmt, 1, user.getUsername().data(), -1, SQLITE_TRANSIENT);
 
         std::optional<int> userId;
 
@@ -122,19 +122,34 @@ namespace sLink::server::db
         return userId;
     }
 
-    bool Database::findUser(std::string_view username) const
+    bool Database::findUser(const user::User &user) const
     {
-        return getUserId(username).has_value();
+        return getUserId(user).has_value();
     }
 
-    bool Database::checkUserPassword(int userId, std::string_view password) const
+    Database::ActionResult Database::checkUserAuthInfo(const user::User &user) const
+    {
+        if (auto userId = getUserId(user))
+        {
+            auto result = checkUserPassword(*userId, user);
+
+            if (result)
+                return result;
+
+            return std::unexpected(result.error());
+        }
+
+        return std::unexpected(std::format("User {} could not be found", user.getUsername()));
+    }
+
+    Database::ActionResult Database::checkUserPassword(int userId, const user::User &user) const
     {
         SLINK_START_BENCHMARK
 
         sqlite3_stmt *stmt;
 
         if (sqlite3_prepare_v2(m_DatabaseHandle, s_GetUserPasswordQuery.data(), -1, &stmt, nullptr) != SQLITE_OK)
-            return false;
+            return std::unexpected("Failed to prepare get user password query");
 
         sqlite3_bind_int(stmt, 1, userId);
 
@@ -145,14 +160,16 @@ namespace sLink::server::db
             const unsigned char *storedPassword = sqlite3_column_text(stmt, 0);
 
             if (storedPassword != nullptr)
-                passwordMatches = (password == reinterpret_cast<const char *>(storedPassword));
+                passwordMatches = (user.getPassword() == reinterpret_cast<const char *>(storedPassword));
         }
 
         sqlite3_finalize(stmt);
 
         SLINK_END_BENCHMARK("[Database]", "checkUserPassword", s_BenchmarkOutputColor)
 
-        return passwordMatches;
+        return passwordMatches
+                   ? ActionResult{std::format("User {} password matches", user.getUsername())}
+                   : std::unexpected(std::format("User {} password does not match", user.getUsername()));
     }
 
     Database::ActionResult Database::addMessage(const message::Message &message)
@@ -164,7 +181,7 @@ namespace sLink::server::db
         if (sqlite3_prepare_v2(m_DatabaseHandle, s_InsertMessageQuery.data(), -1, &stmt, nullptr) != SQLITE_OK)
             return std::unexpected(std::format("Failed to prepare insert message query"));
 
-        if (auto userId = getUserId(message.getSenderName()))
+        if (auto userId = getUserId({message.getSenderName(), ""}))
         {
             sqlite3_bind_text(stmt, 1, message.getContent().data(), -1, SQLITE_TRANSIENT);
 
