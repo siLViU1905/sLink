@@ -47,30 +47,32 @@ namespace sLink::server::db
         static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_YELLOW;
 
     public:
+        using ActionResult = std::expected<std::string, std::string>;
+
         Database();
 
         void run(utility::SafeQueue<user::User>& usernameInbox, utility::SafeQueue<std::string>& rawMessageInbox);
 
         utility::SafeQueue<std::string>& getInfo();
 
-        std::optional<int> getUserId(std::string_view username) const;
+        bool findUser(const user::User& user) const;
 
-        bool findUser(std::string_view username) const;
-
-        bool checkUserPassword(int userId, std::string_view password) const;
+        ActionResult checkUserAuthInfo(const user::User& user) const;
 
         void close();
 
         ~Database();
 
     private:
-        using ActionResult = std::expected<std::string, std::string>;
-
         ActionResult start();
 
         ActionResult addUser(const user::User& user);
 
         ActionResult addMessage(const message::Message& message);
+
+        std::optional<int> getUserId(const user::User &user) const;
+
+        ActionResult checkUserPassword(int userId, const user::User &user) const;
 
         sqlite3* m_DatabaseHandle;
 

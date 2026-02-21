@@ -129,15 +129,21 @@ namespace sLink::server::db
 
     Database::ActionResult Database::checkUserAuthInfo(const user::User &user) const
     {
+        SLINK_START_BENCHMARK
+
         if (auto userId = getUserId(user))
         {
             auto result = checkUserPassword(*userId, user);
+
+            SLINK_END_BENCHMARK("[Database]", "checkUserAuthInfo", s_BenchmarkOutputColor);
 
             if (result)
                 return result;
 
             return std::unexpected(result.error());
         }
+
+        SLINK_END_BENCHMARK("[Database]", "checkUserAuthInfo", s_BenchmarkOutputColor);
 
         return std::unexpected(std::format("User {} could not be found", user.getUsername()));
     }
