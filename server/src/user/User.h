@@ -1,6 +1,7 @@
 #ifndef SLINK_USER_H
 #define SLINK_USER_H
 #include <string_view>
+#include <string>
 
 namespace sLink::server::user
 {
@@ -20,9 +21,9 @@ namespace sLink::server::user
         std::string_view getPassword() const;
 
     private:
-        std::string_view m_Username;
+        std::string m_Username;
 
-        std::string_view m_Password;
+        std::string m_Password;
     };
 }
 
