@@ -7,11 +7,15 @@
 #include <expected>
 
 #include "../database/Database.h"
+#include <utility/benchmark/Benchmark.h>
 
 namespace sLink::server
 {
     class Server
     {
+    private:
+        static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_MAGENTA;
+
     public:
         Server(asio::io_context &ctx, db::Database& database);
 
