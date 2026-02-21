@@ -60,7 +60,7 @@ namespace sLink::server::db
 
         std::optional<int> getUserId(std::string_view username) const;
 
-        ActionResult addMesssage(const message::Message& message);
+        ActionResult addMessage(const message::Message& message);
 
         sqlite3* m_DatabaseHandle;
 
