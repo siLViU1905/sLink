@@ -2,7 +2,7 @@
 
 #include "message/Message.h"
 
-namespace sLink::session
+namespace sLink::server::session
 {
     Session::Session(asio::ip::tcp::socket &&socket, utility::SafeQueue<std::string> &inbox)
         : m_Socket(std::move(socket)), m_Inbox(inbox), m_ShouldDisconnectAfterWrite(false)
@@ -54,16 +54,6 @@ namespace sLink::session
         SLINK_END_BENCHMARK("[Session]", "send", s_BenchmarkOutputColor)
     }
 
-    void Session::setUsername(std::string_view username)
-    {
-        m_Username = username;
-    }
-
-    std::string_view Session::getUsername() const
-    {
-        return m_Username;
-    }
-
     void Session::setOnAuthInfoSentCallback(OnAuthInfoSentCallback &&callback)
     {
         m_OnAuthInfoSentCallback = std::move(callback);
@@ -89,7 +79,7 @@ namespace sLink::session
                                    } else if (ec == asio::error::eof || ec == asio::error::connection_reset)
                                    {
                                        if (m_OnDisconnectCallback)
-                                           m_OnDisconnectCallback(m_Username);
+                                           m_OnDisconnectCallback(m_User.getUsername());
                                    }
                                });
     }
@@ -128,9 +118,7 @@ namespace sLink::session
             switch (message.getCommand())
             {
                 case protocol::Command::LOGIN_REQUEST:
-                    m_Username = message.getSenderName();
-
-                    m_OnAuthInfoSentCallback(m_Username, message.getContent());
+                    m_OnAuthInfoSentCallback({message.getSenderName(), message.getContent()});
                     break;
                 case protocol::Command::LOGIN_RESPONSE_REJECT:
                     break;
