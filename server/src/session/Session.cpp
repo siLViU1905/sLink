@@ -64,9 +64,9 @@ namespace sLink::session
         return m_Username;
     }
 
-    void Session::setOnUsernameSentCallback(OnUsernameSentCallback &&callback)
+    void Session::setOnAuthInfoSentCallback(OnAuthInfoSentCallback &&callback)
     {
-        m_OnUsernameSentCallback = std::move(callback);
+        m_OnAuthInfoSentCallback = std::move(callback);
     }
 
     void Session::setOnDisconnectCallback(OnDisconnectCallback &&callback)
@@ -130,7 +130,7 @@ namespace sLink::session
                 case protocol::Command::LOGIN_REQUEST:
                     m_Username = message.getSenderName();
 
-                    m_OnUsernameSentCallback(m_Username);
+                    m_OnAuthInfoSentCallback(m_Username, message.getContent());
                     break;
                 case protocol::Command::LOGIN_RESPONSE_REJECT:
                     break;

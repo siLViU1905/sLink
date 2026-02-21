@@ -79,7 +79,7 @@ namespace sLink::server
 
                 auto &session = m_Sessions.back();
 
-                session->setOnUsernameSentCallback([this, session](std::string_view username)
+                session->setOnAuthInfoSentCallback([this, session](std::string_view username, std::string_view password)
                 {
                     if (m_Database.findUser(username))
                         onClientAccept(session);
