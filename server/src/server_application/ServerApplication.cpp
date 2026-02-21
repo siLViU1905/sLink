@@ -3,7 +3,7 @@
 namespace sLink::server_application
 {
     ServerApplication::ServerApplication(int windowWidth, int windowHeight, std::string_view windowName)
-        : Application(windowWidth, windowHeight, windowName), m_Server(m_IOContext)
+        : Application(windowWidth, windowHeight, windowName), m_Server(m_IOContext, m_Database)
     {
         initLayers();
 

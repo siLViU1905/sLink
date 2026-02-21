@@ -13,3 +13,6 @@
 [submodule "external/sqlite"]
 	path = external/sqlite
 	url = https://github.com/azadkuh/sqlite-amalgamation.git
+[submodule "external/catch2"]
+	path = external/catch2
+	url = https://github.com/catchorg/Catch2.git

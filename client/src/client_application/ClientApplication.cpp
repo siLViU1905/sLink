@@ -26,7 +26,33 @@ namespace sLink::client_application
         {
             auto message = message::Message::deserialize(*raw_message);
 
-            m_ChatLayer->getChatWindow().addMessage(message);
+            switch (message.getCommand())
+            {
+                case protocol::Command::LOGIN_RESPONSE_REJECT:
+                {
+                    m_CurrentLayer = m_LoginLayer;
+
+                    m_LoginLayer->getClientLoginPanel().notifyLoginFailed(message.getContent());
+                    break;
+                }
+
+                case protocol::Command::LOGIN_RESPONSE_ACCEPT:
+                {
+                    m_CurrentLayer = m_ChatLayer;
+
+                    m_ChatLayer->getInfoPanel().addSuccessInfo(message.getContent());
+                    break;
+                }
+
+                case protocol::Command::CHAT_MESSAGE:
+                {
+                    m_ChatLayer->getChatWindow().addMessage(message);
+                    break;
+                }
+
+                default:
+                    break;
+            }
         }
     }
 
@@ -57,6 +83,7 @@ namespace sLink::client_application
         m_ChatLayer->getChatWindow().setOnMessageSend([this](std::string_view content)
         {
             message::Message message(
+                protocol::Command::CHAT_MESSAGE,
                 m_Client.getUsername(),
                 content
             );
@@ -82,11 +109,7 @@ namespace sLink::client_application
 
         auto result = m_Client.connect("127.0.0.1", serverPort);
 
-        if (result)
-            m_ChatLayer->getInfoPanel().addSuccessInfo(*result);
-        else
+        if (!result)
             m_ChatLayer->getInfoPanel().addFailInfo(result.error());
-
-        m_CurrentLayer = m_ChatLayer;
     }
 }

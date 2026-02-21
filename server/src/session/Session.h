@@ -3,6 +3,7 @@
 
 #include <asio.hpp>
 
+#include "message/Message.h"
 #include "safe_queue/SafeQueue.h"
 
 namespace sLink::session
@@ -18,7 +19,11 @@ namespace sLink::session
 
         void start();
 
-        void send(const std::string &message);
+        void disconnect();
+
+        void disconnectAfterWrite();
+
+        void send(const message::Message &message);
 
         void setUsername(std::string_view username);
 
@@ -33,6 +38,8 @@ namespace sLink::session
 
         void onWrite();
 
+        void handleMessage();
+
         std::string m_Username;
 
         asio::ip::tcp::socket m_Socket;
@@ -46,6 +53,8 @@ namespace sLink::session
         OnUsernameSentCallback m_OnUsernameSentCallback;
 
         OnDisconnectCallback m_OnDisconnectCallback;
+
+        bool m_ShouldDisconnectAfterWrite;
     };
 }
 
