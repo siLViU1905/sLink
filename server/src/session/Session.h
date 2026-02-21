@@ -19,7 +19,7 @@ namespace sLink::server::session
     public:
         using OnAuthInfoSentCallback = std::move_only_function<void(const user::User&)>;
 
-        using OnDisconnectCallback = std::move_only_function<void(std::string_view)>;
+        using OnDisconnectCallback = std::move_only_function<void()>;
 
         Session(asio::ip::tcp::socket &&socket, utility::SafeQueue<std::string> &inbox);
 

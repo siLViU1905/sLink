@@ -57,9 +57,9 @@ namespace sLink::server
         return m_DisconnectedUsernames;
     }
 
-    utility::SafeQueue<std::string> &Server::getDbUsernameInbox()
+    utility::SafeQueue<user::User> &Server::getDbUsernameInbox()
     {
-        return m_DbUsernameInbox;
+        return m_DbUserInbox;
     }
 
     utility::SafeQueue<std::string> &Server::getDbMessageInbox()
@@ -81,13 +81,13 @@ namespace sLink::server
 
                 session->setOnAuthInfoSentCallback([this, session](const user::User& user)
                 {
-                    if (m_Database.findUser("TO DO"))
+                    if (m_Database.checkUserAuthInfo(user))
                         onClientAccept(session);
                     else
                         onClientReject(session);
                 });
 
-                session->setOnDisconnectCallback([this, session](std::string_view username)
+                session->setOnDisconnectCallback([this, session]()
                 {
                     onClientDisconnected(session);
                 });

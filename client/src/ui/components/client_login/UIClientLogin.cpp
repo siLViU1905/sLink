@@ -41,20 +41,26 @@ namespace sLink::client::ui::component
 
         if (ImGui::Button("Connect", ImVec2(-1, 40)))
         {
-            if (m_InputUsername.front() == '\0')
+            auto username = m_InputUsername.substr(0, m_InputUsername.find_first_of('\0'));
+
+            auto password = m_InputPassword.substr(0, m_InputPassword.find_first_of('\0'));
+
+            auto serverPort = m_InputServerPort.substr(0, m_InputServerPort.find_first_of('\0'));
+
+            if (username.empty())
             {
                 m_AuthInfoErrorMessage = "Username field is empty!";
                 m_ShowAuthIncorrectInfoErrorPopup = true;
-            } else if (m_InputPassword.front() == '\0')
+            } else if (password.empty())
             {
                 m_AuthInfoErrorMessage = "Password field is empty!";
                 m_ShowAuthIncorrectInfoErrorPopup = true;
-            } else if (m_InputServerPort.front() == '\0')
+            } else if (serverPort.empty())
             {
                 m_AuthInfoErrorMessage = "Server Port field is empty!";
                 m_ShowAuthIncorrectInfoErrorPopup = true;
             } else if (m_OnLoginDataInputCallback)
-                m_OnLoginDataInputCallback(m_InputUsername, m_InputPassword, m_InputServerPort);
+                m_OnLoginDataInputCallback(username, password, serverPort);
         }
 
         if (m_ShowAuthIncorrectInfoErrorPopup)
