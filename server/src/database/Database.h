@@ -21,20 +21,20 @@ namespace sLink::server::db
         static constexpr std::string_view s_DatabaseName = "sLink_storage.db";
 
         static constexpr std::string_view s_CreateUsersTableQuery =
-            "CREATE TABLE IF NOT EXISTS users ("
-            "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-            "username VARCHAR(25) NOT NULL,"
-            "password VARCHAR(32) NOT NULL"
-            ");";
+                "CREATE TABLE IF NOT EXISTS users ("
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                "username VARCHAR(25) NOT NULL,"
+                "password VARCHAR(32) NOT NULL"
+                ");";
 
         static constexpr std::string_view s_CreateMessagesTableQuery =
-            "CREATE TABLE IF NOT EXISTS messages ("
-            "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-            "content VARCHAR(255), "
-            "timestamp BIGINT, "
-            "user_id INTEGER, "
-            "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
-            ");";
+                "CREATE TABLE IF NOT EXISTS messages ("
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                "content VARCHAR(255), "
+                "timestamp BIGINT, "
+                "user_id INTEGER, "
+                "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+                ");";
 
         static constexpr std::string_view s_InsertUserQuery = "INSERT INTO users (username, password) VALUES (?, ?);";
 
@@ -42,39 +42,79 @@ namespace sLink::server::db
 
         static constexpr std::string_view s_GetUserPasswordQuery = "SELECT password FROM users WHERE id = ?;";
 
-        static constexpr std::string_view s_InsertMessageQuery = "INSERT INTO messages (content, timestamp, user_id) VALUES (?, ?, ?);";
+        static constexpr std::string_view s_InsertMessageQuery =
+                "INSERT INTO messages (content, timestamp, user_id) VALUES (?, ?, ?);";
 
         static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_YELLOW;
 
     public:
+        struct Response
+        {
+            enum class ResponseType
+            {
+                LOGIN_SUCCESS,
+                LOGIN_FAIL,
+                REGISTER_SUCCESS,
+                REGISTER_FAIL
+            };
+
+            std::string m_Username;
+
+            std::string m_Message;
+
+            ResponseType m_Type;
+        };
+
         Database();
 
-        void run(utility::SafeQueue<user::User>& usernameInbox, utility::SafeQueue<std::string>& rawMessageInbox);
+        void run(utility::SafeQueue<std::string> &rawMessageInbox);
 
-        utility::SafeQueue<std::string>& getInfo();
+        utility::SafeQueue<Response> &getUserResponses();
 
-        bool findUser(const user::User& user) const;
+        utility::SafeQueue<std::string> &getInfo();
 
-        bool checkUserAuthInfo(const user::User& user);
+        bool findUser(const user::User &user) const;
+
+        void requestUserLogin(const user::User &user);
 
         void close();
 
         ~Database();
 
     private:
+        struct UserRequest
+        {
+            enum class RequestType
+            {
+                LOGIN,
+                REGISTER
+            };
+
+            user::User m_User;
+
+            RequestType m_Type;
+        };
+
+
         using ActionResult = std::expected<std::string, std::string>;
 
         ActionResult start();
 
-        ActionResult addUser(const user::User& user);
+        ActionResult addUser(const user::User &user);
 
-        ActionResult addMessage(const message::Message& message);
+        ActionResult addMessage(const message::Message &message);
 
         std::optional<int> getUserId(const user::User &user) const;
 
+        ActionResult checkUserLoginInfo(const user::User &user);
+
         ActionResult checkUserPassword(int userId, const user::User &user) const;
 
-        sqlite3* m_DatabaseHandle;
+        sqlite3 *m_DatabaseHandle;
+
+        utility::SafeQueue<UserRequest> m_Requests;
+
+        utility::SafeQueue<Response> m_Responses;
 
         utility::SafeQueue<std::string> m_InfoOutbox;
 

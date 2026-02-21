@@ -39,6 +39,36 @@ namespace sLink::server
 
     void Server::update()
     {
+        while (auto response = m_Database.getUserResponses().tryPop())
+        {
+            auto it = m_PendingSessions.find(response->m_Username);
+
+            if (it != m_PendingSessions.end())
+            {
+                auto session = it->second;
+
+                switch (response->m_Type)
+                {
+                    case db::Database::Response::ResponseType::LOGIN_SUCCESS:
+                        onClientAccept(session);
+
+                        break;
+
+                    case db::Database::Response::ResponseType::LOGIN_FAIL:
+                        onClientReject(session, response->m_Message);
+
+                        break;
+                    case db::Database::Response::ResponseType::REGISTER_SUCCESS:
+                        break;
+
+                    case db::Database::Response::ResponseType::REGISTER_FAIL:
+                        break;
+                }
+
+                m_PendingSessions.erase(it);
+            }
+        }
+
         while (auto message = m_Inbox.tryPop())
         {
             broadcast(message::Message::deserialize(*message));
@@ -79,12 +109,11 @@ namespace sLink::server
 
                 auto &session = m_Sessions.back();
 
-                session->setOnAuthInfoSentCallback([this, session](const user::User& user)
+                session->setOnAuthInfoSentCallback([this, session](const user::User &user)
                 {
-                    if (m_Database.checkUserAuthInfo(user))
-                        onClientAccept(session);
-                    else
-                        onClientReject(session);
+                    m_PendingSessions[user.getUsername().data()] = session;
+
+                    m_Database.requestUserLogin(user);
                 });
 
                 session->setOnDisconnectCallback([this, session]()
@@ -103,7 +132,9 @@ namespace sLink::server
 
     void Server::onClientAccept(const std::shared_ptr<session::Session> &session)
     {
-        m_PendingUsernames.push(std::string(session->getUser().getUsername()));
+        m_Sessions.push_back(session);
+
+        m_PendingUsernames.push(session->getUser().getUsername().data());
 
         session->send({protocol::Command::LOGIN_RESPONSE_ACCEPT, "", "Successfully connected to the server"});
     }
@@ -115,18 +146,14 @@ namespace sLink::server
         std::erase(m_Sessions, session);
     }
 
-    void Server::onClientReject(const std::shared_ptr<session::Session> &session)
+    void Server::onClientReject(const std::shared_ptr<session::Session> &session, std::string_view reason)
     {
-        message::Message message(protocol::Command::LOGIN_RESPONSE_REJECT, "", "Username not found");
+        message::Message message(protocol::Command::LOGIN_RESPONSE_REJECT, "", reason);
 
         session->send(message);
 
         session->disconnectAfterWrite();
 
-        std::string username = session->getUser().getUsername().data();
-
-        std::erase(m_Sessions, session);
-
-        m_DisconnectedUsernames.push(std::format("Rejected: {}", username));
+        m_DisconnectedUsernames.push(std::format("Rejected: {} reason: {}", session->getUser().getUsername(), reason));
     }
 }

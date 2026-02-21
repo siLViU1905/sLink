@@ -40,7 +40,7 @@ namespace sLink::server
 
         void onClientDisconnected(const std::shared_ptr<session::Session> &session);
 
-        void onClientReject(const std::shared_ptr<session::Session> &session);
+        void onClientReject(const std::shared_ptr<session::Session> &session, std::string_view reason);
 
         asio::io_context &m_IOContext;
 
@@ -57,6 +57,8 @@ namespace sLink::server
         asio::streambuf m_ReadBuffer;
 
         std::vector<std::shared_ptr<session::Session> > m_Sessions;
+
+        std::unordered_map<std::string, std::shared_ptr<session::Session>> m_PendingSessions;
 
         utility::SafeQueue<std::string> m_PendingUsernames;
 
