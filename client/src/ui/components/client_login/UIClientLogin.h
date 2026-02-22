@@ -4,6 +4,7 @@
 
 #include "asio/detail/executor_function.hpp"
 #include <components/UIComponent.h>
+#include <imgui.h>
 
 namespace sLink::client::ui::component
 {
@@ -18,14 +19,21 @@ namespace sLink::client::ui::component
 
         static constexpr float s_ItemSpacing = 15.0f;
 
+        static constexpr ImVec4 s_ColorLink = { 0.2f, 0.6f, 1.0f, 1.0f };
+
     public:
-        using OnLoginDataInputCallback = std::move_only_function<void(std::string_view, std::string_view, std::string_view)>;
+        using OnLoginDataInputCallback = std::move_only_function<void(std::string_view, std::string_view,
+                                                                      std::string_view)>;
+
+        using OnRegisterClickCallback = std::move_only_function<void()>;
 
         UIClientLogin();
 
         void render() override;
 
         void setOnLoginDataInput(OnLoginDataInputCallback &&callback);
+
+        void setOnRegisterClick(OnRegisterClickCallback &&callback);
 
         void notifyLoginFailed(std::string_view message);
 
@@ -37,6 +45,8 @@ namespace sLink::client::ui::component
         std::string m_InputServerPort;
 
         OnLoginDataInputCallback m_OnLoginDataInputCallback;
+
+        OnRegisterClickCallback m_OnRegisterClickCallback;
 
         bool m_ShowAuthIncorrectInfoErrorPopup;
 

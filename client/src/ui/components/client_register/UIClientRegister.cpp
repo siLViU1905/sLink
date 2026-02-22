@@ -1,23 +1,25 @@
-#include "UIClientLogin.h"
+#include "UIClientRegister.h"
 
 namespace sLink::client::ui::component
 {
-    UIClientLogin::UIClientLogin() : m_ShowAuthIncorrectInfoErrorPopup(false), m_ShowLoginFailedPopup(false)
+    UIClientRegister::UIClientRegister() : m_ShowAuthIncorrectInfoErrorPopup(false), m_ShowRegisterFailedPopup(false)
     {
         m_InputUsername.resize(25);
 
         m_InputPassword.resize(32);
 
+        m_InputConfirmPassword.resize(32);
+
         m_InputServerPort.resize(5);
     }
 
-    void UIClientLogin::render()
+    void UIClientRegister::render()
     {
         ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
         ImGui::SetNextWindowSize(ImVec2(s_WindowWidth, s_WindowHeight));
 
-        ImGui::Begin("Login to sLink", nullptr,
+        ImGui::Begin("Register to sLink", nullptr,
                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, s_InputPaddingY));
@@ -27,6 +29,10 @@ namespace sLink::client::ui::component
 
         ImGui::Text("Password:");
         ImGui::InputText("##password", m_InputPassword.data(), 33, ImGuiInputTextFlags_Password);
+
+        ImGui::Text("Confirm Password:");
+        ImGui::InputText("##confirm_password", m_InputConfirmPassword.data(), 33, ImGuiInputTextFlags_Password);
+
         ImGui::Dummy(ImVec2(0, 5));
 
         ImGui::Dummy(ImVec2(0, s_ItemSpacing));
@@ -43,6 +49,8 @@ namespace sLink::client::ui::component
 
             auto password = m_InputPassword.substr(0, m_InputPassword.find_first_of('\0'));
 
+            auto confirmPassword = m_InputConfirmPassword.substr(0, m_InputConfirmPassword.find_first_of('\0'));
+
             auto serverPort = m_InputServerPort.substr(0, m_InputServerPort.find_first_of('\0'));
 
             if (username.empty())
@@ -53,23 +61,33 @@ namespace sLink::client::ui::component
             {
                 m_AuthInfoErrorMessage = "Password field is empty!";
                 m_ShowAuthIncorrectInfoErrorPopup = true;
-            } else if (serverPort.empty())
+            } else if (confirmPassword.empty())
+            {
+                m_AuthInfoErrorMessage = "Confirm Password field is empty!";
+                m_ShowAuthIncorrectInfoErrorPopup = true;
+            }
+            else if (password != confirmPassword)
+            {
+                m_AuthInfoErrorMessage = "Password and confirmed password does not match!";
+                m_ShowAuthIncorrectInfoErrorPopup = true;
+            }
+            else if (serverPort.empty())
             {
                 m_AuthInfoErrorMessage = "Server Port field is empty!";
                 m_ShowAuthIncorrectInfoErrorPopup = true;
-            } else if (m_OnLoginDataInputCallback)
-                m_OnLoginDataInputCallback(username, password, serverPort);
+            } else if (m_OnRegisterDataInputCallback)
+                m_OnRegisterDataInputCallback(username, password, serverPort);
         }
 
         ImGui::Spacing();
 
-        float text_width = ImGui::CalcTextSize("Don't have an account? Register").x;
+        float text_width = ImGui::CalcTextSize("Have an account? Login").x;
         ImGui::SetCursorPosX((s_WindowWidth - text_width) * 0.5f);
 
         ImGui::PushStyleColor(ImGuiCol_Text, s_ColorLink);
-        if (ImGui::Selectable("Don't have an account? Register", false, 0, ImVec2(text_width, 0)))
-            if (m_OnRegisterClickCallback)
-                m_OnRegisterClickCallback();
+        if (ImGui::Selectable("Have an account? Login", false, 0, ImVec2(text_width, 0)))
+            if (m_OnLoginClickCallback)
+                m_OnLoginClickCallback();
 
         ImGui::PopStyleColor();
 
@@ -99,17 +117,17 @@ namespace sLink::client::ui::component
         }
 
 
-        if (m_ShowLoginFailedPopup)
-            ImGui::OpenPopup("Login Fail Error");
+        if (m_ShowRegisterFailedPopup)
+            ImGui::OpenPopup("Register Fail Error");
 
-        if (ImGui::BeginPopupModal("Login Fail Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        if (ImGui::BeginPopupModal("Register Fail Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
-            ImGui::Text("%s", m_LoginFailMessage.c_str());
+            ImGui::Text("%s", m_RegisterFailMessage.c_str());
             ImGui::Separator();
 
             if (ImGui::Button("OK", ImVec2(120, 0)))
             {
-                m_ShowLoginFailedPopup = false;
+                m_ShowRegisterFailedPopup = false;
                 ImGui::CloseCurrentPopup();
             }
             ImGui::EndPopup();
@@ -118,20 +136,20 @@ namespace sLink::client::ui::component
         ImGui::End();
     }
 
-    void UIClientLogin::setOnLoginDataInput(OnLoginDataInputCallback &&callback)
+    void UIClientRegister::setOnRegisterDataInput(OnRegisterDataInputCallback &&callback)
     {
-        m_OnLoginDataInputCallback = std::move(callback);
+        m_OnRegisterDataInputCallback = std::move(callback);
     }
 
-    void UIClientLogin::setOnRegisterClick(OnRegisterClickCallback &&callback)
+    void UIClientRegister::setOnLoginClick(OnLoginClickedCallback &&callback)
     {
-        m_OnRegisterClickCallback = std::move(callback);
+        m_OnLoginClickCallback = std::move(callback);
     }
 
-    void UIClientLogin::notifyLoginFailed(std::string_view message)
+    void UIClientRegister::notifyRegisterFailed(std::string_view message)
     {
-        m_LoginFailMessage = message;
+        m_RegisterFailMessage = message;
 
-        m_ShowLoginFailedPopup = true;
+        m_ShowRegisterFailedPopup = true;
     }
 }

@@ -26,13 +26,13 @@ namespace sLink::client
         return m_Username;
     }
 
-    std::expected<std::string, std::string> Client::connect(std::string_view host, std::string_view port)
+    std::expected<std::string, std::string> Client::connect(std::string_view host, std::string_view port, protocol::Command joinType)
     {
         asio::ip::tcp::resolver resolver(m_IOContext);
 
         auto endpoints = resolver.resolve(host, port);
 
-        auto result = onConnect(endpoints);
+        auto result = onConnect(endpoints, joinType);
 
         if (result)
             return {std::format("Connected to port {}", port)};
@@ -61,18 +61,18 @@ namespace sLink::client
         return m_Inbox;
     }
 
-    std::expected<std::string, std::string> Client::onConnect(asio::ip::tcp::resolver::results_type endpoints)
+    std::expected<std::string, std::string> Client::onConnect(asio::ip::tcp::resolver::results_type endpoints, protocol::Command joinType)
     {
         auto promise = std::make_shared<std::promise<std::expected<std::string, std::string> > >();
 
         auto future = promise->get_future();
 
         asio::async_connect(m_Socket, endpoints,
-                            [this, promise](std::error_code ec, asio::ip::tcp::endpoint)
+                            [this, promise, joinType](std::error_code ec, asio::ip::tcp::endpoint)
                             {
                                 if (!ec)
                                 {
-                                    onJoin();
+                                    onJoin(joinType);
 
                                     onRead();
 
@@ -140,9 +140,9 @@ namespace sLink::client
         SLINK_END_BENCHMARK("[CLIENT]", "onRead", s_BenchmarkOutputColor)
     }
 
-    void Client::onJoin()
+    void Client::onJoin(protocol::Command joinType)
     {
-        message::Message joinMessage(protocol::Command::LOGIN_REQUEST, m_Username, m_Password);
+        message::Message joinMessage(joinType, m_Username, m_Password);
 
         auto data = joinMessage.serialize() + "\n";
 

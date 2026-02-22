@@ -24,7 +24,7 @@ namespace sLink::client
 
         std::string_view getUsername() const;
 
-        std::expected<std::string, std::string> connect(std::string_view host, std::string_view port);
+        std::expected<std::string, std::string> connect(std::string_view host, std::string_view port, protocol::Command joinType);
 
         void send(const message::Message &message);
 
@@ -33,13 +33,13 @@ namespace sLink::client
         utility::SafeQueue<std::string> &getInbox();
 
     private:
-        std::expected<std::string, std::string> onConnect(asio::ip::tcp::resolver::results_type endpoints);
+        std::expected<std::string, std::string> onConnect(asio::ip::tcp::resolver::results_type endpoints, protocol::Command joinType);
 
         void onWrite();
 
         void onRead();
 
-        void onJoin();
+        void onJoin(protocol::Command joinType);
 
         std::string m_Username;
 
