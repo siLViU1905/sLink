@@ -21,7 +21,7 @@ namespace sLink::client::ui::component
         static constexpr float s_ItemSpacing = 15.0f;
 
     public:
-        using OnRegisterDataInputCallback = std::move_only_function<void(std::string_view, std::string_view)>;
+        using OnRegisterDataInputCallback = std::move_only_function<void(std::string_view, std::string_view, std::string_view)>;
 
         UIClientRegister();
 
@@ -35,6 +35,8 @@ namespace sLink::client::ui::component
         std::string m_InputUsername;
 
         std::string m_InputPassword;
+
+        std::string m_InputServerPort;
 
         OnRegisterDataInputCallback m_OnRegisterDataInputCallback;
 

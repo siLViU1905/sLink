@@ -8,6 +8,8 @@ namespace sLink::client::ui::component
         m_InputUsername.resize(25);
 
         m_InputPassword.resize(32);
+
+        m_InputServerPort.resize(5);
     }
 
     void UIClientRegister::render()
@@ -28,6 +30,11 @@ namespace sLink::client::ui::component
         ImGui::InputText("##password", m_InputPassword.data(), 33, ImGuiInputTextFlags_Password);
         ImGui::Dummy(ImVec2(0, 5));
 
+        ImGui::Dummy(ImVec2(0, s_ItemSpacing));
+
+        ImGui::Text("Server Port:");
+        ImGui::InputText("##port", m_InputServerPort.data(), 6, ImGuiInputTextFlags_CharsDecimal);
+
         ImGui::PopStyleVar();
         ImGui::Dummy(ImVec2(0, s_ItemSpacing));
 
@@ -37,6 +44,8 @@ namespace sLink::client::ui::component
 
             auto password = m_InputPassword.substr(0, m_InputPassword.find_first_of('\0'));
 
+            auto serverPort = m_InputServerPort.substr(0, m_InputServerPort.find_first_of('\0'));
+
             if (username.empty())
             {
                 m_AuthInfoErrorMessage = "Username field is empty!";
@@ -45,8 +54,12 @@ namespace sLink::client::ui::component
             {
                 m_AuthInfoErrorMessage = "Password field is empty!";
                 m_ShowAuthIncorrectInfoErrorPopup = true;
+            } else if (serverPort.empty())
+            {
+                m_AuthInfoErrorMessage = "Server Port field is empty!";
+                m_ShowAuthIncorrectInfoErrorPopup = true;
             } else if (m_OnRegisterDataInputCallback)
-                m_OnRegisterDataInputCallback(username, password);
+                m_OnRegisterDataInputCallback(username, password, serverPort);
         }
 
         if (m_ShowAuthIncorrectInfoErrorPopup)
