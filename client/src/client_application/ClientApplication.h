@@ -5,6 +5,7 @@
 #include <application/Application.h>
 #include  "../ui/layers/chat_layer/UIChatLayer.h"
 #include "../ui/layers/login_layer/UILoginLayer.h"
+#include "../ui/layers/register_layer/UIRegisterLayer.h"
 
 namespace sLink::client_application
 {
@@ -25,7 +26,7 @@ namespace sLink::client_application
     private:
         void initLayers();
 
-        void onConnect(std::string_view username, std::string_view password, std::string_view serverPort);
+        void onConnect(std::string_view username, std::string_view password, std::string_view serverPort, protocol::Command joinType);
 
         asio::io_context m_IOContext;
 
@@ -38,6 +39,8 @@ namespace sLink::client_application
         std::shared_ptr<client::ui::layer::UIChatLayer> m_ChatLayer;
 
         std::shared_ptr<client::ui::layer::UILoginLayer> m_LoginLayer;
+
+        std::shared_ptr<client::ui::layer::UIRegisterLayer> m_RegisterLayer;
     };
 }
 
