@@ -1,5 +1,4 @@
 #include "UIClientRegister.h"
-#include <imgui.h>
 
 namespace sLink::client::ui::component
 {
@@ -8,6 +7,8 @@ namespace sLink::client::ui::component
         m_InputUsername.resize(25);
 
         m_InputPassword.resize(32);
+
+        m_InputConfirmPassword.resize(32);
 
         m_InputServerPort.resize(5);
     }
@@ -28,6 +29,10 @@ namespace sLink::client::ui::component
 
         ImGui::Text("Password:");
         ImGui::InputText("##password", m_InputPassword.data(), 33, ImGuiInputTextFlags_Password);
+
+        ImGui::Text("Confirm Password:");
+        ImGui::InputText("##confirm_password", m_InputConfirmPassword.data(), 33, ImGuiInputTextFlags_Password);
+
         ImGui::Dummy(ImVec2(0, 5));
 
         ImGui::Dummy(ImVec2(0, s_ItemSpacing));
@@ -44,6 +49,8 @@ namespace sLink::client::ui::component
 
             auto password = m_InputPassword.substr(0, m_InputPassword.find_first_of('\0'));
 
+            auto confirmPassword = m_InputConfirmPassword.substr(0, m_InputConfirmPassword.find_first_of('\0'));
+
             auto serverPort = m_InputServerPort.substr(0, m_InputServerPort.find_first_of('\0'));
 
             if (username.empty())
@@ -54,12 +61,43 @@ namespace sLink::client::ui::component
             {
                 m_AuthInfoErrorMessage = "Password field is empty!";
                 m_ShowAuthIncorrectInfoErrorPopup = true;
-            } else if (serverPort.empty())
+            } else if (confirmPassword.empty())
+            {
+                m_AuthInfoErrorMessage = "Confirm Password field is empty!";
+                m_ShowAuthIncorrectInfoErrorPopup = true;
+            }
+            else if (password != confirmPassword)
+            {
+                m_AuthInfoErrorMessage = "Password and confirmed password does not match!";
+                m_ShowAuthIncorrectInfoErrorPopup = true;
+            }
+            else if (serverPort.empty())
             {
                 m_AuthInfoErrorMessage = "Server Port field is empty!";
                 m_ShowAuthIncorrectInfoErrorPopup = true;
             } else if (m_OnRegisterDataInputCallback)
                 m_OnRegisterDataInputCallback(username, password, serverPort);
+        }
+
+        ImGui::Spacing();
+
+        float text_width = ImGui::CalcTextSize("Have an account? Login").x;
+        ImGui::SetCursorPosX((s_WindowWidth - text_width) * 0.5f);
+
+        ImGui::PushStyleColor(ImGuiCol_Text, s_ColorLink);
+        if (ImGui::Selectable("Have an account? Login", false, 0, ImVec2(text_width, 0)))
+            if (m_OnLoginClickCallback)
+                m_OnLoginClickCallback();
+
+        ImGui::PopStyleColor();
+
+        if (ImGui::IsItemHovered())
+        {
+            ImVec2 min = ImGui::GetItemRectMin();
+            ImVec2 max = ImGui::GetItemRectMax();
+            min.y = max.y;
+            ImGui::GetWindowDrawList()->AddLine(min, max, ImGui::ColorConvertFloat4ToU32(s_ColorLink));
+            ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
         }
 
         if (m_ShowAuthIncorrectInfoErrorPopup)
@@ -101,6 +139,11 @@ namespace sLink::client::ui::component
     void UIClientRegister::setOnRegisterDataInput(OnRegisterDataInputCallback &&callback)
     {
         m_OnRegisterDataInputCallback = std::move(callback);
+    }
+
+    void UIClientRegister::setOnLoginClick(OnLoginClickedCallback &&callback)
+    {
+        m_OnLoginClickCallback = std::move(callback);
     }
 
     void UIClientRegister::notifyRegisterFailed(std::string_view message)

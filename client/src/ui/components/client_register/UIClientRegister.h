@@ -6,6 +6,7 @@
 #include <functional>
 #include <string>
 #include <string_view>
+#include <imgui.h>
 
 namespace sLink::client::ui::component
 {
@@ -14,20 +15,26 @@ namespace sLink::client::ui::component
     private:
         static constexpr float s_WindowWidth = 350.f;
 
-        static constexpr float s_WindowHeight = 300.f;
+        static constexpr float s_WindowHeight = 350.f;
 
         static constexpr float s_InputPaddingY = 8.f;
 
         static constexpr float s_ItemSpacing = 15.0f;
 
+        static constexpr ImVec4 s_ColorLink = { 0.2f, 0.6f, 1.0f, 1.0f };
+
     public:
         using OnRegisterDataInputCallback = std::move_only_function<void(std::string_view, std::string_view, std::string_view)>;
+
+        using OnLoginClickedCallback = std::move_only_function<void()>;
 
         UIClientRegister();
 
         void render() override;
 
         void setOnRegisterDataInput(OnRegisterDataInputCallback &&callback);
+
+        void setOnLoginClick(OnLoginClickedCallback &&callback);
 
         void notifyRegisterFailed(std::string_view message);
 
@@ -36,9 +43,13 @@ namespace sLink::client::ui::component
 
         std::string m_InputPassword;
 
+        std::string m_InputConfirmPassword;
+
         std::string m_InputServerPort;
 
         OnRegisterDataInputCallback m_OnRegisterDataInputCallback;
+
+        OnLoginClickedCallback m_OnLoginClickCallback;
 
         bool m_ShowAuthIncorrectInfoErrorPopup;
 
