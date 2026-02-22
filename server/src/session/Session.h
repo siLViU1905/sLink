@@ -17,7 +17,9 @@ namespace sLink::server::session
         static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_RED;
 
     public:
-        using OnAuthInfoSentCallback = std::move_only_function<void(const user::User&)>;
+        using OnLoginInfoSentCallback = std::move_only_function<void(const user::User&)>;
+
+        using OnRegisterInfoSentCallback = std::move_only_function<void(const user::User&)>;
 
         using OnDisconnectCallback = std::move_only_function<void()>;
 
@@ -36,7 +38,9 @@ namespace sLink::server::session
             return self.m_User;
         }
 
-        void setOnAuthInfoSentCallback(OnAuthInfoSentCallback &&callback);
+        void setOnLoginInfoSentCallback(OnLoginInfoSentCallback &&callback);
+
+        void setOnRegisterInfoSentCallback(OnRegisterInfoSentCallback &&callback);
 
         void setOnDisconnectCallback(OnDisconnectCallback &&callback);
 
@@ -57,7 +61,9 @@ namespace sLink::server::session
 
         std::queue<std::string> m_WriteQueue;
 
-        OnAuthInfoSentCallback m_OnAuthInfoSentCallback;
+        OnLoginInfoSentCallback m_OnLoginInfoSentCallback;
+
+        OnRegisterInfoSentCallback m_OnRegisterInfoSentCallback;
 
         OnDisconnectCallback m_OnDisconnectCallback;
 
