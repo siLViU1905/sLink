@@ -54,9 +54,14 @@ namespace sLink::server::session
         SLINK_END_BENCHMARK("[Session]", "send", s_BenchmarkOutputColor)
     }
 
-    void Session::setOnAuthInfoSentCallback(OnAuthInfoSentCallback &&callback)
+    void Session::setOnLoginInfoSentCallback(OnLoginInfoSentCallback &&callback)
     {
-        m_OnAuthInfoSentCallback = std::move(callback);
+        m_OnLoginInfoSentCallback = std::move(callback);
+    }
+
+    void Session::setOnRegisterInfoSentCallback(OnRegisterInfoSentCallback &&callback)
+    {
+        m_OnRegisterInfoSentCallback = std::move(callback);
     }
 
     void Session::setOnDisconnectCallback(OnDisconnectCallback &&callback)
@@ -120,7 +125,12 @@ namespace sLink::server::session
                 case protocol::Command::LOGIN_REQUEST:
                     m_User = {message.getSenderName(), message.getContent()};
 
-                    m_OnAuthInfoSentCallback(m_User);
+                    m_OnLoginInfoSentCallback(m_User);
+                    break;
+                case protocol::Command::REGISTER_REQUEST:
+                    m_User = {message.getSenderName(), message.getContent()};
+
+                    m_OnRegisterInfoSentCallback(m_User);
                     break;
                 case protocol::Command::LOGIN_RESPONSE_REJECT:
                     break;

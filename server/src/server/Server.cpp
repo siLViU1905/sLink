@@ -59,9 +59,13 @@ namespace sLink::server
 
                         break;
                     case db::Database::Response::ResponseType::REGISTER_SUCCESS:
+                        onClientAccept(session);
+
                         break;
 
                     case db::Database::Response::ResponseType::REGISTER_FAIL:
+                        onClientReject(session, response->m_Message);
+
                         break;
                 }
 
@@ -109,11 +113,18 @@ namespace sLink::server
 
                 auto &session = m_Sessions.back();
 
-                session->setOnAuthInfoSentCallback([this, session](const user::User &user)
+                session->setOnLoginInfoSentCallback([this, session](const user::User &user)
                 {
                     m_PendingSessions[user.getUsername().data()] = session;
 
                     m_Database.requestUserLogin(user);
+                });
+
+                session->setOnRegisterInfoSentCallback([this, session](const user::User &user)
+                {
+                    m_PendingSessions[user.getUsername().data()] = session;
+
+                    m_Database.requestUserRegister(user);
                 });
 
                 session->setOnDisconnectCallback([this, session]()
