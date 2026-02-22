@@ -137,7 +137,8 @@ namespace sLink::server::session
                 case protocol::Command::LOGIN_RESPONSE_ACCEPT:
                     break;
                 case protocol::Command::CHAT_MESSAGE:
-                    send(message);
+                    m_Inbox.push(line);
+
                     break;
                 case protocol::Command::USER_JOINED:
                     break;

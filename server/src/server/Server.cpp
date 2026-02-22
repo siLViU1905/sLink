@@ -109,9 +109,7 @@ namespace sLink::server
         {
             if (!ec)
             {
-                m_Sessions.push_back(std::make_shared<session::Session>(std::move(socket), m_Inbox));
-
-                auto &session = m_Sessions.back();
+                auto session = std::make_shared<session::Session>(std::move(socket), m_Inbox);
 
                 session->setOnLoginInfoSentCallback([this, session](const user::User &user)
                 {
