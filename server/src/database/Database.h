@@ -77,6 +77,8 @@ namespace sLink::server::db
 
         void requestUserLogin(const user::User &user);
 
+        void requestUserRegister(const user::User &user);
+
         void close();
 
         ~Database();
@@ -106,7 +108,9 @@ namespace sLink::server::db
 
         std::optional<int> getUserId(const user::User &user) const;
 
-        ActionResult checkUserLoginInfo(const user::User &user);
+        ActionResult checkUserLoginInfo(const user::User &user) const;
+
+        ActionResult checkUserRegisterInfo(const user::User &user);
 
         ActionResult checkUserPassword(int userId, const user::User &user) const;
 

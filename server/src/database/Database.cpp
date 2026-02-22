@@ -32,12 +32,33 @@ namespace sLink::server::db
                     result = checkUserLoginInfo(request->m_User);
 
                     if (result)
-                        m_Responses.push({request->m_User.getUsername().data(), "", Response::ResponseType::LOGIN_SUCCESS});
+                        m_Responses.push({
+                            request->m_User.getUsername().data(), "", Response::ResponseType::LOGIN_SUCCESS
+                        });
                     else
-                        m_Responses.push({request->m_User.getUsername().data(), result.error(), Response::ResponseType::LOGIN_FAIL});
-                }
+                        m_Responses.push({
+                            request->m_User.getUsername().data(), result.error(), Response::ResponseType::LOGIN_FAIL
+                        });
+                } else if (request->m_Type == UserRequest::RequestType::REGISTER)
+                {
+                    result = checkUserRegisterInfo(request->m_User);
 
-                //result = addUser(*user);
+                    if (result)
+                    {
+                        if (auto addResult = addUser(request->m_User))
+                            m_Responses.push({
+                                request->m_User.getUsername().data(), "", Response::ResponseType::REGISTER_SUCCESS
+                            });
+                        else
+                            m_Responses.push({
+                                request->m_User.getUsername().data(), addResult.error(),
+                                Response::ResponseType::REGISTER_FAIL
+                            });
+                    } else
+                        m_Responses.push({
+                            request->m_User.getUsername().data(), result.error(), Response::ResponseType::REGISTER_FAIL
+                        });
+                }
 
                 m_InfoOutbox.push(result ? *result : result.error());
             }
@@ -51,7 +72,7 @@ namespace sLink::server::db
         }
     }
 
-    utility::SafeQueue<Database::Response> & Database::getUserResponses()
+    utility::SafeQueue<Database::Response> &Database::getUserResponses()
     {
         return m_Responses;
     }
@@ -147,7 +168,12 @@ namespace sLink::server::db
         m_Requests.push({user, UserRequest::RequestType::LOGIN});
     }
 
-    Database::ActionResult Database::checkUserLoginInfo(const user::User &user)
+    void Database::requestUserRegister(const user::User &user)
+    {
+        m_Requests.push({user, UserRequest::RequestType::REGISTER});
+    }
+
+    Database::ActionResult Database::checkUserLoginInfo(const user::User &user) const
     {
         SLINK_START_BENCHMARK
 
@@ -166,6 +192,22 @@ namespace sLink::server::db
         SLINK_END_BENCHMARK("[Database]", "checkUserLoginInfo", s_BenchmarkOutputColor);
 
         return std::unexpected(std::format("User {} could not be found", user.getUsername()));
+    }
+
+    Database::ActionResult Database::checkUserRegisterInfo(const user::User &user)
+    {
+        SLINK_START_BENCHMARK
+
+        if (findUser(user))
+        {
+            SLINK_END_BENCHMARK("[Database]", "checkUserRegisterInfo", s_BenchmarkOutputColor);
+
+            return std::unexpected(std::format("User {} already exist", user.getUsername()));
+        }
+
+        SLINK_END_BENCHMARK("[Database]", "checkUserRegisterInfo", s_BenchmarkOutputColor);
+
+        return {std::format("User {} register info are good", user.getUsername())};
     }
 
     Database::ActionResult Database::checkUserPassword(int userId, const user::User &user) const

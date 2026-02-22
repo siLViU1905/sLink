@@ -97,19 +97,38 @@ namespace sLink::client_application
         m_LoginLayer->getClientLoginPanel().setOnLoginDataInput(
             [this](std::string_view username, std::string_view password, std::string_view serverPort)
             {
-                onConnect(username, password, serverPort);
+                onConnect(username, password, serverPort, protocol::Command::LOGIN_REQUEST);
             });
+
+        m_LoginLayer->getClientLoginPanel().setOnRegisterClick([this]()
+        {
+            m_CurrentLayer = m_RegisterLayer;
+        });
+
+        m_RegisterLayer = std::make_shared<client::ui::layer::UIRegisterLayer>();
+
+        m_RegisterLayer->getClientRegisterPanel().setOnRegisterDataInput(
+            [this](std::string_view username, std::string_view password, std::string_view serverPort)
+            {
+                onConnect(username, password, serverPort, protocol::Command::REGISTER_REQUEST);
+            });
+
+        m_RegisterLayer->getClientRegisterPanel().setOnLoginClick([this]()
+        {
+            m_CurrentLayer = m_LoginLayer;
+        });
 
         m_CurrentLayer = m_LoginLayer;
     }
 
-    void ClientApplication::onConnect(std::string_view username, std::string_view password, std::string_view serverPort)
+    void ClientApplication::onConnect(std::string_view username, std::string_view password, std::string_view serverPort,
+                                      protocol::Command joinType)
     {
         m_Client.setUsername(username);
 
         m_Client.setPassword(password);
 
-        auto result = m_Client.connect("127.0.0.1", serverPort);
+        auto result = m_Client.connect("127.0.0.1", serverPort, joinType);
 
         if (!result)
             m_ChatLayer->getInfoPanel().addFailInfo(result.error());
