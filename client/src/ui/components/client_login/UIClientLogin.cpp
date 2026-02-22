@@ -1,7 +1,5 @@
 #include "UIClientLogin.h"
 
-#include <imgui.h>
-
 namespace sLink::client::ui::component
 {
     UIClientLogin::UIClientLogin() : m_ShowAuthIncorrectInfoErrorPopup(false), m_ShowLoginFailedPopup(false)
@@ -63,6 +61,27 @@ namespace sLink::client::ui::component
                 m_OnLoginDataInputCallback(username, password, serverPort);
         }
 
+        ImGui::Spacing();
+
+        float text_width = ImGui::CalcTextSize("Don't have an account? Register").x;
+        ImGui::SetCursorPosX((s_WindowWidth - text_width) * 0.5f);
+
+        ImGui::PushStyleColor(ImGuiCol_Text, s_ColorLink);
+        if (ImGui::Selectable("Don't have an account? Register", false, 0, ImVec2(text_width, 0)))
+            if (m_OnRegisterClickCallback)
+                m_OnRegisterClickCallback();
+
+        ImGui::PopStyleColor();
+
+        if (ImGui::IsItemHovered())
+        {
+            ImVec2 min = ImGui::GetItemRectMin();
+            ImVec2 max = ImGui::GetItemRectMax();
+            min.y = max.y;
+            ImGui::GetWindowDrawList()->AddLine(min, max, ImGui::ColorConvertFloat4ToU32(s_ColorLink));
+            ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+        }
+
         if (m_ShowAuthIncorrectInfoErrorPopup)
             ImGui::OpenPopup("Auth Info Error");
 
@@ -102,6 +121,11 @@ namespace sLink::client::ui::component
     void UIClientLogin::setOnLoginDataInput(OnLoginDataInputCallback &&callback)
     {
         m_OnLoginDataInputCallback = std::move(callback);
+    }
+
+    void UIClientLogin::setOnRegisterClick(OnRegisterClickCallback &&callback)
+    {
+        m_OnRegisterClickCallback = std::move(callback);
     }
 
     void UIClientLogin::notifyLoginFailed(std::string_view message)
