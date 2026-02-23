@@ -53,15 +53,11 @@ namespace sLink::client
 
         utility::SafeQueue<std::string> m_Inbox;
 
-        utility::SafeQueue<std::string> m_Outbox;
-
         asio::streambuf m_ReadBuffer;
-
-        bool m_IsWriting;
 
         bool m_ConnectionFailed;
 
-        std::string m_CurrentMessage;
+        std::queue<std::string> m_WriteQueue;
     };
 }
 
