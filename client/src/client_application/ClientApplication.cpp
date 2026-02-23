@@ -87,8 +87,7 @@ namespace sLink::client_application
                 m_Client.getUsername(),
                 content
             );
-
-            m_Client.send(message);
+                m_Client.send(message);
         });
 
 

@@ -6,7 +6,6 @@ namespace sLink::client
         : m_IOContext(ctx),
           m_WorkGuard(asio::make_work_guard(ctx)),
           m_Socket(ctx),
-          m_IsWriting(false),
           m_ConnectionFailed(false)
     {
     }
@@ -26,7 +25,8 @@ namespace sLink::client
         return m_Username;
     }
 
-    std::expected<std::string, std::string> Client::connect(std::string_view host, std::string_view port, protocol::Command joinType)
+    std::expected<std::string, std::string> Client::connect(std::string_view host, std::string_view port,
+                                                            protocol::Command joinType)
     {
         asio::ip::tcp::resolver resolver(m_IOContext);
 
@@ -42,11 +42,13 @@ namespace sLink::client
 
     void Client::send(const message::Message &message)
     {
-        m_Outbox.push(message.serialize());
+        auto serialized = message.serialize() + "\n";
 
-        asio::post(m_IOContext, [this]()
+        asio::post(m_IOContext, [this, msg = std::move(serialized)]() mutable
         {
-            if (!m_IsWriting)
+            bool idle = m_WriteQueue.empty();
+            m_WriteQueue.push(std::move(msg));
+            if (idle)
                 onWrite();
         });
     }
@@ -61,7 +63,8 @@ namespace sLink::client
         return m_Inbox;
     }
 
-    std::expected<std::string, std::string> Client::onConnect(asio::ip::tcp::resolver::results_type endpoints, protocol::Command joinType)
+    std::expected<std::string, std::string> Client::onConnect(asio::ip::tcp::resolver::results_type endpoints,
+                                                              protocol::Command joinType)
     {
         auto promise = std::make_shared<std::promise<std::expected<std::string, std::string> > >();
 
@@ -88,28 +91,16 @@ namespace sLink::client
     {
         SLINK_START_BENCHMARK
 
-        auto msg = m_Outbox.tryPop();
-
-        if (!msg)
-        {
-            m_IsWriting = false;
-            return;
-        }
-
-        m_IsWriting = true;
-
-        m_CurrentMessage = *msg + "\n";
-
-        asio::async_write(m_Socket, asio::buffer(m_CurrentMessage),
+        asio::async_write(m_Socket, asio::buffer(m_WriteQueue.front()),
                           [this](std::error_code ec, size_t)
                           {
                               if (!ec)
-                                  onWrite();
-                              else
                               {
-                                  m_IsWriting = false;
+                                  m_WriteQueue.pop();
+                                  if (!m_WriteQueue.empty())
+                                      onWrite();
+                              } else
                                   m_Socket.close();
-                              }
                           });
 
         SLINK_END_BENCHMARK("[CLIENT]", "onWrite", s_BenchmarkOutputColor)
