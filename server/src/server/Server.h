@@ -58,7 +58,11 @@ namespace sLink::server
 
         std::vector<std::shared_ptr<session::Session> > m_Sessions;
 
+        std::mutex m_SessionsMutex;
+
         std::unordered_map<std::string, std::shared_ptr<session::Session>> m_PendingSessions;
+
+        std::mutex m_PendingSessionsMutex;
 
         utility::SafeQueue<std::string> m_PendingUsernames;
 

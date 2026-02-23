@@ -31,6 +31,7 @@ namespace sLink::server
     {
         SLINK_START_BENCHMARK
 
+        std::scoped_lock lock(m_SessionsMutex);
         for (auto &session: m_Sessions)
             session->send(message);
 
@@ -41,12 +42,18 @@ namespace sLink::server
     {
         while (auto response = m_Database.getUserResponses().tryPop())
         {
-            auto it = m_PendingSessions.find(response->m_Username);
-
-            if (it != m_PendingSessions.end())
+            std::shared_ptr<session::Session> session;
             {
-                auto session = it->second;
+                std::scoped_lock lock(m_PendingSessionsMutex);
+                auto it = m_PendingSessions.find(response->m_Username);
+                if (it != m_PendingSessions.end())
+                {
+                    session = it->second;
+                    m_PendingSessions.erase(it);
+                }
+            }
 
+            if (session)
                 switch (response->m_Type)
                 {
                     case db::Database::Response::ResponseType::LOGIN_SUCCESS:
@@ -68,9 +75,6 @@ namespace sLink::server
 
                         break;
                 }
-
-                m_PendingSessions.erase(it);
-            }
         }
 
         while (auto message = m_Inbox.tryPop())
@@ -140,9 +144,11 @@ namespace sLink::server
     }
 
     void Server::onClientAccept(const std::shared_ptr<session::Session> &session)
-    {
-        m_Sessions.push_back(session);
+    { {
+            std::scoped_lock lock(m_SessionsMutex);
 
+            m_Sessions.push_back(session);
+        }
         m_PendingUsernames.push(session->getUser().getUsername().data());
 
         session->send({protocol::Command::LOGIN_RESPONSE_ACCEPT, "", "Successfully connected to the server"});
