@@ -42,6 +42,8 @@ namespace sLink::server
 
         void onClientReject(const std::shared_ptr<session::Session> &session, std::string_view reason);
 
+        bool isUserConnected(const user::User& user);
+
         asio::io_context &m_IOContext;
 
         db::Database& m_Database;
