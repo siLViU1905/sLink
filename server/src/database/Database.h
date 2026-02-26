@@ -3,7 +3,6 @@
 #include <string_view>
 
 #include <sqlite3.h>
-#include <memory>
 #include <string>
 #include <expected>
 
@@ -47,6 +46,7 @@ namespace sLink::server::db
 
         static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_YELLOW;
 
+        static constexpr auto s_DbPoolingTimeMs = std::chrono::milliseconds(100);
     public:
         struct Response
         {

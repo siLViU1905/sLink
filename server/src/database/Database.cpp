@@ -1,6 +1,8 @@
 #include "Database.h"
 
 #include <format>
+#include <thread>
+#include <chrono>
 
 namespace sLink::server::db
 {
@@ -25,8 +27,12 @@ namespace sLink::server::db
                     break;
             }
 
+            bool hadWork = false;
+
             if (auto request = m_Requests.tryPop())
             {
+                hadWork = true;
+
                 if (request->m_Type == UserRequest::RequestType::LOGIN)
                 {
                     result = checkUserLoginInfo(request->m_User);
@@ -65,10 +71,14 @@ namespace sLink::server::db
 
             if (auto rawMessage = rawMessageInbox.tryPop())
             {
+                hadWork = true;
                 result = addMessage(message::Message::deserialize(*rawMessage));
 
                 m_InfoOutbox.push(result ? *result : result.error());
             }
+
+            if (!hadWork)
+                std::this_thread::sleep_for(s_DbPoolingTimeMs);
         }
     }
 
