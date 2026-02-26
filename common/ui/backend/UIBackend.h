@@ -23,6 +23,11 @@ namespace sLink::ui
         ~UIBackend();
 
     private:
+        /*
+         *This theme was taken from the official imgui repo -> https://github.com/ocornut/imgui/issues/707#issuecomment-2732535348
+         */
+        static void apply_theme();
+
         ImGuiContext *m_Context;
 
         ImGuiIO *m_Io;
