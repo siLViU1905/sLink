@@ -12,7 +12,8 @@ namespace sLink::protocol
         LOGIN_RESPONSE_ACCEPT,
         CHAT_MESSAGE,
         USER_JOINED,
-        USER_LEFT
+        USER_LEFT,
+        SERVER_KICK_REQUEST
     };
 }
 
