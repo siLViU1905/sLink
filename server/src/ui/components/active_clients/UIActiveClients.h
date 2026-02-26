@@ -9,6 +9,8 @@
 #include <imgui.h>
 #include <functional>
 
+#include "Command.h"
+
 namespace sLink::server::ui::component
 {
     class UIActiveClients : public sLink::ui::component::UIComponent
@@ -26,9 +28,9 @@ namespace sLink::server::ui::component
         static constexpr float s_ItemSpacing = 4.0f;
 
     public:
-        enum class Action
+        enum class Action : uint8_t
         {
-            KICK
+            KICK = static_cast<uint8_t>(protocol::Command::SERVER_KICK_REQUEST)
         };
 
         using OnActionCallback = std::move_only_function<void(Action, const std::string&)>;
