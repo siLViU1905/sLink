@@ -184,3 +184,5 @@ out/build/x64-Debug/VSInheritEnvironments.txt
 /CMakeSettings.json
 /out/build/x64-Debug
 .idea/dataSources.xml
+/tests/build-debug-msvc/CMakeFiles/clion-Debug-Visual Studio-log.txt
+/tests/build-release-msvc/CMakeFiles/clion-Release-Visual Studio-log.txt

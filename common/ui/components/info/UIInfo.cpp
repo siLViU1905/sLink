@@ -2,12 +2,16 @@
 
 namespace sLink::ui::component
 {
+    UIInfo::UIInfo(float posX) : m_PosX(posX)
+    {
+    }
+
     void UIInfo::render()
     {
         float window_height = ImGui::GetIO().DisplaySize.y;
         float half_height = window_height / 2.f;
 
-        ImGui::SetNextWindowPos(ImVec2(s_SidebarWidth, half_height));
+        ImGui::SetNextWindowPos(ImVec2(m_PosX, half_height));
         ImGui::SetNextWindowSize(ImVec2(s_SidebarWidth, half_height));
 
         constexpr ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar |
@@ -70,7 +74,7 @@ namespace sLink::ui::component
         m_Infos.emplace_back(content.data(), Info::Type::GENERAL);
     }
 
-    const std::vector<UIInfo::Info> & UIInfo::getInfos() const
+    const std::vector<UIInfo::Info> &UIInfo::getInfos() const
     {
         return m_Infos;
     }

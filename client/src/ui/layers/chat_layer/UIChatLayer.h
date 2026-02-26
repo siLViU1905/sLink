@@ -3,18 +3,26 @@
 
 #include <layers/UILayer.h>
 #include "../../components/chat_window/UIChatWindow.h"
+#include <components/info/UIInfo.h>
 
 namespace sLink::client::ui::layer
 {
-	class UIChatLayer : public sLink::ui::layer::UILayer
-	{
-	public:
-		void render() override;
+    class UIChatLayer : public sLink::ui::layer::UILayer
+    {
+    public:
+        UIChatLayer();
 
-		component::UIChatWindow& getChatWindow();
-	private:
-		component::UIChatWindow m_ChatWindow;
-	};
+        void render() override;
+
+        sLink::ui::component::UIInfo &getInfoPanel();
+
+        component::UIChatWindow &getChatWindow();
+
+    private:
+        sLink::ui::component::UIInfo m_InfoPanel;
+
+        component::UIChatWindow m_ChatWindow;
+    };
 }
 
 #endif

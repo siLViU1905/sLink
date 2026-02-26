@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 
 project(sLink
         VERSION 1.0
-        LANGUAGES CXX
+        LANGUAGES C CXX
 )
 
 set(CMAKE_CXX_STANDARD 23)
@@ -31,3 +31,5 @@ add_subdirectory(client)
 add_subdirectory(server)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+add_subdirectory(tests)

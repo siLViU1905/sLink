@@ -4,7 +4,9 @@
 
 namespace sLink::client::ui::component
 {
-    UIChatWindow::UIChatWindow() : m_InputContent(255, '\0')
+    UIChatWindow::UIChatWindow(const std::vector<sLink::ui::component::UIInfo::Info> &infos)
+        : m_InfosRef(infos),
+          m_InputContent(255, '\0')
     {
     }
 
@@ -16,10 +18,10 @@ namespace sLink::client::ui::component
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
 
         constexpr ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoBringToFrontOnFocus;
+                                                  ImGuiWindowFlags_NoResize |
+                                                  ImGuiWindowFlags_NoMove |
+                                                  ImGuiWindowFlags_NoCollapse |
+                                                  ImGuiWindowFlags_NoBringToFrontOnFocus;
 
         ImGui::Begin("Chat Window", nullptr, window_flags);
 
@@ -29,7 +31,37 @@ namespace sLink::client::ui::component
 
         ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height), false);
 
-        for (const auto& message : m_Messages)
+        for (const auto &info: m_InfosRef)
+        {
+            ImVec4 infoColor;
+            std::string tag;
+
+            switch (info.m_Type)
+            {
+                case sLink::ui::component::UIInfo::Info::Type::SUCCESS:
+                    infoColor = s_ColorInfoSuccess;
+                    tag = "[SYSTEM-OK]";
+                    break;
+                case sLink::ui::component::UIInfo::Info::Type::FAIL:
+                    infoColor = s_ColorInfoFail;
+                    tag = "[SYSTEM-ERR]";
+                    break;
+                case sLink::ui::component::UIInfo::Info::Type::GENERAL:
+                    infoColor = s_ColorInfoGeneral;
+                    tag = "[SYSTEM-INFO]";
+                    break;
+            }
+
+            ImGui::BeginGroup();
+            ImGui::TextColored(infoColor, "%s %s", tag.c_str(), info.m_Content.c_str());
+            ImGui::EndGroup();
+            ImGui::Dummy(ImVec2(0.0f, s_MessageSpacing));
+        }
+
+        if (!m_InfosRef.empty() && !m_Messages.empty())
+            ImGui::Separator();
+
+        for (const auto &message: m_Messages)
         {
             ImGui::BeginGroup();
 
@@ -60,7 +92,8 @@ namespace sLink::client::ui::component
 
         ImGui::PushItemWidth(available_width - s_ButtonWidth - spacing);
 
-        bool input_submitted = ImGui::InputText("##input", m_InputContent.data(), 256, ImGuiInputTextFlags_EnterReturnsTrue);
+        bool input_submitted = ImGui::InputText("##input", m_InputContent.data(), 256,
+                                                ImGuiInputTextFlags_EnterReturnsTrue);
 
         ImGui::PopItemWidth();
         ImGui::PopStyleVar();

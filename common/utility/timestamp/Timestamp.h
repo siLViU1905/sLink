@@ -15,6 +15,7 @@ namespace sLink::utility
         int64_t getMs() const;
 
         std::string toString() const;
+
     private:
         int64_t m_MsSinceEpoch;
     };

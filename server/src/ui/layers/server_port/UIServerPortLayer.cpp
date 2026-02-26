@@ -7,7 +7,7 @@ namespace sLink::server::ui::layer
         m_PortSelect.render();
     }
 
-    component::UIPortSelect & UIServerPortLayer::getPortSelectPanel()
+    component::UIPortSelect &UIServerPortLayer::getPortSelectPanel()
     {
         return m_PortSelect;
     }

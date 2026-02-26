@@ -2,121 +2,141 @@
 
 namespace sLink::client
 {
-	Client::Client(asio::io_context& ctx)
-		:m_IOContext(ctx),
-		m_WorkGuard(asio::make_work_guard(ctx)),
-		m_Socket(ctx),
-		m_IsWriting(false)
-	{
-	}
+    Client::Client(asio::io_context &ctx)
+        : m_IOContext(ctx),
+          m_WorkGuard(asio::make_work_guard(ctx)),
+          m_Socket(ctx),
+          m_ConnectionFailed(false)
+    {
+    }
 
-	void Client::setUsername(std::string_view name)
-	{
-		m_Username = name;
-	}
+    void Client::setUsername(std::string_view name)
+    {
+        m_Username = name;
+    }
 
-	std::string_view Client::getUsername() const
-	{
-		return m_Username;
-	}
+    void Client::setPassword(std::string_view password)
+    {
+        m_Password = password;
+    }
 
-	void Client::connect(std::string_view host, std::string_view port)
-	{
-		asio::ip::tcp::resolver resolver(m_IOContext);
+    std::string_view Client::getUsername() const
+    {
+        return m_Username;
+    }
 
-		auto endpoints = resolver.resolve(host, port);
+    std::expected<std::string, std::string> Client::connect(std::string_view host, std::string_view port,
+                                                            protocol::Command joinType)
+    {
+        asio::ip::tcp::resolver resolver(m_IOContext);
 
-		onConnect(endpoints);
-	}
+        auto endpoints = resolver.resolve(host, port);
 
-	void Client::send(const message::Message& message)
-	{
-		m_Outbox.push(message.serialize());
+        auto result = onConnect(endpoints, joinType);
 
-		asio::post(m_IOContext, [this]()
-			{
-				if (!m_IsWriting)
-					onWrite();
-			});
-	}
+        if (result)
+            return {std::format("Connected to port {}", port)};
 
-	bool Client::isConnected() const
-	{
-		return m_Socket.is_open();
-	}
+        return std::unexpected(std::format("Failed to connect to port {} -> {}", port, result.error()));
+    }
 
-	utility::SafeQueue<std::string>& Client::getInbox()
-	{
-		return m_Inbox;
-	}
+    void Client::send(const message::Message &message)
+    {
+        auto serialized = message.serialize() + "\n";
 
-	void Client::onConnect(asio::ip::tcp::resolver::results_type endpoints)
-	{
-		asio::async_connect(m_Socket, endpoints,
-			[this](std::error_code ec, asio::ip::tcp::endpoint)
-			{
-				if (!ec)
-				{
-					onJoin();
+        asio::post(m_IOContext, [this, msg = std::move(serialized)]() mutable
+        {
+            bool idle = m_WriteQueue.empty();
+            m_WriteQueue.push(std::move(msg));
+            if (idle)
+                onWrite();
+        });
+    }
 
-					onRead();
-				}
-			});
-	}
+    bool Client::isConnected() const
+    {
+        return m_Socket.is_open();
+    }
 
-	void Client::onWrite()
-	{
-		auto msg = m_Outbox.tryPop();
+    utility::SafeQueue<std::string> &Client::getInbox()
+    {
+        return m_Inbox;
+    }
 
-		if (!msg)
-		{
-			m_IsWriting = false;
-			return;
-		}
+    std::expected<std::string, std::string> Client::onConnect(asio::ip::tcp::resolver::results_type endpoints,
+                                                              protocol::Command joinType)
+    {
+        auto promise = std::make_shared<std::promise<std::expected<std::string, std::string> > >();
 
-		m_IsWriting = true;
+        auto future = promise->get_future();
 
-		m_CurrentMessage = *msg + "\n";
+        asio::async_connect(m_Socket, endpoints,
+                            [this, promise, joinType](std::error_code ec, asio::ip::tcp::endpoint)
+                            {
+                                if (!ec)
+                                {
+                                    onJoin(joinType);
 
-		asio::async_write(m_Socket, asio::buffer(m_CurrentMessage),
-			[this](std::error_code ec, size_t)
-			{
-				if (!ec)
-					onWrite();
-				else
-				{
-					m_IsWriting = false;
-					m_Socket.close();
-				}
-			});
-	}
+                                    onRead();
 
-	void Client::onRead()
-	{
-		asio::async_read_until(m_Socket, m_ReadBuffer, '\n',
-			[this](std::error_code ec, size_t length)
-			{
-				if (!ec)
-				{
-					std::istream is(&m_ReadBuffer);
+                                    promise->set_value({});
+                                } else
+                                    promise->set_value(std::unexpected(ec.message()));
+                            });
 
-					std::string line;
+        return future.get();
+    }
 
-					std::getline(is, line);
+    void Client::onWrite()
+    {
+        SLINK_START_BENCHMARK
 
-					m_Inbox.push(std::move(line));
+        asio::async_write(m_Socket, asio::buffer(m_WriteQueue.front()),
+                          [this](std::error_code ec, size_t)
+                          {
+                              if (!ec)
+                              {
+                                  m_WriteQueue.pop();
+                                  if (!m_WriteQueue.empty())
+                                      onWrite();
+                              } else
+                                  m_Socket.close();
+                          });
 
-					onRead();
-				}
-				else
-					m_Socket.close();
-			});
-	}
+        SLINK_END_BENCHMARK("[CLIENT]", "onWrite", s_BenchmarkOutputColor)
+    }
 
-	void Client::onJoin()
-	{
-		auto joinMessage = "/" + m_Username + "\n";
+    void Client::onRead()
+    {
+        SLINK_START_BENCHMARK
 
-		asio::write(m_Socket, asio::buffer(joinMessage));
-	}
+        asio::async_read_until(m_Socket, m_ReadBuffer, '\n',
+                               [this](std::error_code ec, size_t length)
+                               {
+                                   if (!ec)
+                                   {
+                                       std::istream is(&m_ReadBuffer);
+
+                                       std::string line;
+
+                                       std::getline(is, line);
+
+                                       m_Inbox.push(std::move(line));
+
+                                       onRead();
+                                   } else
+                                       m_Socket.close();
+                               });
+
+        SLINK_END_BENCHMARK("[CLIENT]", "onRead", s_BenchmarkOutputColor)
+    }
+
+    void Client::onJoin(protocol::Command joinType)
+    {
+        message::Message joinMessage(joinType, m_Username, m_Password);
+
+        auto data = joinMessage.serialize() + "\n";
+
+        asio::write(m_Socket, asio::buffer(data));
+    }
 }

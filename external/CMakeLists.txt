@@ -10,6 +10,12 @@ add_library(json_lib INTERFACE)
 
 target_include_directories(json_lib INTERFACE json/include)
 
+add_library(sqlite3_lib STATIC
+        sqlite/sqlite3.c
+)
+
+target_include_directories(sqlite3_lib PUBLIC sqlite)
+
 add_library(imgui_lib STATIC
         imgui/imgui.cpp
         imgui/imgui_draw.cpp

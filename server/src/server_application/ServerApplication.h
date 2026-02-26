@@ -3,6 +3,8 @@
 
 #include "../server/Server.h"
 #include <application/Application.h>
+
+#include "../database/Database.h"
 #include "../ui/layers/clients_layer/UiClientsLayer.h"
 #include "../ui/layers/server_port/UIServerPortLayer.h"
 
@@ -31,11 +33,17 @@ namespace sLink::server_application
 
         void onUpdateDisconnectedClients();
 
+        void onUpdateDbInfo();
+
         asio::io_context m_IOContext;
 
         server::Server m_Server;
 
         std::jthread m_NetworkThread;
+
+        server::db::Database m_Database;
+
+        std::jthread m_DbThread;
 
         std::shared_ptr<ui::layer::UILayer> m_CurrentLayer;
 

@@ -2,56 +2,63 @@
 #define SLINK_CLIENT_H
 
 #include <asio.hpp>
+#include <expected>
 #include <utility/safe_queue/SafeQueue.h>
 
 #include "message/Message.h"
+#include <utility/benchmark/Benchmark.h>
 
 namespace sLink::client
 {
-	class Client
-	{
-	public:
-		Client(asio::io_context& ctx);
+    class Client
+    {
+    private:
+        static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_GREEN;
 
-		void setUsername(std::string_view name);
+    public:
+        Client(asio::io_context &ctx);
 
-		std::string_view getUsername() const;
+        void setUsername(std::string_view name);
 
-		void connect(std::string_view host, std::string_view port);
+        void setPassword(std::string_view password);
 
-		void send(const message::Message& message);
+        std::string_view getUsername() const;
 
-		bool isConnected() const;
+        std::expected<std::string, std::string> connect(std::string_view host, std::string_view port, protocol::Command joinType);
 
-		utility::SafeQueue<std::string>& getInbox();
+        void send(const message::Message &message);
 
-	private:
-		void onConnect(asio::ip::tcp::resolver::results_type endpoints);
+        bool isConnected() const;
 
-		void onWrite();
+        utility::SafeQueue<std::string> &getInbox();
 
-		void onRead();
+    private:
+        std::expected<std::string, std::string> onConnect(asio::ip::tcp::resolver::results_type endpoints, protocol::Command joinType);
 
-		void onJoin();
+        void onWrite();
 
-		std::string m_Username;
+        void onRead();
 
-		asio::io_context& m_IOContext;
+        void onJoin(protocol::Command joinType);
 
-		asio::executor_work_guard<asio::io_context::executor_type> m_WorkGuard;
+        std::string m_Username;
 
-		asio::ip::tcp::socket m_Socket;
+        std::string m_Password;
 
-		utility::SafeQueue<std::string> m_Inbox;
+        asio::io_context &m_IOContext;
 
-		utility::SafeQueue<std::string> m_Outbox;
+        asio::executor_work_guard<asio::io_context::executor_type> m_WorkGuard;
 
-		asio::streambuf m_ReadBuffer;
+        asio::ip::tcp::socket m_Socket;
 
-		bool m_IsWriting;
+        utility::SafeQueue<std::string> m_Inbox;
 
-		std::string m_CurrentMessage;
-	};
+        asio::streambuf m_ReadBuffer;
+
+        bool m_ConnectionFailed;
+
+        std::queue<std::string> m_WriteQueue;
+    };
 }
 
 #endif

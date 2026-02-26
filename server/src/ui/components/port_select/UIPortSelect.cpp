@@ -4,7 +4,7 @@
 
 namespace sLink::server::ui::component
 {
-    UIPortSelect::UIPortSelect():m_ShowErrorPopup(false)
+    UIPortSelect::UIPortSelect() : m_ShowErrorPopup(false)
     {
         m_InputPort.reserve(5);
     }
@@ -15,7 +15,13 @@ namespace sLink::server::ui::component
         ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
         ImGui::SetNextWindowSize(ImVec2(s_WindowWidth, s_WindowHeight));
 
-        ImGui::Begin("Select the host port", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+        constexpr ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar |
+                                                  ImGuiWindowFlags_NoResize |
+                                                  ImGuiWindowFlags_NoMove |
+                                                  ImGuiWindowFlags_NoCollapse |
+                                                  ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+        ImGui::Begin("Select the host port", nullptr, window_flags);
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, s_InputPaddingY));
 
@@ -33,8 +39,7 @@ namespace sLink::server::ui::component
             {
                 m_ErrorMessage = "Port field is empty!";
                 m_ShowErrorPopup = true;
-            }
-            else if (m_OnPortInputCallback)
+            } else if (m_OnPortInputCallback)
             {
                 m_OnPortInputCallback(portStr);
             }

@@ -3,51 +3,79 @@
 
 #include <asio.hpp>
 #include <utility/safe_queue/SafeQueue.h>
-
 #include "../session/Session.h"
+#include <expected>
+
+#include "../database/Database.h"
+#include <utility/benchmark/Benchmark.h>
 
 namespace sLink::server
 {
-	class Server
-	{
-	public:
-		Server(asio::io_context& ctx);
+    class Server
+    {
+    private:
+        static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_MAGENTA;
 
-		void startHost(uint16_t port);
+    public:
+        Server(asio::io_context &ctx, db::Database& database);
 
-		void broadcast(const std::string& message);
+        std::expected<std::string, std::string> startHost(uint16_t port);
 
-		void update();
+        void broadcast(const message::Message &message);
 
-		utility::SafeQueue<std::string>& getPendingUsernames();
+        void update();
 
-		utility::SafeQueue<std::string>& getDisconnectedUsernames();
+        utility::SafeQueue<std::string> &getPendingUsernames();
 
-	private:
-		void onAccept();
+        utility::SafeQueue<std::string> &getDisconnectedUsernames();
 
-		void onClientDisconnected(const std::shared_ptr<session::Session>& session);
+        utility::SafeQueue<user::User> &getDbUsernameInbox();
 
-		asio::io_context& m_IOContext;
+        utility::SafeQueue<std::string> &getDbMessageInbox();
 
-		asio::executor_work_guard<asio::io_context::executor_type> m_WorkGuard;
+    private:
+        void onAccept();
 
-		std::unique_ptr<asio::ip::tcp::acceptor> m_Acceptor;
+        void onClientAccept(const std::shared_ptr<session::Session> &session);
 
-		utility::SafeQueue<std::string> m_Inbox;
+        void onClientDisconnected(const std::shared_ptr<session::Session> &session);
 
-		utility::SafeQueue<std::string> m_Outbox;
+        void onClientReject(const std::shared_ptr<session::Session> &session, std::string_view reason);
 
-		asio::streambuf m_ReadBuffer;
+        bool isUserConnected(const user::User& user);
 
-		std::vector<std::shared_ptr<session::Session>> m_Sessions;
+        asio::io_context &m_IOContext;
 
-		utility::SafeQueue<std::string> m_PendingUsernames;
+        db::Database& m_Database;
 
-		utility::SafeQueue<std::string> m_DisconnectedUsernames;
+        asio::executor_work_guard<asio::io_context::executor_type> m_WorkGuard;
 
-		bool m_IsWriting;
-	};
+        std::unique_ptr<asio::ip::tcp::acceptor> m_Acceptor;
+
+        utility::SafeQueue<std::string> m_Inbox;
+
+        utility::SafeQueue<std::string> m_Outbox;
+
+        asio::streambuf m_ReadBuffer;
+
+        std::vector<std::shared_ptr<session::Session> > m_Sessions;
+
+        std::mutex m_SessionsMutex;
+
+        std::unordered_map<std::string, std::shared_ptr<session::Session>> m_PendingSessions;
+
+        std::mutex m_PendingSessionsMutex;
+
+        utility::SafeQueue<std::string> m_PendingUsernames;
+
+        utility::SafeQueue<std::string> m_DisconnectedUsernames;
+
+        utility::SafeQueue<user::User> m_DbUserInbox;
+
+        utility::SafeQueue<std::string> m_DbMessageInbox;
+
+        bool m_IsWriting;
+    };
 }
 
 #endif

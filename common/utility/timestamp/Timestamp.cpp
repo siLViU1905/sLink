@@ -11,7 +11,7 @@ namespace sLink::utility
     {
     }
 
-    Timestamp::Timestamp(int64_t ms):m_MsSinceEpoch(ms)
+    Timestamp::Timestamp(int64_t ms) : m_MsSinceEpoch(ms)
     {
     }
 

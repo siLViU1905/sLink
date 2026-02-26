@@ -1,31 +1,28 @@
-sLink | Local Chat App
+# sLink
 
-sLink is a real-time messaging application. It leverages a C++23 stack to combine graphics with a networking infrastructure.
+A real-time local messaging application built on a C++23 stack, combining a Vulkan rendering engine with an Asio networking layer.
 
-🚀 Key Technologies
+## Technologies
 
-Language: C++23
+| Area | Library / Tool |
+|---|---|
+| Language | C++23 |
+| Graphics | Vulkan RAII 1.4 |
+| UI | ImGui |
+| Networking | Asio (standalone) |
+| Serialization | nlohmann/json |
+| Storage | SQLite |
+| Build System | CMake |
 
-Graphics: Vulkan RAII 1.4
+## Architecture
 
-UI: ImGui
+The project is split into three modules:
 
-Networking: Asio
+- **common** — Shared static library containing the communication protocol, message system, and the Vulkan/ImGui rendering engine.
+- **client** — End-user chat application.
+- **server** — Administration tool for hosting a session and monitoring active users in real time.
 
-Build System: CMake
+## Requirements
 
-🏗️ Project Architecture
-
-The project is organized into three distinct modules to ensure a clean separation of concerns:
-
-common/: The core shared library containing the communication protocol, and the shared Vulkan/ImGui rendering engine.
-
-client/: The end-user application
-
-server/: An administration tool that allows real-time monitoring of active users.
-
-📋 Requirements
-
-Vulkan SDK 1.4+
-
-C++23 Compatible Compiler
+- Vulkan SDK 1.4+
+- C++23 compatible compiler

@@ -3,50 +3,72 @@
 
 #include <asio.hpp>
 
+#include "message/Message.h"
 #include "safe_queue/SafeQueue.h"
+#include <utility/benchmark/Benchmark.h>
 
-namespace sLink::session
+#include "../user/User.h"
+
+namespace sLink::server::session
 {
-	class Session : public std::enable_shared_from_this<Session>
-	{
-	public:
-		using OnUsernameSentCallback = std::move_only_function<void(std::string_view)>;
+    class Session : public std::enable_shared_from_this<Session>
+    {
+    private:
+        static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_RED;
 
-		using OnDisconnectCallback = std::move_only_function<void(std::string_view)>;
+    public:
+        using OnLoginInfoSentCallback = std::move_only_function<void(const user::User&)>;
 
-		Session(asio::ip::tcp::socket&& socket, utility::SafeQueue<std::string>& inbox);
+        using OnRegisterInfoSentCallback = std::move_only_function<void(const user::User&)>;
 
-		void start();
+        using OnDisconnectCallback = std::move_only_function<void()>;
 
-		void send(const std::string& message);
+        Session(asio::ip::tcp::socket &&socket, utility::SafeQueue<std::string> &inbox);
 
-		void setUsername(std::string_view username);
+        void start();
 
-		std::string_view getUsername() const;
+        void disconnect();
 
-		void setOnUsernameSentCallback(OnUsernameSentCallback&& callback);
+        void disconnectAfterWrite();
 
-		void setOnDisconnectCallback(OnDisconnectCallback&& callback);
+        void send(const message::Message &message);
 
-	private:
-		void onRead();
+        auto getUser(this auto&& self)
+        {
+            return self.m_User;
+        }
 
-		void onWrite();
+        void setOnLoginInfoSentCallback(OnLoginInfoSentCallback &&callback);
 
-		std::string m_Username;
+        void setOnRegisterInfoSentCallback(OnRegisterInfoSentCallback &&callback);
 
-		asio::ip::tcp::socket m_Socket;
+        void setOnDisconnectCallback(OnDisconnectCallback &&callback);
 
-		asio::streambuf m_Buffer;
+    private:
+        void onRead();
 
-		utility::SafeQueue<std::string>& m_Inbox;
+        void onWrite();
 
-		std::queue<std::string> m_WriteQueue;
+        void handleMessage();
 
-		OnUsernameSentCallback m_OnUsernameSentCallback;
+        user::User m_User;
 
-		OnDisconnectCallback m_OnDisconnectCallback;
-	};
+        asio::ip::tcp::socket m_Socket;
+
+        asio::streambuf m_Buffer;
+
+        utility::SafeQueue<std::string> &m_Inbox;
+
+        std::queue<std::string> m_WriteQueue;
+
+        OnLoginInfoSentCallback m_OnLoginInfoSentCallback;
+
+        OnRegisterInfoSentCallback m_OnRegisterInfoSentCallback;
+
+        OnDisconnectCallback m_OnDisconnectCallback;
+
+        bool m_ShouldDisconnectAfterWrite;
+    };
 }
 
 #endif

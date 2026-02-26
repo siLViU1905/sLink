@@ -2,13 +2,24 @@
 
 namespace sLink::client::ui::layer
 {
-	void UIChatLayer::render()
-	{
-		m_ChatWindow.render();
-	}
+    UIChatLayer::UIChatLayer() : m_InfoPanel(0.f), m_ChatWindow(m_InfoPanel.getInfos())
+    {
+    }
 
-	component::UIChatWindow& UIChatLayer::getChatWindow()
-	{
-		return m_ChatWindow;
-	}
+    void UIChatLayer::render()
+    {
+        m_ChatWindow.render();
+
+        m_InfoPanel.render();
+    }
+
+    sLink::ui::component::UIInfo &UIChatLayer::getInfoPanel()
+    {
+        return m_InfoPanel;
+    }
+
+    component::UIChatWindow &UIChatLayer::getChatWindow()
+    {
+        return m_ChatWindow;
+    }
 }
