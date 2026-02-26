@@ -1,5 +1,7 @@
 #include "UIActiveClients.h"
 
+#include <print>
+
 namespace sLink::server::ui::component
 {
     void UIActiveClients::render()
@@ -20,15 +22,31 @@ namespace sLink::server::ui::component
         ImGui::Separator();
         ImGui::Dummy(ImVec2(0.0f, s_ItemSpacing));
 
+        int index = 0;
+
         for (const auto &username: m_Usernames)
         {
-            ImGui::Bullet();
+            ImGui::Selectable(username.c_str());
 
-            ImGui::SameLine();
+            if (ImGui::BeginPopupContextItem())
+            {
+                ImGui::Text("Actions: %s", username.c_str());
+                ImGui::Separator();
 
-            ImGui::TextColored(s_ColorUser, "%s", username.c_str());
+                if (ImGui::Selectable("Kick User"))
+                    if (m_OnActionCallback)
+                        m_OnActionCallback(Action::KICK, username);
+
+
+                ImGui::EndPopup();
+            }
+
+            if (ImGui::IsItemHovered())
+                ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
             ImGui::Dummy(ImVec2(0.0f, s_ItemSpacing));
+
+            ++index;
         }
 
         ImGui::End();
@@ -42,5 +60,10 @@ namespace sLink::server::ui::component
     void UIActiveClients::removeUsername(std::string_view username)
     {
         std::erase(m_Usernames, username);
+    }
+
+    void UIActiveClients::setOnActionCallback(OnActionCallback &&callback)
+    {
+        m_OnActionCallback = std::move(callback);
     }
 }
