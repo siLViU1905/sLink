@@ -7,6 +7,7 @@
 
 #include <components/UIComponent.h>
 #include <imgui.h>
+#include <functional>
 
 namespace sLink::server::ui::component
 {
@@ -25,14 +26,25 @@ namespace sLink::server::ui::component
         static constexpr float s_ItemSpacing = 4.0f;
 
     public:
+        enum class Action
+        {
+            KICK
+        };
+
+        using OnActionCallback = std::move_only_function<void(Action, const std::string&)>;
+
         void render() override;
 
         void addUsername(std::string_view username);
 
         void removeUsername(std::string_view username);
 
+        void setOnActionCallback(OnActionCallback &&callback);
+
     private:
         std::vector<std::string> m_Usernames;
+
+        OnActionCallback m_OnActionCallback;
     };
 };
 
