@@ -42,8 +42,7 @@ namespace sLink::server
     {
         while (auto response = m_Database.getUserResponses().tryPop())
         {
-            std::shared_ptr<session::Session> session;
-            {
+            std::shared_ptr<session::Session> session; {
                 std::scoped_lock lock(m_PendingSessionsMutex);
                 auto it = m_PendingSessions.find(response->m_Username);
                 if (it != m_PendingSessions.end())
@@ -57,7 +56,10 @@ namespace sLink::server
                 switch (response->m_Type)
                 {
                     case db::Database::Response::ResponseType::LOGIN_SUCCESS:
-                        onClientAccept(session);
+                        if (!isUserConnected(session->getUser()))
+                            onClientAccept(session);
+                        else
+                            onClientReject(session, "User is already connected");
 
                         break;
 
@@ -66,7 +68,10 @@ namespace sLink::server
 
                         break;
                     case db::Database::Response::ResponseType::REGISTER_SUCCESS:
-                        onClientAccept(session);
+                        if (!isUserConnected(session->getUser()))
+                            onClientAccept(session);
+                        else
+                            onClientReject(session, "User is already connected");
 
                         break;
 
@@ -170,5 +175,21 @@ namespace sLink::server
         session->disconnectAfterWrite();
 
         m_DisconnectedUsernames.push(std::format("Rejected: {} reason: {}", session->getUser().getUsername(), reason));
+    }
+
+    bool Server::isUserConnected(const user::User &user)
+    {
+        std::scoped_lock lock(m_SessionsMutex);
+
+        SLINK_START_BENCHMARK
+
+        auto it = std::ranges::find_if(m_Sessions, [&user](const auto &session)
+        {
+            return session->getUser().getUsername() == user.getUsername();
+        });
+
+        SLINK_END_BENCHMARK("[Server]", "isUserConnected", s_BenchmarkOutputColor)
+
+        return it != m_Sessions.end();
     }
 }
