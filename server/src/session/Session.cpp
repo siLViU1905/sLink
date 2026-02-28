@@ -132,17 +132,11 @@ namespace sLink::server::session
 
                     m_OnRegisterInfoSentCallback(m_User);
                     break;
-                case protocol::Command::LOGIN_RESPONSE_REJECT:
-                    break;
-                case protocol::Command::LOGIN_RESPONSE_ACCEPT:
-                    break;
                 case protocol::Command::CHAT_MESSAGE:
                     m_Inbox.push(line);
 
                     break;
-                case protocol::Command::USER_JOINED:
-                    break;
-                case protocol::Command::USER_LEFT:
+               default:
                     break;
             }
         }

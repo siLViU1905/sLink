@@ -31,6 +31,8 @@ namespace sLink::server_application
 
         void onUpdateConnectedClients();
 
+        void onConnectedClientsAction(server::ui::component::UIActiveClients::Action action, std::string_view username, std::string_view reason);
+
         void onUpdateDisconnectedClients();
 
         void onUpdateDbInfo();

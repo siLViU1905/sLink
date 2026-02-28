@@ -7,6 +7,9 @@
 
 #include <components/UIComponent.h>
 #include <imgui.h>
+#include <functional>
+
+#include "Command.h"
 
 namespace sLink::server::ui::component
 {
@@ -22,17 +25,38 @@ namespace sLink::server::ui::component
 
         static constexpr ImVec4 s_ColorUser = {1.0f, 1.0f, 1.0f, 1.0f};
 
+        static constexpr ImVec4 s_ColorUsernameKickReason = {1.f, 0.4f, 0.4f, 1};
+
         static constexpr float s_ItemSpacing = 4.0f;
 
     public:
+        enum class Action : uint8_t
+        {
+            KICK = static_cast<uint8_t>(protocol::Command::SERVER_KICK_REQUEST)
+        };
+
+        using OnActionCallback = std::move_only_function<void(Action, std::string_view, std::string_view)>;
+
+        UIActiveClients();
+
         void render() override;
 
         void addUsername(std::string_view username);
 
         void removeUsername(std::string_view username);
 
+        void setOnActionCallback(OnActionCallback &&callback);
+
     private:
         std::vector<std::string> m_Usernames;
+
+        OnActionCallback m_OnActionCallback;
+
+        bool m_ShowKickReasonPopup;
+
+        std::string m_UserToKick;
+
+        std::string m_KickReason;
     };
 };
 
