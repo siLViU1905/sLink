@@ -47,7 +47,9 @@ namespace sLink::client
         asio::post(m_IOContext, [this, msg = std::move(serialized)]() mutable
         {
             bool idle = m_WriteQueue.empty();
+
             m_WriteQueue.push(std::move(msg));
+
             if (idle)
                 onWrite();
         });

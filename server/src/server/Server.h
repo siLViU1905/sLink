@@ -25,6 +25,8 @@ namespace sLink::server
 
         void update();
 
+        void kickUser(const user::User& user, std::string_view reason);
+
         utility::SafeQueue<std::string> &getPendingUsernames();
 
         utility::SafeQueue<std::string> &getDisconnectedUsernames();

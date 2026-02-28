@@ -192,4 +192,30 @@ namespace sLink::server
 
         return it != m_Sessions.end();
     }
+
+    void Server::kickUser(const user::User &user, std::string_view reason)
+    {
+        std::scoped_lock lock(m_SessionsMutex);
+
+        SLINK_START_BENCHMARK
+
+        auto it = std::ranges::find_if(m_Sessions, [&user](const auto &session)
+        {
+            return session->getUser().getUsername() == user.getUsername();
+        });
+
+        auto& session = *it->get();
+
+        message::Message message(protocol::Command::SERVER_KICK_REQUEST, "", reason);
+
+        session.send(message);
+
+        session.disconnectAfterWrite();
+
+        m_Sessions.erase(it);
+
+        SLINK_END_BENCHMARK("[Server]", "kickUser", s_BenchmarkOutputColor)
+
+        m_DisconnectedUsernames.push(user.getUsername().data());
+    }
 }

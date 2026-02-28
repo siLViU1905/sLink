@@ -50,6 +50,12 @@ namespace sLink::client_application
                     break;
                 }
 
+                case protocol::Command::SERVER_KICK_REQUEST:
+                    m_CurrentLayer = m_LoginLayer;
+
+                    m_LoginLayer->getClientLoginPanel().notifyKick(message.getContent());
+                    break;
+
                 default:
                     break;
             }
