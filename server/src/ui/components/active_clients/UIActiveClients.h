@@ -25,6 +25,8 @@ namespace sLink::server::ui::component
 
         static constexpr ImVec4 s_ColorUser = {1.0f, 1.0f, 1.0f, 1.0f};
 
+        static constexpr ImVec4 s_ColorUsernameKickReason = {1.f, 0.4f, 0.4f, 1};
+
         static constexpr float s_ItemSpacing = 4.0f;
 
     public:
