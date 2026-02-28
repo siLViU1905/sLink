@@ -14,7 +14,7 @@ namespace sLink::server_application
 
         m_DbThread = std::jthread([this]()
         {
-            m_Database.run(m_Server.getDbMessageInbox());
+            m_Database.run();
         });
     }
 

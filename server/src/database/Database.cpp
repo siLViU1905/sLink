@@ -6,11 +6,11 @@
 
 namespace sLink::server::db
 {
-    Database::Database() : m_DatabaseHandle(nullptr), m_Closed(false)
+    Database::Database() : m_DatabaseHandle(nullptr), m_Shutdown(false)
     {
     }
 
-    void Database::run(utility::SafeQueue<std::string> &rawMessageInbox)
+    void Database::run()
     {
         auto result = start();
 
@@ -19,66 +19,37 @@ namespace sLink::server::db
         if (!result)
             return;
 
-        while (true)
+        while (!m_Shutdown)
         {
-            {
-                std::scoped_lock lock(m_CloseMutex);
-                if (m_Closed)
-                    break;
-            }
+            auto request = m_Requests.waitAndPop();
 
-            bool hadWork = false;
-
-            if (auto request = m_Requests.tryPop())
-            {
-                hadWork = true;
-
-                if (request->m_Type == UserRequest::RequestType::LOGIN)
-                {
-                    result = checkUserLoginInfo(request->m_User);
-
-                    if (result)
-                        m_Responses.push({
-                            request->m_User.getUsername().data(), "", Response::ResponseType::LOGIN_SUCCESS
-                        });
-                    else
-                        m_Responses.push({
-                            request->m_User.getUsername().data(), result.error(), Response::ResponseType::LOGIN_FAIL
-                        });
-                } else if (request->m_Type == UserRequest::RequestType::REGISTER)
-                {
-                    result = checkUserRegisterInfo(request->m_User);
-
-                    if (result)
+            std::visit(
+                RequestOverloads{
+                    [this](const LoginRequest &request)
                     {
-                        if (auto addResult = addUser(request->m_User))
-                            m_Responses.push({
-                                request->m_User.getUsername().data(), "", Response::ResponseType::REGISTER_SUCCESS
-                            });
-                        else
-                            m_Responses.push({
-                                request->m_User.getUsername().data(), addResult.error(),
-                                Response::ResponseType::REGISTER_FAIL
-                            });
-                    } else
-                        m_Responses.push({
-                            request->m_User.getUsername().data(), result.error(), Response::ResponseType::REGISTER_FAIL
-                        });
-                }
+                        auto requestResult = handleLoginRequest(request.m_User);
 
-                m_InfoOutbox.push(result ? *result : result.error());
-            }
+                        m_InfoOutbox.push(requestResult ? *requestResult : requestResult.error());
+                    },
+                    [this](const RegisterRequest &request)
+                    {
+                        auto requestResult = handleRegisterRequest(request.m_User);
 
-            if (auto rawMessage = rawMessageInbox.tryPop())
-            {
-                hadWork = true;
-                result = addMessage(message::Message::deserialize(*rawMessage));
+                        m_InfoOutbox.push(requestResult ? *requestResult : requestResult.error());
+                    },
+                    [this](const MessageRequest& request)
+                    {
+                        auto requestResult = handleMessageRequest(request.m_Message);
 
-                m_InfoOutbox.push(result ? *result : result.error());
-            }
-
-            if (!hadWork)
-                std::this_thread::sleep_for(s_DbPoolingTimeMs);
+                        m_InfoOutbox.push(requestResult ? *requestResult : requestResult.error());
+                    },
+                    [this](ShutdownRequest request)
+                    {
+                        m_Shutdown = true;
+                    }
+                },
+                request
+            );
         }
     }
 
@@ -94,8 +65,7 @@ namespace sLink::server::db
 
     void Database::close()
     {
-        std::scoped_lock lock(m_CloseMutex);
-        m_Closed = true;
+        m_Requests.push(ShutdownRequest());
     }
 
     Database::ActionResult Database::start()
@@ -175,12 +145,17 @@ namespace sLink::server::db
 
     void Database::requestUserLogin(const user::User &user)
     {
-        m_Requests.push({user, UserRequest::RequestType::LOGIN});
+        m_Requests.push(LoginRequest{user});
     }
 
     void Database::requestUserRegister(const user::User &user)
     {
-        m_Requests.push({user, UserRequest::RequestType::REGISTER});
+        m_Requests.push(RegisterRequest{user});
+    }
+
+    void Database::requestMessageSave(const message::Message &message)
+    {
+        m_Requests.push(MessageRequest{message});
     }
 
     Database::ActionResult Database::checkUserLoginInfo(const user::User &user) const
@@ -204,7 +179,7 @@ namespace sLink::server::db
         return std::unexpected(std::format("User {} could not be found", user.getUsername()));
     }
 
-    Database::ActionResult Database::checkUserRegisterInfo(const user::User &user)
+    Database::ActionResult Database::checkUserRegisterInfo(const user::User &user) const
     {
         SLINK_START_BENCHMARK
 
@@ -254,6 +229,50 @@ namespace sLink::server::db
         return passwordMatches
                    ? ActionResult{std::format("User {} password matches", user.getUsername())}
                    : std::unexpected(std::format("User {} password does not match", user.getUsername()));
+    }
+
+    Database::ActionResult Database::handleLoginRequest(const user::User &user)
+    {
+        auto result = checkUserLoginInfo(user);
+
+        if (result)
+            m_Responses.push({
+                user.getUsername().data(), "", Response::ResponseType::LOGIN_SUCCESS
+            });
+        else
+            m_Responses.push({
+                user.getUsername().data(), result.error(), Response::ResponseType::LOGIN_FAIL
+            });
+
+        return result;
+    }
+
+    Database::ActionResult Database::handleRegisterRequest(const user::User &user)
+    {
+        auto result = checkUserRegisterInfo(user);
+
+        if (result)
+        {
+            if (auto addResult = addUser(user))
+                m_Responses.push({
+                    user.getUsername().data(), "", Response::ResponseType::REGISTER_SUCCESS
+                });
+            else
+                m_Responses.push({
+                    user.getUsername().data(), addResult.error(),
+                    Response::ResponseType::REGISTER_FAIL
+                });
+        } else
+            m_Responses.push({
+                user.getUsername().data(), result.error(), Response::ResponseType::REGISTER_FAIL
+            });
+
+        return result;
+    }
+
+    Database::ActionResult Database::handleMessageRequest(const message::Message &message)
+    {
+       return addMessage(message);
     }
 
     Database::ActionResult Database::addMessage(const message::Message &message)
