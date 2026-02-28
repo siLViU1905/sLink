@@ -59,10 +59,11 @@ namespace sLink::server::ui::component
         if (m_ShowKickReasonPopup)
             ImGui::OpenPopup("Kick Reason");
 
-        if (ImGui::BeginPopupModal("Kick Reason Required", &m_ShowKickReasonPopup, ImGuiWindowFlags_AlwaysAutoResize))
+        if (ImGui::BeginPopupModal("Kick Reason", &m_ShowKickReasonPopup, ImGuiWindowFlags_AlwaysAutoResize))
         {
-            ImGui::Text("Reason for kicking "); ImGui::SameLine();
-            ImGui::TextColored(ImVec4(1, 0.4f, 0.4f, 1), "%s:", m_UserToKick.c_str());
+            ImGui::Text("Reason for kicking ");
+            ImGui::SameLine();
+            ImGui::TextColored(s_ColorUsernameKickReason, "%s:", m_UserToKick.c_str());
 
             ImGui::Spacing();
 
