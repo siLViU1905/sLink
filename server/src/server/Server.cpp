@@ -82,11 +82,13 @@ namespace sLink::server
                 }
         }
 
-        while (auto message = m_Inbox.tryPop())
+        while (auto rawMessage = m_Inbox.tryPop())
         {
-            broadcast(message::Message::deserialize(*message));
+            auto message = message::Message::deserialize(*rawMessage);
 
-            m_DbMessageInbox.push(*message);
+            broadcast(message);
+
+            m_Database.requestMessageSave(message);
         }
     }
 
@@ -98,16 +100,6 @@ namespace sLink::server
     utility::SafeQueue<std::string> &Server::getDisconnectedUsernames()
     {
         return m_DisconnectedUsernames;
-    }
-
-    utility::SafeQueue<user::User> &Server::getDbUsernameInbox()
-    {
-        return m_DbUserInbox;
-    }
-
-    utility::SafeQueue<std::string> &Server::getDbMessageInbox()
-    {
-        return m_DbMessageInbox;
     }
 
     void Server::onAccept()

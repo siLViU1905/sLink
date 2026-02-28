@@ -50,6 +50,22 @@ namespace sLink::utility
             return value;
         }
 
+        T waitAndPop()
+        {
+            std::unique_lock lock(m_Mutex);
+
+            m_CondVar.wait(lock, [this]()
+            {
+                return !m_Queue.empty();
+            });
+
+            auto value = std::move(m_Queue.front());
+
+            m_Queue.pop();
+
+            return value;
+        }
+
     private:
         std::queue<T> m_Queue;
 
