@@ -31,10 +31,6 @@ namespace sLink::server
 
         utility::SafeQueue<std::string> &getDisconnectedUsernames();
 
-        utility::SafeQueue<user::User> &getDbUsernameInbox();
-
-        utility::SafeQueue<std::string> &getDbMessageInbox();
-
     private:
         void onAccept();
 
@@ -71,10 +67,6 @@ namespace sLink::server
         utility::SafeQueue<std::string> m_PendingUsernames;
 
         utility::SafeQueue<std::string> m_DisconnectedUsernames;
-
-        utility::SafeQueue<user::User> m_DbUserInbox;
-
-        utility::SafeQueue<std::string> m_DbMessageInbox;
 
         bool m_IsWriting;
     };

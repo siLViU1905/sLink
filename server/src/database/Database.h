@@ -5,6 +5,7 @@
 #include <sqlite3.h>
 #include <string>
 #include <expected>
+#include <variant>
 
 #include "message/Message.h"
 #include "safe_queue/SafeQueue.h"
@@ -14,6 +15,12 @@
 
 namespace sLink::server::db
 {
+    template<typename... T>
+    struct RequestOverloads : T...
+    {
+        using T::operator()...;
+    };
+
     class Database
     {
     private:
@@ -47,6 +54,7 @@ namespace sLink::server::db
         static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_YELLOW;
 
         static constexpr auto s_DbPoolingTimeMs = std::chrono::milliseconds(100);
+
     public:
         struct Response
         {
@@ -67,7 +75,7 @@ namespace sLink::server::db
 
         Database();
 
-        void run(utility::SafeQueue<std::string> &rawMessageInbox);
+        void run();
 
         utility::SafeQueue<Response> &getUserResponses();
 
@@ -79,24 +87,31 @@ namespace sLink::server::db
 
         void requestUserRegister(const user::User &user);
 
+        void requestMessageSave(const message::Message& message);
+
         void close();
 
         ~Database();
 
     private:
-        struct UserRequest
+        struct LoginRequest
         {
-            enum class RequestType
-            {
-                LOGIN,
-                REGISTER
-            };
-
             user::User m_User;
-
-            RequestType m_Type;
         };
 
+        struct RegisterRequest
+        {
+            user::User m_User;
+        };
+
+        struct MessageRequest
+        {
+            message::Message m_Message;
+        };
+
+        struct ShutdownRequest{};
+
+        using DbRequest = std::variant<LoginRequest, RegisterRequest, MessageRequest, ShutdownRequest>;
 
         using ActionResult = std::expected<std::string, std::string>;
 
@@ -110,21 +125,25 @@ namespace sLink::server::db
 
         ActionResult checkUserLoginInfo(const user::User &user) const;
 
-        ActionResult checkUserRegisterInfo(const user::User &user);
+        ActionResult checkUserRegisterInfo(const user::User &user) const;
 
         ActionResult checkUserPassword(int userId, const user::User &user) const;
 
+        ActionResult handleLoginRequest(const user::User &user);
+
+        ActionResult handleRegisterRequest(const user::User& user);
+
+        ActionResult handleMessageRequest(const message::Message &message);
+
         sqlite3 *m_DatabaseHandle;
 
-        utility::SafeQueue<UserRequest> m_Requests;
+        utility::SafeQueue<DbRequest> m_Requests;
 
         utility::SafeQueue<Response> m_Responses;
 
         utility::SafeQueue<std::string> m_InfoOutbox;
 
-        std::mutex m_CloseMutex;
-
-        bool m_Closed;
+        bool m_Shutdown;
     };
 }
 
