@@ -37,6 +37,8 @@ namespace sLink::client::ui::component
 
         void notifyLoginFailed(std::string_view message);
 
+        void notifyKick(std::string_view reason);
+
     private:
         std::string m_InputUsername;
 
@@ -52,9 +54,13 @@ namespace sLink::client::ui::component
 
         bool m_ShowLoginFailedPopup;
 
+        bool m_ShowKickedPopup;
+
         std::string m_AuthInfoErrorMessage;
 
         std::string m_LoginFailMessage;
+
+        std::string m_KickReason;
     };
 }
 
