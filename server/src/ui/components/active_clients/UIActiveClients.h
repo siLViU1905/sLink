@@ -33,7 +33,9 @@ namespace sLink::server::ui::component
             KICK = static_cast<uint8_t>(protocol::Command::SERVER_KICK_REQUEST)
         };
 
-        using OnActionCallback = std::move_only_function<void(Action, const std::string&)>;
+        using OnActionCallback = std::move_only_function<void(Action, std::string_view, std::string_view)>;
+
+        UIActiveClients();
 
         void render() override;
 
@@ -47,6 +49,12 @@ namespace sLink::server::ui::component
         std::vector<std::string> m_Usernames;
 
         OnActionCallback m_OnActionCallback;
+
+        bool m_ShowKickReasonPopup;
+
+        std::string m_UserToKick;
+
+        std::string m_KickReason;
     };
 };
 
