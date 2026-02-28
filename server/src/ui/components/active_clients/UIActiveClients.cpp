@@ -4,6 +4,11 @@
 
 namespace sLink::server::ui::component
 {
+    UIActiveClients::UIActiveClients():m_ShowKickReasonPopup(false)
+    {
+        m_KickReason.resize(128, '\0');
+    }
+
     void UIActiveClients::render()
     {
         ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -34,9 +39,11 @@ namespace sLink::server::ui::component
                 ImGui::Separator();
 
                 if (ImGui::Selectable("Kick User"))
-                    if (m_OnActionCallback)
-                        m_OnActionCallback(Action::KICK, username);
+                {
+                    m_UserToKick = username;
 
+                    m_ShowKickReasonPopup = true;
+                }
 
                 ImGui::EndPopup();
             }
@@ -47,6 +54,46 @@ namespace sLink::server::ui::component
             ImGui::Dummy(ImVec2(0.0f, s_ItemSpacing));
 
             ++index;
+        }
+
+        if (m_ShowKickReasonPopup)
+            ImGui::OpenPopup("Kick Reason");
+
+        if (ImGui::BeginPopupModal("Kick Reason Required", &m_ShowKickReasonPopup, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("Reason for kicking "); ImGui::SameLine();
+            ImGui::TextColored(ImVec4(1, 0.4f, 0.4f, 1), "%s:", m_UserToKick.c_str());
+
+            ImGui::Spacing();
+
+            ImGui::InputText("##reason", m_KickReason.data(), m_KickReason.size());
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            if (ImGui::Button("Cancel", ImVec2(120, 0)))
+            {
+                m_ShowKickReasonPopup = false;
+
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Confirm Kick", ImVec2(120, 0)))
+            {
+                if (m_OnActionCallback)
+                {
+                    auto reason = m_KickReason.substr(0, m_KickReason.find_first_of('\0'));
+
+                    m_OnActionCallback(Action::KICK, m_UserToKick, reason);
+                }
+                m_ShowKickReasonPopup = false;
+
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
         }
 
         ImGui::End();
