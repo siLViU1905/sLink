@@ -2,6 +2,8 @@
 
 A real-time local messaging application built on a C++23 stack, combining a Vulkan rendering engine with an Asio networking layer.
 
+Here is a demo: https://github.com/user-attachments/assets/9c04ea7e-84c3-4944-aad5-a477dbafe363
+
 ## Technologies
 
 | Area | Library / Tool |
