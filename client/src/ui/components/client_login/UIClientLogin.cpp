@@ -2,7 +2,8 @@
 
 namespace sLink::client::ui::component
 {
-    UIClientLogin::UIClientLogin() : m_ShowAuthIncorrectInfoErrorPopup(false), m_ShowLoginFailedPopup(false)
+    UIClientLogin::UIClientLogin() : m_ShowAuthIncorrectInfoErrorPopup(false), m_ShowLoginFailedPopup(false),
+                                     m_ShowKickedPopup(false)
     {
         m_InputUsername.resize(25);
 
@@ -115,6 +116,22 @@ namespace sLink::client::ui::component
             ImGui::EndPopup();
         }
 
+        if (m_ShowKickedPopup)
+            ImGui::OpenPopup("Kicked");
+
+        if (ImGui::BeginPopupModal("Kicked", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("%s", m_KickReason.c_str());
+            ImGui::Separator();
+
+            if (ImGui::Button("OK", ImVec2(120, 0)))
+            {
+                m_ShowKickedPopup = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
         ImGui::End();
     }
 
@@ -133,5 +150,12 @@ namespace sLink::client::ui::component
         m_LoginFailMessage = message;
 
         m_ShowLoginFailedPopup = true;
+    }
+
+    void UIClientLogin::notifyKick(std::string_view reason)
+    {
+        m_KickReason = reason;
+
+        m_ShowKickedPopup = true;
     }
 }
