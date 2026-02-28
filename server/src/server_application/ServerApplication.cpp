@@ -60,9 +60,9 @@ namespace sLink::server_application
     {
         m_ClientsLayer = std::make_shared<server::ui::layer::UIClientsLayer>();
 
-        m_ClientsLayer->getClientsPanel().setOnActionCallback([this](auto action, const std::string& username)
+        m_ClientsLayer->getClientsPanel().setOnActionCallback([this](auto action, std::string_view username, std::string_view reason)
         {
-            onConnectedClientsAction(action, username);
+            onConnectedClientsAction(action, username, reason);
         });
 
         m_ServerPortLayer = std::make_shared<server::ui::layer::UIServerPortLayer>();
@@ -102,12 +102,12 @@ namespace sLink::server_application
     }
 
     void ServerApplication::onConnectedClientsAction(server::ui::component::UIActiveClients::Action action,
-        std::string_view username)
+                                                     std::string_view username, std::string_view reason)
     {
         switch (action)
         {
             case server::ui::component::UIActiveClients::Action::KICK:
-                m_Server.kickUser({username, ""});
+                m_Server.kickUser({username, ""}, reason);
         }
     }
 
