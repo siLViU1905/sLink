@@ -11,7 +11,7 @@
 
 namespace sLink::server::session
 {
-    class Session : public std::enable_shared_from_this<Session>
+    class Session
     {
     private:
         static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_RED;
@@ -25,13 +25,13 @@ namespace sLink::server::session
 
         Session(asio::ip::tcp::socket &&socket, utility::SafeQueue<std::string> &inbox);
 
-        void start();
+        void start(const std::shared_ptr<Session> &self);
 
         void disconnect();
 
-        void disconnectAfterWrite();
+        void disconnectAfterWrite(const std::shared_ptr<Session>& self);
 
-        void send(const message::Message &message);
+        void send(const message::Message &message, const std::shared_ptr<Session>& self);
 
         auto getUser(this auto&& self)
         {
@@ -44,10 +44,12 @@ namespace sLink::server::session
 
         void setOnDisconnectCallback(OnDisconnectCallback &&callback);
 
-    private:
-        void onRead();
+        ~Session();
 
-        void onWrite();
+    private:
+        void onRead(const std::shared_ptr<Session>& self);
+
+        void onWrite(const std::shared_ptr<Session>& self);
 
         void handleMessage();
 
