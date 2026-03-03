@@ -10,6 +10,7 @@ add_executable(sLink_Server
         src/ui/layers/server_port/UIServerPortLayer.cpp
         src/database/Database.cpp
         src/user/User.cpp
+        src/database/password_hasher/PasswordHasher.cpp
 )
 
 target_link_libraries(sLink_Server
