@@ -11,6 +11,7 @@
     #define SLINK_CL_CLR_CYAN        "\033[1;36m"
     #define SLINK_CL_CLR_MAGENTA     "\033[1;35m"
     #define SLINK_CL_CLR_RED         "\033[1;31m"
+    #define SLINK_CL_CLR_BLUE        "\033[1;34m"
 
     #define SLINK_START_BENCHMARK auto startTime = std::chrono::steady_clock::now();
 
@@ -28,6 +29,7 @@
     #define SLINK_CL_CLR_CYAN        ""
     #define SLINK_CL_CLR_MAGENTA     ""
     #define SLINK_CL_CLR_RED         ""
+    #define SLINK_CL_CLR_BLUE        ""
 
 #define SLINK_START_BENCHMARK
 
