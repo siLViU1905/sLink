@@ -8,10 +8,8 @@ add_executable(sLink_Client
         src/ui/layers/login_layer/UILoginLayer.cpp
         src/ui/components/client_register/UIClientRegister.cpp
         src/ui/layers/register_layer/UIRegisterLayer.cpp
-        src/client/profile_picture/ProfilePicture.cpp
 )
 
 target_link_libraries(sLink_Client PRIVATE
         common_shared
-        stb_lib
 )
