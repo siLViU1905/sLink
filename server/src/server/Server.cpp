@@ -33,7 +33,7 @@ namespace sLink::server
 
         std::scoped_lock lock(m_SessionsMutex);
         for (auto &session: m_Sessions)
-            session->send(message);
+            session->send(message, session);
 
         SLINK_END_BENCHMARK("[Server]", "broadcast", s_BenchmarkOutputColor)
     }
@@ -131,7 +131,7 @@ namespace sLink::server
                     onClientDisconnected(session);
                 });
 
-                session->start();
+                session->start(session);
             }
 
             onAccept();
@@ -148,7 +148,7 @@ namespace sLink::server
         }
         m_PendingUsernames.push(session->getUser().getUsername().data());
 
-        session->send({protocol::Command::LOGIN_RESPONSE_ACCEPT, "", "Successfully connected to the server"});
+        session->send({protocol::Command::LOGIN_RESPONSE_ACCEPT, "", "Successfully connected to the server"}, session);
     }
 
     void Server::onClientDisconnected(const std::shared_ptr<session::Session> &session)
@@ -162,9 +162,9 @@ namespace sLink::server
     {
         message::Message message(protocol::Command::LOGIN_RESPONSE_REJECT, "", reason);
 
-        session->send(message);
+        session->send(message, session);
 
-        session->disconnectAfterWrite();
+        session->disconnectAfterWrite(session);
 
         m_DisconnectedUsernames.push(std::format("Rejected: {} reason: {}", session->getUser().getUsername(), reason));
     }
@@ -196,13 +196,13 @@ namespace sLink::server
             return session->getUser().getUsername() == user.getUsername();
         });
 
-        auto& session = *it->get();
+        auto& session = *it;
 
         message::Message message(protocol::Command::SERVER_KICK_REQUEST, "", reason);
 
-        session.send(message);
+        session->send(message, session);
 
-        session.disconnectAfterWrite();
+        session->disconnectAfterWrite(session);
 
         m_Sessions.erase(it);
 

@@ -9,9 +9,9 @@ namespace sLink::server::session
     {
     }
 
-    void Session::start()
+    void Session::start(const std::shared_ptr<Session> &self)
     {
-        onRead();
+        onRead(self);
     }
 
     void Session::disconnect()
@@ -23,9 +23,8 @@ namespace sLink::server::session
         m_Socket.close(ec);
     }
 
-    void Session::disconnectAfterWrite()
+    void Session::disconnectAfterWrite(const std::shared_ptr<Session>& self)
     {
-        auto self(shared_from_this());
         asio::post(m_Socket.get_executor(), [this, self]()
         {
             m_ShouldDisconnectAfterWrite = true;
@@ -35,11 +34,9 @@ namespace sLink::server::session
         });
     }
 
-    void Session::send(const message::Message &message)
+    void Session::send(const message::Message &message, const std::shared_ptr<Session>& self)
     {
         SLINK_START_BENCHMARK
-
-        auto self(shared_from_this());
 
         asio::post(m_Socket.get_executor(), [this, self, message]()
         {
@@ -48,7 +45,7 @@ namespace sLink::server::session
             m_WriteQueue.push(message.serialize() + "\n");
 
             if (idle)
-                onWrite();
+                onWrite(self);
         });
 
         SLINK_END_BENCHMARK("[Session]", "send", s_BenchmarkOutputColor)
@@ -69,10 +66,13 @@ namespace sLink::server::session
         m_OnDisconnectCallback = std::move(callback);
     }
 
-    void Session::onRead()
+    Session::~Session()
     {
-        auto self(shared_from_this());
+        disconnect();
+    }
 
+    void Session::onRead(const std::shared_ptr<Session>& self)
+    {
         asio::async_read_until(m_Socket, m_Buffer, '\n',
                                [this, self](std::error_code ec, size_t)
                                {
@@ -80,7 +80,7 @@ namespace sLink::server::session
                                    {
                                        handleMessage();
 
-                                       onRead();
+                                       onRead(self);
                                    } else if (ec == asio::error::eof || ec == asio::error::connection_reset)
                                    {
                                        if (m_OnDisconnectCallback)
@@ -89,10 +89,8 @@ namespace sLink::server::session
                                });
     }
 
-    void Session::onWrite()
+    void Session::onWrite(const std::shared_ptr<Session>& self)
     {
-        auto self(shared_from_this());
-
         asio::async_write(m_Socket, asio::buffer(m_WriteQueue.front()),
                           [this, self](std::error_code ec, size_t)
                           {
@@ -101,7 +99,7 @@ namespace sLink::server::session
                                   m_WriteQueue.pop();
 
                                   if (!m_WriteQueue.empty())
-                                      onWrite();
+                                      onWrite(self);
                                   else if (m_ShouldDisconnectAfterWrite)
                                       disconnect();
                               }
