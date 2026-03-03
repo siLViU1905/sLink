@@ -4,6 +4,8 @@
 #include <thread>
 #include <chrono>
 
+#include "password_hasher/PasswordHasher.h"
+
 namespace sLink::server::db
 {
     Database::Database() : m_DatabaseHandle(nullptr), m_Shutdown(false)
@@ -99,7 +101,8 @@ namespace sLink::server::db
 
         sqlite3_bind_text(stmt, 1, user.getUsername().data(), -1, SQLITE_TRANSIENT);
 
-        sqlite3_bind_text(stmt, 2, user.getPassword().data(), -1, SQLITE_TRANSIENT);
+        auto hashedPassword = password_hasher::PasswordHasher::hash(user.getPassword());
+        sqlite3_bind_text(stmt, 2, hashedPassword.c_str(), -1, SQLITE_TRANSIENT);
 
         if (sqlite3_step(stmt) != SQLITE_DONE)
         {
@@ -217,6 +220,8 @@ namespace sLink::server::db
                 std::string stored = reinterpret_cast<const char *>(storedPassword);
 
                 std::string provided = user.getPassword().data();
+
+                provided = password_hasher::PasswordHasher::hash(provided);
 
                 passwordMatches = (provided == stored);
             }
