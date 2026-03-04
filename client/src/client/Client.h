@@ -8,6 +8,8 @@
 #include "message/Message.h"
 #include <utility/benchmark/Benchmark.h>
 
+#include "profile_picture/ProfilePicture.h"
+
 namespace sLink::client
 {
     class Client
@@ -32,6 +34,8 @@ namespace sLink::client
 
         utility::SafeQueue<std::string> &getInbox();
 
+        profile_picture::ProfilePicture& getProfilePicture();
+
     private:
         std::expected<std::string, std::string> onConnect(asio::ip::tcp::resolver::results_type endpoints, protocol::Command joinType);
 
@@ -44,6 +48,8 @@ namespace sLink::client
         std::string m_Username;
 
         std::string m_Password;
+
+        profile_picture::ProfilePicture m_ProfilePicture;
 
         asio::io_context &m_IOContext;
 

@@ -7,6 +7,7 @@ add_library(common_shared STATIC
         utility/timestamp/Timestamp.cpp
         ui/components/info/UIInfo.cpp
         profile_picture/ProfilePicture.cpp
+        utility/file_explorer/FileExplorer.cpp
 )
 
 target_include_directories(common_shared PUBLIC
