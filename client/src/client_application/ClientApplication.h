@@ -6,6 +6,7 @@
 #include  "../ui/layers/chat_layer/UIChatLayer.h"
 #include "../ui/layers/login_layer/UILoginLayer.h"
 #include "../ui/layers/register_layer/UIRegisterLayer.h"
+#include <utility/file_explorer/FileExplorer.h>
 
 namespace sLink::client_application
 {
@@ -31,6 +32,8 @@ namespace sLink::client_application
         asio::io_context m_IOContext;
 
         client::Client m_Client;
+
+        utility::FileExplorer m_FileExplorer;
 
         std::jthread m_NetworkThread;
 

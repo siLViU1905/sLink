@@ -6,6 +6,8 @@ add_library(common_shared STATIC
         message/Message.cpp
         utility/timestamp/Timestamp.cpp
         ui/components/info/UIInfo.cpp
+        profile_picture/ProfilePicture.cpp
+        utility/file_explorer/FileExplorer.cpp
 )
 
 target_include_directories(common_shared PUBLIC
@@ -23,6 +25,7 @@ target_link_libraries(common_shared
         asio_lib
         json_lib
         imgui_lib
+        stb_lib
         glfw
         Vulkan::Vulkan
 )

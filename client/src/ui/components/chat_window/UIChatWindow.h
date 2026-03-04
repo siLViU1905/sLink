@@ -36,6 +36,8 @@ namespace sLink::client::ui::component
     public:
         using OnSendCallback = std::move_only_function<void(std::string_view)>;
 
+        using ProfilePictureTextureID = ImTextureID;
+
         UIChatWindow(const std::vector<sLink::ui::component::UIInfo::Info> &infos);
 
         void render() override;
@@ -44,12 +46,18 @@ namespace sLink::client::ui::component
 
         void setOnMessageSend(OnSendCallback &&callback);
 
+        void setTextureID(ProfilePictureTextureID id);
+
     private:
+        void drawCircularProfile(ImVec2 pos, float size, std::string_view placeholderText);
+
         std::vector<message::Message> m_Messages;
 
         const std::vector<sLink::ui::component::UIInfo::Info> &m_InfosRef;
 
         std::string m_InputContent;
+
+        ProfilePictureTextureID m_ProfilePictureTextureID;
 
         OnSendCallback m_OnSendCallback;
     };

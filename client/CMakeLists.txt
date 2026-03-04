@@ -10,4 +10,6 @@ add_executable(sLink_Client
         src/ui/layers/register_layer/UIRegisterLayer.cpp
 )
 
-target_link_libraries(sLink_Client PRIVATE common_shared)
+target_link_libraries(sLink_Client PRIVATE
+        common_shared
+)

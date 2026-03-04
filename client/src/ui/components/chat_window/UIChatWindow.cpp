@@ -6,7 +6,8 @@ namespace sLink::client::ui::component
 {
     UIChatWindow::UIChatWindow(const std::vector<sLink::ui::component::UIInfo::Info> &infos)
         : m_InfosRef(infos),
-          m_InputContent(255, '\0')
+          m_InputContent(255, '\0'),
+          m_ProfilePictureTextureID(0)
     {
     }
 
@@ -66,6 +67,11 @@ namespace sLink::client::ui::component
             ImGui::BeginGroup();
 
             ImGui::TextColored(s_ColorTimestamp, "[%s]", message.getTimestamp().toString().c_str());
+
+            ImVec2 pos = ImGui::GetCursorScreenPos();
+            float avatarSize = ImGui::GetFontSize() * 1.5f;
+            drawCircularProfile(pos, avatarSize, "IMG");
+            ImGui::SameLine();
 
             ImGui::SameLine();
             ImGui::TextColored(s_ColorUsername, "%s:", message.getSenderName().data());
@@ -134,5 +140,41 @@ namespace sLink::client::ui::component
     void UIChatWindow::setOnMessageSend(OnSendCallback &&callback)
     {
         m_OnSendCallback = std::move(callback);
+    }
+
+    void UIChatWindow::setTextureID(ProfilePictureTextureID id)
+    {
+        m_ProfilePictureTextureID = id;
+    }
+
+    void UIChatWindow::drawCircularProfile(ImVec2 pos, float size, std::string_view placeholderText)
+    {
+        ImDrawList *drawList = ImGui::GetWindowDrawList();
+        float rounding = size * 0.5f;
+        ImVec2 center = ImVec2(pos.x + rounding, pos.y + rounding);
+
+        if (m_ProfilePictureTextureID == 0)
+        {
+            drawList->AddCircleFilled(center, rounding, ImColor(60, 60, 60, 255), 64);
+
+            ImVec2 textSize = ImGui::CalcTextSize(placeholderText.data());
+            drawList->AddText(ImVec2(center.x - textSize.x * 0.5f, center.y - textSize.y * 0.5f),
+                              ImColor(200, 200, 200, 255), placeholderText.data());
+        } else
+        {
+            ImVec2 maxPos = ImVec2(pos.x + size, pos.y + size);
+            drawList->AddImageRounded(
+                m_ProfilePictureTextureID,
+                pos,
+                maxPos,
+                ImVec2(0, 0), ImVec2(1, 1),
+                IM_COL32_WHITE,
+                rounding
+            );
+        }
+
+        drawList->AddCircle(center, rounding, IM_COL32(200, 200, 200, 255), 64, 2.0f);
+
+        ImGui::Dummy(ImVec2(size, size));
     }
 }
