@@ -13,19 +13,25 @@ namespace sLink::client::ui::component
     private:
         static constexpr float s_WindowWidth = 350.f;
 
-        static constexpr float s_WindowHeight = 300.f;
+        static constexpr float s_WindowHeight = 500.f;
 
         static constexpr float s_InputPaddingY = 8.f;
 
         static constexpr float s_ItemSpacing = 15.0f;
 
-        static constexpr ImVec4 s_ColorLink = { 0.2f, 0.6f, 1.0f, 1.0f };
+        static constexpr ImVec4 s_ColorLink = {0.2f, 0.6f, 1.0f, 1.0f};
+
+        static constexpr float s_ProfileCircleRadius = 40.f;
 
     public:
         using OnLoginDataInputCallback = std::move_only_function<void(std::string_view, std::string_view,
                                                                       std::string_view)>;
 
         using OnRegisterClickCallback = std::move_only_function<void()>;
+
+        using OnLoadProfilePictureCallback = std::move_only_function<void()>;
+
+        using ProfilePictureTextureID = ImTextureID;
 
         UIClientLogin();
 
@@ -35,11 +41,17 @@ namespace sLink::client::ui::component
 
         void setOnRegisterClick(OnRegisterClickCallback &&callback);
 
+        void setOnLoadProfilePicture(OnLoadProfilePictureCallback &&callback);
+
+        void setTextureID(ProfilePictureTextureID id);
+
         void notifyLoginFailed(std::string_view message);
 
         void notifyKick(std::string_view reason);
 
     private:
+        void drawCircularProfile(ImVec2 pos, float size, std::string_view placeholderText);
+
         std::string m_InputUsername;
 
         std::string m_InputPassword;
@@ -49,6 +61,8 @@ namespace sLink::client::ui::component
         OnLoginDataInputCallback m_OnLoginDataInputCallback;
 
         OnRegisterClickCallback m_OnRegisterClickCallback;
+
+        OnLoadProfilePictureCallback m_OnLoadProfilePictureCallback;
 
         bool m_ShowAuthIncorrectInfoErrorPopup;
 
@@ -61,7 +75,9 @@ namespace sLink::client::ui::component
         std::string m_LoginFailMessage;
 
         std::string m_KickReason;
+
+        ProfilePictureTextureID m_ProfilePictureTextureID;
     };
 }
 
-#endif //SLINK_UICLIENTLOGIN_H
+#endif
