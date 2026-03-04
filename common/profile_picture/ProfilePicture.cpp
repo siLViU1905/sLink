@@ -32,4 +32,9 @@ namespace sLink::profile_picture
 
         return std::unexpected(std::format("Failed to load image with path: {}", path));
     }
+
+    const std::vector<uint8_t> & ProfilePicture::getPixels() const
+    {
+        return m_Pixels;
+    }
 }
