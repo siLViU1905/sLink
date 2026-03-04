@@ -60,6 +60,24 @@ namespace sLink::client_application
                     break;
             }
         }
+
+        if (auto path = m_FileExplorer.getPaths().tryPop())
+        {
+            auto result = m_Client.getProfilePicture().loadImage(*path);
+
+            if (result)
+            {
+                m_ChatLayer->getInfoPanel().addSuccessInfo(*result);
+
+                m_Renderer.createProfilePicture(m_Client.getProfilePicture());
+
+                m_LoginLayer->getClientLoginPanel().setTextureID(m_Renderer.getProfilePictureTextureID());
+
+                m_ChatLayer->getChatWindow().setTextureID(m_Renderer.getProfilePictureTextureID());
+            }
+            else
+                m_ChatLayer->getInfoPanel().addFailInfo(result.error());
+        }
     }
 
     void ClientApplication::onRender()
@@ -93,9 +111,8 @@ namespace sLink::client_application
                 m_Client.getUsername(),
                 content
             );
-                m_Client.send(message);
+            m_Client.send(message);
         });
-
 
         m_LoginLayer = std::make_shared<client::ui::layer::UILoginLayer>();
 
@@ -108,6 +125,14 @@ namespace sLink::client_application
         m_LoginLayer->getClientLoginPanel().setOnRegisterClick([this]()
         {
             m_CurrentLayer = m_RegisterLayer;
+        });
+
+        m_LoginLayer->getClientLoginPanel().setOnLoadProfilePicture([this]()
+        {
+            std::thread([this]()
+            {
+                m_FileExplorer.open();
+            }).detach();
         });
 
         m_RegisterLayer = std::make_shared<client::ui::layer::UIRegisterLayer>();

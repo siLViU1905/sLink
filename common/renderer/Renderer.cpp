@@ -19,7 +19,9 @@ namespace sLink::renderer
           m_DepthImage(nullptr), m_DepthImageMemory(nullptr),
           m_DepthImageView(nullptr),
           m_ColorImage(nullptr), m_ColorImageView(nullptr),
-          m_ColorImageMemory(nullptr)
+          m_ColorImageMemory(nullptr),
+          m_ProfilePictureImage(nullptr), m_ProfilePictureImageMemory(nullptr),
+          m_ProfilePictureImageView(nullptr), m_ProfilePictureSampler(nullptr)
     {
     }
 
@@ -905,6 +907,155 @@ namespace sLink::renderer
         m_DepthImageView = createImageView(m_DepthImage, m_DepthFormat, vk::ImageAspectFlagBits::eDepth, 1);
     }
 
+    void Renderer::createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage,
+                                vk::MemoryPropertyFlags properties,
+                                vk::raii::Buffer &buffer, vk::raii::DeviceMemory &bufferMemory)
+    {
+        vk::BufferCreateInfo bufferInfo({},
+                                        size, usage,
+                                        vk::SharingMode::eExclusive
+        );
+
+        buffer = vk::raii::Buffer(m_Device, bufferInfo);
+
+        vk::MemoryRequirements memRequirements = buffer.getMemoryRequirements();
+
+        vk::MemoryAllocateInfo allocInfo(memRequirements.size,
+                                         findMemoryType(memRequirements.memoryTypeBits, properties)
+        );
+
+        bufferMemory = vk::raii::DeviceMemory(m_Device, allocInfo);
+
+        buffer.bindMemory(*bufferMemory, 0);
+    }
+
+    void Renderer::copyBuffer(vk::raii::Buffer &srcBuffer, vk::raii::Buffer &dstBuffer, vk::DeviceSize size)
+    {
+        vk::CommandBufferAllocateInfo allocInfo{
+            m_PrimaryCommandPool,
+            vk::CommandBufferLevel::ePrimary,
+            1
+        };
+
+        vk::raii::CommandBuffer commandCopyBuffer = std::move(m_Device.allocateCommandBuffers(allocInfo).front());
+
+        commandCopyBuffer.begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
+
+        commandCopyBuffer.copyBuffer(srcBuffer,
+                                     dstBuffer,
+                                     vk::BufferCopy(0, 0, size)
+        );
+
+        commandCopyBuffer.end();
+
+        vk::SubmitInfo submitInfo;
+
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &*commandCopyBuffer;
+
+        m_GraphicsQueue.submit(submitInfo);
+
+        m_GraphicsQueue.waitIdle();
+    }
+
+    void Renderer::generateProfilePictureMipMaps(vk::Format imageFormat)
+    {
+        vk::FormatProperties formatProperties = m_PhysicalDevice.getFormatProperties(imageFormat);
+
+        if (!(formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eSampledImageFilterLinear))
+            throw std::runtime_error("Texture image format does not support linear blitting");
+
+
+        auto commandBuffer = beginSingleTimeCommands();
+
+        vk::ImageMemoryBarrier barrier(
+            vk::AccessFlagBits::eTransferWrite,
+            vk::AccessFlagBits::eTransferRead,
+            vk::ImageLayout::eTransferDstOptimal,
+            vk::ImageLayout::eTransferSrcOptimal,
+            vk::QueueFamilyIgnored,
+            vk::QueueFamilyIgnored,
+            m_ProfilePictureImage
+        );
+
+        barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+        barrier.subresourceRange.baseArrayLayer = 0;
+        barrier.subresourceRange.layerCount = 1;
+        barrier.subresourceRange.levelCount = 1;
+
+        auto mipWidth = profile_picture::ProfilePicture::s_ImageWidth;
+        auto mipHeight = profile_picture::ProfilePicture::s_ImageHeight;
+
+        for (uint32_t i = 1; i < profile_picture::ProfilePicture::s_MipLevels; i++)
+        {
+            barrier.subresourceRange.baseMipLevel = i - 1;
+            barrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
+            barrier.newLayout = vk::ImageLayout::eTransferSrcOptimal;
+            barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+            barrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
+
+            commandBuffer->pipelineBarrier(
+                vk::PipelineStageFlagBits::eTransfer,
+                vk::PipelineStageFlagBits::eTransfer,
+                {}, {}, {},
+                barrier);
+
+            vk::ArrayWrapper1D<vk::Offset3D, 2> offsets, dstOffsets;
+            offsets[0] = vk::Offset3D(0, 0, 0);
+            offsets[1] = vk::Offset3D(mipWidth, mipHeight, 1);
+            dstOffsets[0] = vk::Offset3D(0, 0, 0);
+            dstOffsets[1] = vk::Offset3D(mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1);
+            vk::ImageBlit blit(
+                {}, offsets,
+                {}, dstOffsets
+            );
+            blit.srcSubresource = vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, i - 1, 0, 1);
+            blit.dstSubresource = vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, i, 0, 1);
+
+            commandBuffer->blitImage(
+                m_ProfilePictureImage,
+                vk::ImageLayout::eTransferSrcOptimal,
+                m_ProfilePictureImage,
+                vk::ImageLayout::eTransferDstOptimal,
+                {blit},
+                vk::Filter::eLinear
+            );
+
+            barrier.oldLayout = vk::ImageLayout::eTransferSrcOptimal;
+            barrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+            barrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
+            barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+            commandBuffer->pipelineBarrier(
+                vk::PipelineStageFlagBits::eTransfer,
+                vk::PipelineStageFlagBits::eFragmentShader,
+                {}, {}, {},
+                barrier
+            );
+
+            if (mipWidth > 1)
+                mipWidth /= 2;
+
+            if (mipHeight > 1)
+                mipHeight /= 2;
+        }
+
+        barrier.subresourceRange.baseMipLevel = profile_picture::ProfilePicture::s_MipLevels - 1;
+        barrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
+        barrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+        barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+        barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+        commandBuffer->pipelineBarrier(
+            vk::PipelineStageFlagBits::eTransfer,
+            vk::PipelineStageFlagBits::eFragmentShader,
+            {}, {}, {},
+            barrier
+        );
+
+        endSingleTimeCommands(*commandBuffer);
+    }
+
     void Renderer::createImGuiDescriptorPool()
     {
         constexpr uint32_t descriptorCount = 1000;
@@ -931,6 +1082,88 @@ namespace sLink::renderer
         );
 
         m_ImGuiDescriptorPool = vk::raii::DescriptorPool(m_Device, poolInfo);
+    }
+
+    void Renderer::createProfilePictureImage(const profile_picture::ProfilePicture &profilePicture)
+    {
+        vk::raii::Buffer stagingBuffer({});
+
+        vk::raii::DeviceMemory stagingBufferMemory({});
+
+        constexpr auto imageSize = profile_picture::ProfilePicture::s_ImageSize;
+
+        createBuffer(imageSize,
+                     vk::BufferUsageFlagBits::eTransferSrc,
+                     vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+                     stagingBuffer,
+                     stagingBufferMemory
+        );
+
+        void *data = stagingBufferMemory.mapMemory(0, imageSize);
+
+        memcpy(data, profilePicture.getPixels().data(), imageSize);
+
+        stagingBufferMemory.unmapMemory();
+
+        createImage(profile_picture::ProfilePicture::s_ImageWidth,
+                    profile_picture::ProfilePicture::s_ImageHeight,
+                    profile_picture::ProfilePicture::s_MipLevels,
+                    vk::Format::eR8G8B8A8Srgb,
+                    vk::SampleCountFlagBits::e1,
+                    vk::ImageTiling::eOptimal,
+                    vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferSrc,
+                    vk::MemoryPropertyFlagBits::eDeviceLocal,
+                    m_ProfilePictureImage,
+                    m_ProfilePictureImageMemory
+        );
+
+        transitionImageLayout(m_ProfilePictureImage,
+                              vk::ImageLayout::eUndefined,
+                              vk::ImageLayout::eTransferDstOptimal,
+                              profile_picture::ProfilePicture::s_MipLevels
+        );
+
+        copyBufferToImage(stagingBuffer, m_ProfilePictureImage,
+                          profile_picture::ProfilePicture::s_ImageWidth,
+                          profile_picture::ProfilePicture::s_ImageHeight);
+
+        generateProfilePictureMipMaps(vk::Format::eR8G8B8A8Srgb);
+    }
+
+    void Renderer::createProfilePictureImageView()
+    {
+        m_ProfilePictureImageView = createImageView(m_ProfilePictureImage, vk::Format::eR8G8B8A8Srgb,
+                                                    vk::ImageAspectFlagBits::eColor,
+                                                    profile_picture::ProfilePicture::s_MipLevels);
+    }
+
+    void Renderer::createProfilePictureSampler()
+    {
+        auto properties = m_PhysicalDevice.getProperties();
+
+        vk::SamplerCreateInfo samplerInfo({},
+                                          vk::Filter::eLinear,
+                                          vk::Filter::eLinear,
+                                          vk::SamplerMipmapMode::eLinear,
+                                          vk::SamplerAddressMode::eRepeat,
+                                          vk::SamplerAddressMode::eRepeat,
+                                          vk::SamplerAddressMode::eRepeat,
+                                          0, 1,
+                                          properties.limits.maxSamplerAnisotropy,
+                                          vk::False,
+                                          vk::CompareOp::eAlways
+        );
+
+        samplerInfo.borderColor = vk::BorderColor::eIntOpaqueBlack;
+        samplerInfo.unnormalizedCoordinates = vk::False;
+        samplerInfo.compareEnable = vk::True;
+        samplerInfo.compareOp = vk::CompareOp::eLess;
+        samplerInfo.mipmapMode = vk::SamplerMipmapMode::eLinear;
+        samplerInfo.mipLodBias = 0.0f;
+        samplerInfo.minLod = 0.0f;
+        samplerInfo.maxLod = 0.0f;
+
+        m_ProfilePictureSampler = vk::raii::Sampler(m_Device, samplerInfo);
     }
 
     vk::Format Renderer::findSupportedFormat(const std::vector<vk::Format> &candidates, vk::ImageTiling tiling,
@@ -1111,6 +1344,24 @@ namespace sLink::renderer
             throw std::runtime_error("Failed to present swap chain image");
 
         m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    }
+
+    void Renderer::createProfilePicture(const profile_picture::ProfilePicture &profilePicture)
+    {
+        createProfilePictureImage(profilePicture);
+
+        createProfilePictureImageView();
+
+        createProfilePictureSampler();
+    }
+
+    ImTextureID Renderer::getProfilePictureTextureID()
+    {
+        return reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(
+            *m_ProfilePictureSampler,
+            *m_ProfilePictureImageView,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        ));
     }
 
     Renderer::~Renderer()

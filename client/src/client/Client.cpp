@@ -65,6 +65,11 @@ namespace sLink::client
         return m_Inbox;
     }
 
+    profile_picture::ProfilePicture & Client::getProfilePicture()
+    {
+        return m_ProfilePicture;
+    }
+
     std::expected<std::string, std::string> Client::onConnect(asio::ip::tcp::resolver::results_type endpoints,
                                                               protocol::Command joinType)
     {

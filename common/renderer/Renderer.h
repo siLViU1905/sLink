@@ -16,6 +16,8 @@
 
 #include <ui/backend/UIBackend.h>
 
+#include <profile_picture/ProfilePicture.h>
+
 namespace sLink::renderer
 {
     class Renderer
@@ -38,6 +40,10 @@ namespace sLink::renderer
         void recordUIData(ui::UIBackend::UIRenderData *data);
 
         void renderFrame();
+
+        void createProfilePicture(const profile_picture::ProfilePicture &profilePicture);
+
+        ImTextureID getProfilePictureTextureID();
 
         ~Renderer();
 
@@ -74,7 +80,21 @@ namespace sLink::renderer
 
         void createDepthResources();
 
+        void createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage,
+                          vk::MemoryPropertyFlags properties,
+                          vk::raii::Buffer &buffer, vk::raii::DeviceMemory &bufferMemory);
+
+        void copyBuffer(vk::raii::Buffer &srcBuffer, vk::raii::Buffer &dstBuffer, vk::DeviceSize size);
+
+        void generateProfilePictureMipMaps(vk::Format imageFormat);
+
         void createImGuiDescriptorPool();
+
+        void createProfilePictureImage(const profile_picture::ProfilePicture &profilePicture);
+
+        void createProfilePictureImageView();
+
+        void createProfilePictureSampler();
 
         vk::Format findSupportedFormat(const std::vector<vk::Format> &candidates,
                                        vk::ImageTiling tiling,
@@ -216,6 +236,14 @@ namespace sLink::renderer
         vk::SampleCountFlagBits m_MsaaSamples;
 
         vk::ClearValue m_ClearColor;
+
+        vk::raii::Image m_ProfilePictureImage;
+
+        vk::raii::DeviceMemory m_ProfilePictureImageMemory;
+
+        vk::raii::ImageView m_ProfilePictureImageView;
+
+        vk::raii::Sampler m_ProfilePictureSampler;
 
         static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 

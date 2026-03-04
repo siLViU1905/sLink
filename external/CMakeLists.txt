@@ -10,6 +10,10 @@ add_library(json_lib INTERFACE)
 
 target_include_directories(json_lib INTERFACE json/include)
 
+add_library(stb_lib INTERFACE)
+
+target_include_directories(stb_lib INTERFACE stb)
+
 add_library(sqlite3_lib STATIC
         sqlite/sqlite3.c
 )
