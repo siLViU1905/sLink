@@ -7,7 +7,7 @@
 #include <format>
 #include <stb_image_resize2.h>
 
-namespace sLink::client::profile_picture
+namespace sLink::profile_picture
 {
     const uint32_t ProfilePicture::s_MipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(s_ImageWidth, s_ImageHeight)))) + 1;
 

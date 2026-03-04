@@ -7,7 +7,7 @@
 #include <string_view>
 #include <vector>
 
-namespace sLink::client::profile_picture
+namespace sLink::profile_picture
 {
     class ProfilePicture
     {

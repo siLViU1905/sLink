@@ -41,7 +41,7 @@ namespace sLink::renderer
 
         void renderFrame();
 
-        void createProfilePicture(const client::profile_picture::ProfilePicture &profilePicture);
+        void createProfilePicture(const profile_picture::ProfilePicture &profilePicture);
 
         ImTextureID getProfilePictureTextureID();
 
@@ -90,7 +90,7 @@ namespace sLink::renderer
 
         void createImGuiDescriptorPool();
 
-        void createProfilePictureImage(const client::profile_picture::ProfilePicture &profilePicture);
+        void createProfilePictureImage(const profile_picture::ProfilePicture &profilePicture);
 
         void createProfilePictureImageView();
 

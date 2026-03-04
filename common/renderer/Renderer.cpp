@@ -983,10 +983,10 @@ namespace sLink::renderer
         barrier.subresourceRange.layerCount = 1;
         barrier.subresourceRange.levelCount = 1;
 
-        auto mipWidth = client::profile_picture::ProfilePicture::s_ImageWidth;
-        auto mipHeight = client::profile_picture::ProfilePicture::s_ImageHeight;
+        auto mipWidth = profile_picture::ProfilePicture::s_ImageWidth;
+        auto mipHeight = profile_picture::ProfilePicture::s_ImageHeight;
 
-        for (uint32_t i = 1; i < client::profile_picture::ProfilePicture::s_MipLevels; i++)
+        for (uint32_t i = 1; i < profile_picture::ProfilePicture::s_MipLevels; i++)
         {
             barrier.subresourceRange.baseMipLevel = i - 1;
             barrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
@@ -1040,7 +1040,7 @@ namespace sLink::renderer
                 mipHeight /= 2;
         }
 
-        barrier.subresourceRange.baseMipLevel = client::profile_picture::ProfilePicture::s_MipLevels - 1;
+        barrier.subresourceRange.baseMipLevel = profile_picture::ProfilePicture::s_MipLevels - 1;
         barrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
         barrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
         barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
@@ -1084,13 +1084,13 @@ namespace sLink::renderer
         m_ImGuiDescriptorPool = vk::raii::DescriptorPool(m_Device, poolInfo);
     }
 
-    void Renderer::createProfilePictureImage(const client::profile_picture::ProfilePicture &profilePicture)
+    void Renderer::createProfilePictureImage(const profile_picture::ProfilePicture &profilePicture)
     {
         vk::raii::Buffer stagingBuffer({});
 
         vk::raii::DeviceMemory stagingBufferMemory({});
 
-        constexpr auto imageSize = client::profile_picture::ProfilePicture::s_ImageSize;
+        constexpr auto imageSize = profile_picture::ProfilePicture::s_ImageSize;
 
         createBuffer(imageSize,
                      vk::BufferUsageFlagBits::eTransferSrc,
@@ -1105,9 +1105,9 @@ namespace sLink::renderer
 
         stagingBufferMemory.unmapMemory();
 
-        createImage(client::profile_picture::ProfilePicture::s_ImageWidth,
-                    client::profile_picture::ProfilePicture::s_ImageHeight,
-                    client::profile_picture::ProfilePicture::s_MipLevels,
+        createImage(profile_picture::ProfilePicture::s_ImageWidth,
+                    profile_picture::ProfilePicture::s_ImageHeight,
+                    profile_picture::ProfilePicture::s_MipLevels,
                     vk::Format::eR8G8B8A8Srgb,
                     vk::SampleCountFlagBits::e1,
                     vk::ImageTiling::eOptimal,
@@ -1120,12 +1120,12 @@ namespace sLink::renderer
         transitionImageLayout(m_ProfilePictureImage,
                               vk::ImageLayout::eUndefined,
                               vk::ImageLayout::eTransferDstOptimal,
-                              client::profile_picture::ProfilePicture::s_MipLevels
+                              profile_picture::ProfilePicture::s_MipLevels
         );
 
         copyBufferToImage(stagingBuffer, m_ProfilePictureImage,
-                          client::profile_picture::ProfilePicture::s_ImageWidth,
-                          client::profile_picture::ProfilePicture::s_ImageHeight);
+                          profile_picture::ProfilePicture::s_ImageWidth,
+                          profile_picture::ProfilePicture::s_ImageHeight);
 
         generateProfilePictureMipMaps(vk::Format::eR8G8B8A8Srgb);
     }
@@ -1134,7 +1134,7 @@ namespace sLink::renderer
     {
         m_ProfilePictureImageView = createImageView(m_ProfilePictureImage, vk::Format::eR8G8B8A8Srgb,
                                                     vk::ImageAspectFlagBits::eColor,
-                                                    client::profile_picture::ProfilePicture::s_MipLevels);
+                                                    profile_picture::ProfilePicture::s_MipLevels);
     }
 
     void Renderer::createProfilePictureSampler()
@@ -1346,7 +1346,7 @@ namespace sLink::renderer
         m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
-    void Renderer::createProfilePicture(const client::profile_picture::ProfilePicture &profilePicture)
+    void Renderer::createProfilePicture(const profile_picture::ProfilePicture &profilePicture)
     {
         createProfilePictureImage(profilePicture);
 
