@@ -13,7 +13,8 @@ namespace sLink::protocol
         CHAT_MESSAGE,
         USER_JOINED,
         USER_LEFT,
-        SERVER_KICK_REQUEST
+        SERVER_KICK_REQUEST,
+        PROFILE_PICTURE
     };
 }
 
