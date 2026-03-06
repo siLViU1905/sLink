@@ -42,6 +42,14 @@ namespace sLink::server::db
                 "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
                 ");";
 
+        static constexpr std::string_view s_CreateProfilePicturesTableQuery =
+                "CREATE TABLE IF NOT EXISTS profile_pictures ("
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                "content TEXT, "
+                "user_id INTEGER, "
+                "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+                ");";
+
         static constexpr std::string_view s_InsertUserQuery = "INSERT INTO users (username, password) VALUES (?, ?);";
 
         static constexpr std::string_view s_GetUserIdQuery = "SELECT id FROM users WHERE username = ?;";
@@ -50,6 +58,9 @@ namespace sLink::server::db
 
         static constexpr std::string_view s_InsertMessageQuery =
                 "INSERT INTO messages (content, timestamp, user_id) VALUES (?, ?, ?);";
+
+        static constexpr std::string_view s_InsertProfilePictureQuery =
+                "INSERT INTO profile_pictures (content, user_id) VALUES (?, ?);";
 
         static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_YELLOW;
 
@@ -87,6 +98,8 @@ namespace sLink::server::db
 
         void requestMessageSave(const message::Message& message);
 
+        void requestProfilePictureSave(const user::User &user, std::string_view content);
+
         void close();
 
         ~Database();
@@ -107,9 +120,16 @@ namespace sLink::server::db
             message::Message m_Message;
         };
 
+        struct ProfilePictureRequest
+        {
+            user::User m_User;
+
+            std::string m_Content;
+        };
+
         struct ShutdownRequest{};
 
-        using DbRequest = std::variant<LoginRequest, RegisterRequest, MessageRequest, ShutdownRequest>;
+        using DbRequest = std::variant<LoginRequest, RegisterRequest, MessageRequest, ProfilePictureRequest, ShutdownRequest>;
 
         using ActionResult = std::expected<std::string, std::string>;
 
@@ -118,6 +138,8 @@ namespace sLink::server::db
         ActionResult addUser(const user::User &user);
 
         ActionResult addMessage(const message::Message &message);
+
+        ActionResult addProfilePicture(const user::User &user, std::string_view content);
 
         std::optional<int> getUserId(const user::User &user) const;
 
@@ -132,6 +154,8 @@ namespace sLink::server::db
         ActionResult handleRegisterRequest(const user::User& user);
 
         ActionResult handleMessageRequest(const message::Message &message);
+
+        ActionResult handleProfilePictureRequest(const user::User &user, std::string_view content);
 
         sqlite3 *m_DatabaseHandle;
 
