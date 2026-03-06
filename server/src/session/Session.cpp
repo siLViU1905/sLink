@@ -61,6 +61,11 @@ namespace sLink::server::session
         m_OnRegisterInfoSentCallback = std::move(callback);
     }
 
+    void Session::setOnProfilePictureSentCallback(OnProfilePictureSentCallback &&callback)
+    {
+        m_OnProfilePictureSentCallback = std::move(callback);
+    }
+
     void Session::setOnDisconnectCallback(OnDisconnectCallback &&callback)
     {
         m_OnDisconnectCallback = std::move(callback);
@@ -133,6 +138,9 @@ namespace sLink::server::session
                 case protocol::Command::CHAT_MESSAGE:
                     m_Inbox.push(line);
 
+                    break;
+                case protocol::Command::PROFILE_PICTURE:
+                    m_OnProfilePictureSentCallback(m_User, message.getContent());
                     break;
                default:
                     break;
