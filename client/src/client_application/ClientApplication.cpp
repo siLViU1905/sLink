@@ -57,9 +57,14 @@ namespace sLink::client_application
                     break;
 
                 case protocol::Command::PROFILE_PICTURE:
-                    m_Client.getProfilePicture().setPixelsFromContent(message.getContent());
+                    if (message.getSenderName() != m_Client.getUsername())
+                    {
+                        profile_picture::ProfilePicture profilePicture;
 
-                    handleProfilePictureCreation();
+                        profilePicture.setPixelsFromContent(message.getContent());
+
+                        handleProfilePictureCreation(message.getSenderName(), profilePicture);
+                    }
                     break;
 
                 default:
@@ -75,7 +80,9 @@ namespace sLink::client_application
             {
                 m_ChatLayer->getInfoPanel().addSuccessInfo(*result);
 
-                handleProfilePictureCreation();
+                m_Renderer.createClientSideProfilePicture(m_Client.getProfilePicture());
+
+                m_LoginLayer->getClientLoginPanel().setTextureID(m_Renderer.getClientSideProfilePictureTextureID());
             } else
                 m_ChatLayer->getInfoPanel().addFailInfo(result.error());
         }
@@ -121,6 +128,8 @@ namespace sLink::client_application
             [this](std::string_view username, std::string_view password, std::string_view serverPort)
             {
                 onConnect(username, password, serverPort, protocol::Command::LOGIN_REQUEST);
+
+                m_ChatLayer->getChatWindow().addUserProfilePictureTextureID(username, m_Renderer.getClientSideProfilePictureTextureID());
             });
 
         m_LoginLayer->getClientLoginPanel().setOnRegisterClick([this]()
@@ -165,12 +174,12 @@ namespace sLink::client_application
             m_ChatLayer->getInfoPanel().addFailInfo(result.error());
     }
 
-    void ClientApplication::handleProfilePictureCreation()
+    void ClientApplication::handleProfilePictureCreation(std::string_view username, const profile_picture::ProfilePicture &profilePicture)
     {
-        m_Renderer.createProfilePicture(m_Client.getProfilePicture());
+        m_Renderer.createProfilePicture(username, profilePicture);
 
-        m_LoginLayer->getClientLoginPanel().setTextureID(m_Renderer.getProfilePictureTextureID());
+        m_LoginLayer->getClientLoginPanel().setTextureID(m_Renderer.getProfilePictureTextureID(username));
 
-        m_ChatLayer->getChatWindow().setTextureID(m_Renderer.getProfilePictureTextureID());
+        m_ChatLayer->getChatWindow().addUserProfilePictureTextureID(username, m_Renderer.getProfilePictureTextureID(username));
     }
 }
