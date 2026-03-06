@@ -5,6 +5,7 @@
 #include <chrono>
 
 #include "password_hasher/PasswordHasher.h"
+#include <nlohmann/json.hpp>
 
 namespace sLink::server::db
 {
@@ -39,15 +40,21 @@ namespace sLink::server::db
 
                         m_InfoOutbox.push(requestResult ? *requestResult : requestResult.error());
                     },
-                    [this](const MessageRequest &request)
+                    [this](const MessageSaveRequest &request)
                     {
-                        auto requestResult = handleMessageRequest(request.m_Message);
+                        auto requestResult = handleMessageSaveRequest(request.m_Message);
 
                         m_InfoOutbox.push(requestResult ? *requestResult : requestResult.error());
                     },
-                    [this](const ProfilePictureRequest& request)
+                    [this](const ProfilePictureSaveRequest &request)
                     {
-                        auto requestResult = handleProfilePictureRequest(request.m_User, request.m_Content);
+                        auto requestResult = handleProfilePictureSaveRequest(request.m_User, request.m_Content);
+
+                        m_InfoOutbox.push(requestResult ? *requestResult : requestResult.error());
+                    },
+                    [this](const UserProfilePictureRequest &request)
+                    {
+                        auto requestResult = handleUserProfilePictureRequest(request.m_User);
 
                         m_InfoOutbox.push(requestResult ? *requestResult : requestResult.error());
                     },
@@ -151,6 +158,37 @@ namespace sLink::server::db
         return userId;
     }
 
+    std::unique_ptr<std::string> Database::getUserProfilePicture(const user::User &user) const
+    {
+        SLINK_START_BENCHMARK
+
+        auto userId = getUserId(user);
+
+        if (!userId)
+            return {};
+
+        sqlite3_stmt *stmt;
+
+        if (sqlite3_prepare_v2(m_DatabaseHandle, s_GetProfilePictureQuery.data(), -1, &stmt, nullptr) != SQLITE_OK)
+            return {};
+
+        sqlite3_bind_int(stmt, 1, *userId);
+
+        std::unique_ptr<std::string> content = {};
+
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            const auto *blobPtr = sqlite3_column_blob(stmt, 0);
+            content = std::make_unique<std::string>(static_cast<const char *>(blobPtr));
+        }
+
+        sqlite3_finalize(stmt);
+
+        SLINK_END_BENCHMARK("[Database]", "getUserProfilePicture", s_BenchmarkOutputColor)
+
+        return content;
+    }
+
     bool Database::findUser(const user::User &user) const
     {
         return getUserId(user).has_value();
@@ -168,12 +206,17 @@ namespace sLink::server::db
 
     void Database::requestMessageSave(const message::Message &message)
     {
-        m_Requests.push(MessageRequest{message});
+        m_Requests.push(MessageSaveRequest{message});
     }
 
     void Database::requestProfilePictureSave(const user::User &user, std::string_view content)
     {
-        m_Requests.push(ProfilePictureRequest{user, content.data()});
+        m_Requests.push(ProfilePictureSaveRequest{user, content.data()});
+    }
+
+    void Database::requestUserProfilePicture(const user::User &user)
+    {
+        m_Requests.push(UserProfilePictureRequest{user});
     }
 
     Database::ActionResult Database::checkUserLoginInfo(const user::User &user) const
@@ -290,14 +333,28 @@ namespace sLink::server::db
         return result;
     }
 
-    Database::ActionResult Database::handleMessageRequest(const message::Message &message)
+    Database::ActionResult Database::handleMessageSaveRequest(const message::Message &message)
     {
         return addMessage(message);
     }
 
-    Database::ActionResult Database::handleProfilePictureRequest(const user::User &user, std::string_view content)
+    Database::ActionResult Database::handleProfilePictureSaveRequest(const user::User &user, std::string_view content)
     {
         return addProfilePicture(user, content);
+    }
+
+    Database::ActionResult Database::handleUserProfilePictureRequest(const user::User &user)
+    {
+        if (auto result = getUserProfilePicture(user))
+        {
+            m_Responses.push({
+                user.getUsername().data(), *result, Response::ResponseType::USER_PROFILE_PICTURE
+            });
+
+            return {std::format("User {} profile picture found successfully", user.getUsername())};
+        }
+
+        return std::unexpected(std::format("User {} profile picture not found", user.getUsername()));
     }
 
     Database::ActionResult Database::addMessage(const message::Message &message)
@@ -344,7 +401,11 @@ namespace sLink::server::db
 
         if (auto userId = getUserId(user))
         {
-            sqlite3_bind_text(stmt, 1, content.data(), -1, SQLITE_TRANSIENT);
+            auto js = nlohmann::json::parse(content);
+            auto pixels = js["bytes"].get<std::vector<uint8_t>>();
+            auto pixelsString = std::string(pixels.begin(), pixels.end());
+
+            sqlite3_bind_text(stmt, 1, pixelsString.c_str(), -1, SQLITE_TRANSIENT);
 
             sqlite3_bind_int(stmt, 2, *userId);
         } else

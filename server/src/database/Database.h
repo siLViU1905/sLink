@@ -45,8 +45,8 @@ namespace sLink::server::db
         static constexpr std::string_view s_CreateProfilePicturesTableQuery =
                 "CREATE TABLE IF NOT EXISTS profile_pictures ("
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                "content TEXT, "
-                "user_id INTEGER, "
+                "content BLOB NOT NULL, "
+                "user_id INTEGER NOT NULL UNIQUE, "
                 "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
                 ");";
 
@@ -56,11 +56,14 @@ namespace sLink::server::db
 
         static constexpr std::string_view s_GetUserPasswordQuery = "SELECT password FROM users WHERE id = ?;";
 
+        static constexpr std::string_view s_GetProfilePictureQuery =
+                "SELECT content FROM profile_pictures WHERE user_id = ?;";
+
         static constexpr std::string_view s_InsertMessageQuery =
                 "INSERT INTO messages (content, timestamp, user_id) VALUES (?, ?, ?);";
 
         static constexpr std::string_view s_InsertProfilePictureQuery =
-                "INSERT INTO profile_pictures (content, user_id) VALUES (?, ?);";
+                "INSERT OR REPLACE INTO profile_pictures (content, user_id) VALUES (?, ?);";
 
         static constexpr std::string_view s_BenchmarkOutputColor = SLINK_CL_CLR_YELLOW;
 
@@ -72,7 +75,8 @@ namespace sLink::server::db
                 LOGIN_SUCCESS,
                 LOGIN_FAIL,
                 REGISTER_SUCCESS,
-                REGISTER_FAIL
+                REGISTER_FAIL,
+                USER_PROFILE_PICTURE
             };
 
             std::string m_Username;
@@ -96,9 +100,11 @@ namespace sLink::server::db
 
         void requestUserRegister(const user::User &user);
 
-        void requestMessageSave(const message::Message& message);
+        void requestMessageSave(const message::Message &message);
 
         void requestProfilePictureSave(const user::User &user, std::string_view content);
+
+        void requestUserProfilePicture(const user::User &user);
 
         void close();
 
@@ -115,21 +121,29 @@ namespace sLink::server::db
             user::User m_User;
         };
 
-        struct MessageRequest
+        struct MessageSaveRequest
         {
             message::Message m_Message;
         };
 
-        struct ProfilePictureRequest
+        struct ProfilePictureSaveRequest
         {
             user::User m_User;
 
             std::string m_Content;
         };
 
-        struct ShutdownRequest{};
+        struct UserProfilePictureRequest
+        {
+            user::User m_User;
+        };
 
-        using DbRequest = std::variant<LoginRequest, RegisterRequest, MessageRequest, ProfilePictureRequest, ShutdownRequest>;
+        struct ShutdownRequest
+        {
+        };
+
+        using DbRequest = std::variant<LoginRequest, RegisterRequest, MessageSaveRequest, ProfilePictureSaveRequest,
+            ShutdownRequest, UserProfilePictureRequest>;
 
         using ActionResult = std::expected<std::string, std::string>;
 
@@ -143,6 +157,8 @@ namespace sLink::server::db
 
         std::optional<int> getUserId(const user::User &user) const;
 
+        std::unique_ptr<std::string> getUserProfilePicture(const user::User &user) const;
+
         ActionResult checkUserLoginInfo(const user::User &user) const;
 
         ActionResult checkUserRegisterInfo(const user::User &user) const;
@@ -151,11 +167,13 @@ namespace sLink::server::db
 
         ActionResult handleLoginRequest(const user::User &user);
 
-        ActionResult handleRegisterRequest(const user::User& user);
+        ActionResult handleRegisterRequest(const user::User &user);
 
-        ActionResult handleMessageRequest(const message::Message &message);
+        ActionResult handleMessageSaveRequest(const message::Message &message);
 
-        ActionResult handleProfilePictureRequest(const user::User &user, std::string_view content);
+        ActionResult handleProfilePictureSaveRequest(const user::User &user, std::string_view content);
+
+        ActionResult handleUserProfilePictureRequest(const user::User &user);
 
         sqlite3 *m_DatabaseHandle;
 
