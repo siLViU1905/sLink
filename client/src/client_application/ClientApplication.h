@@ -29,6 +29,8 @@ namespace sLink::client_application
 
         void onConnect(std::string_view username, std::string_view password, std::string_view serverPort, protocol::Command joinType);
 
+        void handleProfilePictureCreation();
+
         asio::io_context m_IOContext;
 
         client::Client m_Client;

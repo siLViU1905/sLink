@@ -7,6 +7,8 @@
 #include <format>
 #include <stb_image_resize2.h>
 
+#include <nlohmann/json.hpp>
+
 namespace sLink::profile_picture
 {
     const uint32_t ProfilePicture::s_MipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(s_ImageWidth, s_ImageHeight)))) + 1;
@@ -36,5 +38,11 @@ namespace sLink::profile_picture
     const std::vector<uint8_t> & ProfilePicture::getPixels() const
     {
         return m_Pixels;
+    }
+
+    void ProfilePicture::setPixelsFromContent(std::string_view content)
+    {
+        auto js = nlohmann::json::parse(content);
+        m_Pixels = js["bytes"].get<std::vector<uint8_t>>();
     }
 }

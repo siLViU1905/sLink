@@ -126,6 +126,11 @@ namespace sLink::server
                     m_Database.requestUserRegister(user);
                 });
 
+                session->setOnProfilePictureSentCallback([this, session](const user::User &user, std::string_view content)
+                {
+                    m_Database.requestProfilePictureSave(user, content);
+                });
+
                 session->setOnDisconnectCallback([this, session]()
                 {
                     onClientDisconnected(session);

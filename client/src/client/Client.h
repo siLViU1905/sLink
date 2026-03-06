@@ -32,6 +32,8 @@ namespace sLink::client
 
         bool isConnected() const;
 
+        bool hasProfilePicture() const;
+
         utility::SafeQueue<std::string> &getInbox();
 
         profile_picture::ProfilePicture& getProfilePicture();

@@ -27,6 +27,8 @@ namespace sLink::profile_picture
 
         const std::vector<uint8_t>& getPixels() const;
 
+        void setPixelsFromContent(std::string_view content);
+
     private:
         std::vector<uint8_t> m_Pixels;
 

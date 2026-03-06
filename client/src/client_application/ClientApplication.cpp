@@ -56,6 +56,12 @@ namespace sLink::client_application
                     m_LoginLayer->getClientLoginPanel().notifyKick(message.getContent());
                     break;
 
+                case protocol::Command::PROFILE_PICTURE:
+                    m_Client.getProfilePicture().setPixelsFromContent(message.getContent());
+
+                    handleProfilePictureCreation();
+                    break;
+
                 default:
                     break;
             }
@@ -69,13 +75,8 @@ namespace sLink::client_application
             {
                 m_ChatLayer->getInfoPanel().addSuccessInfo(*result);
 
-                m_Renderer.createProfilePicture(m_Client.getProfilePicture());
-
-                m_LoginLayer->getClientLoginPanel().setTextureID(m_Renderer.getProfilePictureTextureID());
-
-                m_ChatLayer->getChatWindow().setTextureID(m_Renderer.getProfilePictureTextureID());
-            }
-            else
+                handleProfilePictureCreation();
+            } else
                 m_ChatLayer->getInfoPanel().addFailInfo(result.error());
         }
     }
@@ -162,5 +163,14 @@ namespace sLink::client_application
 
         if (!result)
             m_ChatLayer->getInfoPanel().addFailInfo(result.error());
+    }
+
+    void ClientApplication::handleProfilePictureCreation()
+    {
+        m_Renderer.createProfilePicture(m_Client.getProfilePicture());
+
+        m_LoginLayer->getClientLoginPanel().setTextureID(m_Renderer.getProfilePictureTextureID());
+
+        m_ChatLayer->getChatWindow().setTextureID(m_Renderer.getProfilePictureTextureID());
     }
 }
