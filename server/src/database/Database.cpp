@@ -54,7 +54,7 @@ namespace sLink::server::db
                     },
                     [this](const UserProfilePictureRequest &request)
                     {
-                        auto requestResult = handleUserProfilePictureRequest(request.m_User);
+                        auto requestResult = handleUserProfilePictureRequest(request);
 
                         m_InfoOutbox.push(requestResult ? *requestResult : requestResult.error());
                     },
@@ -178,8 +178,9 @@ namespace sLink::server::db
 
         if (sqlite3_step(stmt) == SQLITE_ROW)
         {
-            const auto *blobPtr = sqlite3_column_blob(stmt, 0);
-            content = std::make_unique<std::string>(static_cast<const char *>(blobPtr));
+            const void *blobPtr = sqlite3_column_blob(stmt, 0);
+            int blobSize = sqlite3_column_bytes(stmt, 0);
+            content = std::make_unique<std::string>(static_cast<const char *>(blobPtr), blobSize);
         }
 
         sqlite3_finalize(stmt);
@@ -214,9 +215,9 @@ namespace sLink::server::db
         m_Requests.push(ProfilePictureSaveRequest{user, content.data()});
     }
 
-    void Database::requestUserProfilePicture(const user::User &user)
+    void Database::requestUserProfilePicture(const user::User &user, std::string_view requester)
     {
-        m_Requests.push(UserProfilePictureRequest{user});
+        m_Requests.push(UserProfilePictureRequest{user, requester.data()});
     }
 
     Database::ActionResult Database::checkUserLoginInfo(const user::User &user) const
@@ -300,11 +301,17 @@ namespace sLink::server::db
 
         if (result)
             m_Responses.push({
-                user.getUsername().data(), "", Response::ResponseType::LOGIN_SUCCESS
+                user.getUsername().data(),
+                "",
+                "",
+                Response::ResponseType::LOGIN_SUCCESS
             });
         else
             m_Responses.push({
-                user.getUsername().data(), result.error(), Response::ResponseType::LOGIN_FAIL
+                user.getUsername().data(),
+                result.error(),
+                "",
+                Response::ResponseType::LOGIN_FAIL
             });
 
         return result;
@@ -318,16 +325,24 @@ namespace sLink::server::db
         {
             if (auto addResult = addUser(user))
                 m_Responses.push({
-                    user.getUsername().data(), "", Response::ResponseType::REGISTER_SUCCESS
+                    user.getUsername().data(),
+                    "",
+                    "",
+                    Response::ResponseType::REGISTER_SUCCESS
                 });
             else
                 m_Responses.push({
-                    user.getUsername().data(), addResult.error(),
+                    user.getUsername().data(),
+                    addResult.error(),
+                    "",
                     Response::ResponseType::REGISTER_FAIL
                 });
         } else
             m_Responses.push({
-                user.getUsername().data(), result.error(), Response::ResponseType::REGISTER_FAIL
+                user.getUsername().data(),
+                result.error(),
+                "",
+                Response::ResponseType::REGISTER_FAIL
             });
 
         return result;
@@ -343,18 +358,21 @@ namespace sLink::server::db
         return addProfilePicture(user, content);
     }
 
-    Database::ActionResult Database::handleUserProfilePictureRequest(const user::User &user)
+    Database::ActionResult Database::handleUserProfilePictureRequest(const UserProfilePictureRequest &request)
     {
-        if (auto result = getUserProfilePicture(user))
+        if (auto result = getUserProfilePicture(request.m_TargetUser))
         {
             m_Responses.push({
-                user.getUsername().data(), *result, Response::ResponseType::USER_PROFILE_PICTURE
+                request.m_TargetUser.getUsername().data(),
+                *result,
+                request.m_RequesterName,
+                Response::ResponseType::USER_PROFILE_PICTURE
             });
 
-            return {std::format("User {} profile picture found successfully", user.getUsername())};
+            return {std::format("User {} profile picture found successfully", request.m_TargetUser.getUsername())};
         }
 
-        return std::unexpected(std::format("User {} profile picture not found", user.getUsername()));
+        return std::unexpected(std::format("User {} profile picture not found", request.m_TargetUser.getUsername()));
     }
 
     Database::ActionResult Database::addMessage(const message::Message &message)
@@ -403,9 +421,7 @@ namespace sLink::server::db
         {
             auto js = nlohmann::json::parse(content);
             auto pixels = js["bytes"].get<std::vector<uint8_t>>();
-            auto pixelsString = std::string(pixels.begin(), pixels.end());
-
-            sqlite3_bind_text(stmt, 1, pixelsString.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_blob(stmt, 1, pixels.data(), pixels.size(), SQLITE_TRANSIENT);
 
             sqlite3_bind_int(stmt, 2, *userId);
         } else

@@ -83,6 +83,8 @@ namespace sLink::server::db
 
             std::string m_Message;
 
+            std::string m_Recipient;
+
             ResponseType m_Type;
         };
 
@@ -104,7 +106,7 @@ namespace sLink::server::db
 
         void requestProfilePictureSave(const user::User &user, std::string_view content);
 
-        void requestUserProfilePicture(const user::User &user);
+        void requestUserProfilePicture(const user::User &user, std::string_view requester);
 
         void close();
 
@@ -135,7 +137,9 @@ namespace sLink::server::db
 
         struct UserProfilePictureRequest
         {
-            user::User m_User;
+            user::User m_TargetUser;
+
+            std::string m_RequesterName;
         };
 
         struct ShutdownRequest
@@ -173,7 +177,7 @@ namespace sLink::server::db
 
         ActionResult handleProfilePictureSaveRequest(const user::User &user, std::string_view content);
 
-        ActionResult handleUserProfilePictureRequest(const user::User &user);
+        ActionResult handleUserProfilePictureRequest(const UserProfilePictureRequest &request);
 
         sqlite3 *m_DatabaseHandle;
 
