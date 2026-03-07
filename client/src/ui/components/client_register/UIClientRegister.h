@@ -28,6 +28,10 @@ namespace sLink::client::ui::component
 
         using OnLoginClickedCallback = std::move_only_function<void()>;
 
+        using OnLoadProfilePictureCallback = std::move_only_function<void()>;
+
+        using ProfilePictureTextureID = ImTextureID;
+
         UIClientRegister();
 
         void render() override;
@@ -36,9 +40,15 @@ namespace sLink::client::ui::component
 
         void setOnLoginClick(OnLoginClickedCallback &&callback);
 
+        void setOnLoadProfilePicture(OnLoadProfilePictureCallback &&callback);
+
+        void setTextureID(ProfilePictureTextureID id);
+
         void notifyRegisterFailed(std::string_view message);
 
     private:
+        void drawCircularProfile(ImVec2 pos, float size, std::string_view placeholderText);
+
         std::string m_InputUsername;
 
         std::string m_InputPassword;
@@ -51,6 +61,8 @@ namespace sLink::client::ui::component
 
         OnLoginClickedCallback m_OnLoginClickCallback;
 
+        OnLoadProfilePictureCallback m_OnLoadProfilePictureCallback;
+
         bool m_ShowAuthIncorrectInfoErrorPopup;
 
         bool m_ShowRegisterFailedPopup;
@@ -58,6 +70,8 @@ namespace sLink::client::ui::component
         std::string m_AuthInfoErrorMessage;
 
         std::string m_RegisterFailMessage;
+
+        ProfilePictureTextureID m_ProfilePictureTextureID;
     };
 }
 
