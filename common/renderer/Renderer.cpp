@@ -1054,6 +1054,15 @@ namespace sLink::renderer
         endSingleTimeCommands(*commandBuffer);
     }
 
+    void Renderer::clearProfilePictureTexture(ProfilePictureTexture &texture) const
+    {
+        m_Device.waitIdle();
+
+        texture.m_ImageView.clear();
+        texture.m_Image.clear();
+        texture.m_ImageMemory.clear();
+    }
+
     void Renderer::createImGuiDescriptorPool()
     {
         constexpr uint32_t descriptorCount = 1000;
@@ -1348,6 +1357,8 @@ namespace sLink::renderer
 
     void Renderer::createClientSideProfilePicture(const profile_picture::ProfilePicture &profilePicture)
     {
+        clearProfilePictureTexture(m_ClientSideProfilePictureTexture);
+
         createProfilePictureImage(profilePicture, m_ClientSideProfilePictureTexture);
 
         createProfilePictureImageView(m_ClientSideProfilePictureTexture);
@@ -1359,6 +1370,8 @@ namespace sLink::renderer
         const profile_picture::ProfilePicture &profilePicture)
     {
         auto& texture = m_ServerSideProfilePictureTextures[std::string(username)];
+
+        clearProfilePictureTexture(texture);
 
         createProfilePictureImage(profilePicture, texture);
 

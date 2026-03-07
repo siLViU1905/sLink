@@ -114,6 +114,8 @@ namespace sLink::renderer
 
         void generateProfilePictureMipMaps(ProfilePictureTexture& texture, vk::Format imageFormat);
 
+        void clearProfilePictureTexture(ProfilePictureTexture &texture) const;
+
         vk::Format findSupportedFormat(const std::vector<vk::Format> &candidates,
                                        vk::ImageTiling tiling,
                                        vk::FormatFeatureFlags features) const;
