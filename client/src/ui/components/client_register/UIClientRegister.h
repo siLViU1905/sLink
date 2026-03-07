@@ -23,6 +23,8 @@ namespace sLink::client::ui::component
 
         static constexpr ImVec4 s_ColorLink = { 0.2f, 0.6f, 1.0f, 1.0f };
 
+        static constexpr float s_ProfileCircleRadius = 40.f;
+
     public:
         using OnRegisterDataInputCallback = std::move_only_function<void(std::string_view, std::string_view, std::string_view)>;
 

@@ -22,6 +22,26 @@ namespace sLink::client::ui::component
         ImGui::Begin("Register to sLink", nullptr,
                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
+        float circleDiameter = s_ProfileCircleRadius * 2.f;
+        float startPosX = (s_WindowWidth - circleDiameter) * 0.5f;
+        ImVec2 profilePos = ImGui::GetCursorScreenPos();
+        profilePos.x += startPosX - ImGui::GetStyle().WindowPadding.x;
+        profilePos.y += 10.0f;
+
+        drawCircularProfile(profilePos, circleDiameter, "LOAD");
+
+        ImGui::SetCursorScreenPos(profilePos);
+        if (ImGui::InvisibleButton("##profileCircle", ImVec2(circleDiameter, circleDiameter)))
+        {
+            if (m_OnLoadProfilePictureCallback)
+                m_OnLoadProfilePictureCallback();
+        }
+
+        if (ImGui::IsItemHovered())
+            ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.0f);
+
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, s_InputPaddingY));
 
         ImGui::Text("Username:");
