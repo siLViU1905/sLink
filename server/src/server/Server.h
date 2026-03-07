@@ -42,6 +42,10 @@ namespace sLink::server
 
         bool isUserConnected(const user::User& user);
 
+        void handleProfilePictureDataRequest(const db::Database::Response& response);
+
+        void handlePendingSessions(const db::Database::Response& response);
+
         asio::io_context &m_IOContext;
 
         db::Database& m_Database;

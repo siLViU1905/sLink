@@ -25,10 +25,9 @@ namespace sLink::profile_picture
 
         LoadResult loadImage(std::string_view path);
 
-        auto getPixels(this auto&& self)
-        {
-            return self.m_Pixels;
-        }
+        const std::vector<uint8_t>& getPixels() const;
+
+        void setPixelsFromContent(std::string_view content);
 
     private:
         std::vector<uint8_t> m_Pixels;

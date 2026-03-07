@@ -19,9 +19,7 @@ namespace sLink::renderer
           m_DepthImage(nullptr), m_DepthImageMemory(nullptr),
           m_DepthImageView(nullptr),
           m_ColorImage(nullptr), m_ColorImageView(nullptr),
-          m_ColorImageMemory(nullptr),
-          m_ProfilePictureImage(nullptr), m_ProfilePictureImageMemory(nullptr),
-          m_ProfilePictureImageView(nullptr), m_ProfilePictureSampler(nullptr)
+          m_ColorImageMemory(nullptr)
     {
     }
 
@@ -958,7 +956,7 @@ namespace sLink::renderer
         m_GraphicsQueue.waitIdle();
     }
 
-    void Renderer::generateProfilePictureMipMaps(vk::Format imageFormat)
+    void Renderer::generateProfilePictureMipMaps(ProfilePictureTexture& texture, vk::Format imageFormat)
     {
         vk::FormatProperties formatProperties = m_PhysicalDevice.getFormatProperties(imageFormat);
 
@@ -975,7 +973,7 @@ namespace sLink::renderer
             vk::ImageLayout::eTransferSrcOptimal,
             vk::QueueFamilyIgnored,
             vk::QueueFamilyIgnored,
-            m_ProfilePictureImage
+            texture.m_Image
         );
 
         barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
@@ -1013,9 +1011,9 @@ namespace sLink::renderer
             blit.dstSubresource = vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, i, 0, 1);
 
             commandBuffer->blitImage(
-                m_ProfilePictureImage,
+                texture.m_Image,
                 vk::ImageLayout::eTransferSrcOptimal,
-                m_ProfilePictureImage,
+                texture.m_Image,
                 vk::ImageLayout::eTransferDstOptimal,
                 {blit},
                 vk::Filter::eLinear
@@ -1056,6 +1054,15 @@ namespace sLink::renderer
         endSingleTimeCommands(*commandBuffer);
     }
 
+    void Renderer::clearProfilePictureTexture(ProfilePictureTexture &texture) const
+    {
+        m_Device.waitIdle();
+
+        texture.m_ImageView.clear();
+        texture.m_Image.clear();
+        texture.m_ImageMemory.clear();
+    }
+
     void Renderer::createImGuiDescriptorPool()
     {
         constexpr uint32_t descriptorCount = 1000;
@@ -1084,7 +1091,7 @@ namespace sLink::renderer
         m_ImGuiDescriptorPool = vk::raii::DescriptorPool(m_Device, poolInfo);
     }
 
-    void Renderer::createProfilePictureImage(const profile_picture::ProfilePicture &profilePicture)
+    void Renderer::createProfilePictureImage(const profile_picture::ProfilePicture &profilePicture, ProfilePictureTexture& texture)
     {
         vk::raii::Buffer stagingBuffer({});
 
@@ -1111,33 +1118,35 @@ namespace sLink::renderer
                     vk::Format::eR8G8B8A8Srgb,
                     vk::SampleCountFlagBits::e1,
                     vk::ImageTiling::eOptimal,
-                    vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferSrc,
+                    vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled |
+                    vk::ImageUsageFlagBits::eTransferSrc,
                     vk::MemoryPropertyFlagBits::eDeviceLocal,
-                    m_ProfilePictureImage,
-                    m_ProfilePictureImageMemory
+                    texture.m_Image,
+                    texture.m_ImageMemory
         );
 
-        transitionImageLayout(m_ProfilePictureImage,
+        transitionImageLayout(texture.m_Image,
                               vk::ImageLayout::eUndefined,
                               vk::ImageLayout::eTransferDstOptimal,
                               profile_picture::ProfilePicture::s_MipLevels
         );
 
-        copyBufferToImage(stagingBuffer, m_ProfilePictureImage,
+        copyBufferToImage(stagingBuffer, texture.m_Image,
                           profile_picture::ProfilePicture::s_ImageWidth,
                           profile_picture::ProfilePicture::s_ImageHeight);
 
-        generateProfilePictureMipMaps(vk::Format::eR8G8B8A8Srgb);
+        generateProfilePictureMipMaps(texture, vk::Format::eR8G8B8A8Srgb);
     }
 
-    void Renderer::createProfilePictureImageView()
+    void Renderer::createProfilePictureImageView(ProfilePictureTexture& texture)
     {
-        m_ProfilePictureImageView = createImageView(m_ProfilePictureImage, vk::Format::eR8G8B8A8Srgb,
-                                                    vk::ImageAspectFlagBits::eColor,
-                                                    profile_picture::ProfilePicture::s_MipLevels);
+        texture.m_ImageView = createImageView(texture.m_Image,
+                                                              vk::Format::eR8G8B8A8Srgb,
+                                                              vk::ImageAspectFlagBits::eColor,
+                                                              profile_picture::ProfilePicture::s_MipLevels);
     }
 
-    void Renderer::createProfilePictureSampler()
+    void Renderer::createProfilePictureSampler(ProfilePictureTexture& texture)
     {
         auto properties = m_PhysicalDevice.getProperties();
 
@@ -1163,7 +1172,7 @@ namespace sLink::renderer
         samplerInfo.minLod = 0.0f;
         samplerInfo.maxLod = 0.0f;
 
-        m_ProfilePictureSampler = vk::raii::Sampler(m_Device, samplerInfo);
+        texture.m_Sampler = vk::raii::Sampler(m_Device, samplerInfo);
     }
 
     vk::Format Renderer::findSupportedFormat(const std::vector<vk::Format> &candidates, vk::ImageTiling tiling,
@@ -1346,20 +1355,47 @@ namespace sLink::renderer
         m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
-    void Renderer::createProfilePicture(const profile_picture::ProfilePicture &profilePicture)
+    void Renderer::createClientSideProfilePicture(const profile_picture::ProfilePicture &profilePicture)
     {
-        createProfilePictureImage(profilePicture);
+        clearProfilePictureTexture(m_ClientSideProfilePictureTexture);
 
-        createProfilePictureImageView();
+        createProfilePictureImage(profilePicture, m_ClientSideProfilePictureTexture);
 
-        createProfilePictureSampler();
+        createProfilePictureImageView(m_ClientSideProfilePictureTexture);
+
+        createProfilePictureSampler(m_ClientSideProfilePictureTexture);
     }
 
-    ImTextureID Renderer::getProfilePictureTextureID()
+    void Renderer::createProfilePicture(std::string_view username,
+        const profile_picture::ProfilePicture &profilePicture)
+    {
+        auto& texture = m_ServerSideProfilePictureTextures[std::string(username)];
+
+        clearProfilePictureTexture(texture);
+
+        createProfilePictureImage(profilePicture, texture);
+
+        createProfilePictureImageView(texture);
+
+        createProfilePictureSampler(texture);
+    }
+
+    ImTextureID Renderer::getClientSideProfilePictureTextureID() const
     {
         return reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(
-            *m_ProfilePictureSampler,
-            *m_ProfilePictureImageView,
+            *m_ClientSideProfilePictureTexture.m_Sampler,
+            *m_ClientSideProfilePictureTexture.m_ImageView,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        ));
+    }
+
+    ImTextureID Renderer::getProfilePictureTextureID(std::string_view username) const
+    {
+        const auto& texture = m_ServerSideProfilePictureTextures.at(std::string(username));
+
+        return reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(
+            *texture.m_Sampler,
+            *texture.m_ImageView,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         ));
     }
@@ -1382,5 +1418,11 @@ namespace sLink::renderer
         std::println("Validation layer: type {} msg {}", to_string(type), pCallbackData->pMessage);
 
         return VK_FALSE;
+    }
+
+    Renderer::ProfilePictureTexture::ProfilePictureTexture() : m_Image(nullptr), m_ImageMemory(nullptr),
+                                                               m_ImageView(nullptr),
+                                                               m_Sampler(nullptr)
+    {
     }
 }

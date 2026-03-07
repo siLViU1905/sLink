@@ -6,8 +6,7 @@ namespace sLink::client::ui::component
 {
     UIChatWindow::UIChatWindow(const std::vector<sLink::ui::component::UIInfo::Info> &infos)
         : m_InfosRef(infos),
-          m_InputContent(255, '\0'),
-          m_ProfilePictureTextureID(0)
+          m_InputContent(255, '\0')
     {
     }
 
@@ -70,7 +69,7 @@ namespace sLink::client::ui::component
 
             ImVec2 pos = ImGui::GetCursorScreenPos();
             float avatarSize = ImGui::GetFontSize() * 1.5f;
-            drawCircularProfile(pos, avatarSize, "IMG");
+            drawCircularProfile(message.getSenderName(), pos, avatarSize, "IMG");
             ImGui::SameLine();
 
             ImGui::SameLine();
@@ -137,23 +136,23 @@ namespace sLink::client::ui::component
         m_Messages.push_back(message);
     }
 
+    void UIChatWindow::addUserProfilePictureTextureID(std::string_view username, ProfilePictureTextureID id)
+    {
+        m_ProfilePictureIds[username.data()] = id;
+    }
+
     void UIChatWindow::setOnMessageSend(OnSendCallback &&callback)
     {
         m_OnSendCallback = std::move(callback);
     }
 
-    void UIChatWindow::setTextureID(ProfilePictureTextureID id)
-    {
-        m_ProfilePictureTextureID = id;
-    }
-
-    void UIChatWindow::drawCircularProfile(ImVec2 pos, float size, std::string_view placeholderText)
+    void UIChatWindow::drawCircularProfile(std::string_view username, ImVec2 pos, float size, std::string_view placeholderText)
     {
         ImDrawList *drawList = ImGui::GetWindowDrawList();
         float rounding = size * 0.5f;
         ImVec2 center = ImVec2(pos.x + rounding, pos.y + rounding);
 
-        if (m_ProfilePictureTextureID == 0)
+        if (m_ProfilePictureIds[std::string(username)] == 0)
         {
             drawList->AddCircleFilled(center, rounding, ImColor(60, 60, 60, 255), 64);
 
@@ -164,7 +163,7 @@ namespace sLink::client::ui::component
         {
             ImVec2 maxPos = ImVec2(pos.x + size, pos.y + size);
             drawList->AddImageRounded(
-                m_ProfilePictureTextureID,
+                m_ProfilePictureIds[username.data()],
                 pos,
                 maxPos,
                 ImVec2(0, 0), ImVec2(1, 1),

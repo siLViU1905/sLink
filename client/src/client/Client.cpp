@@ -1,5 +1,8 @@
 #include "Client.h"
 
+#include <nlohmann/json.hpp>
+#include <utility/base64/Base64.h>
+
 namespace sLink::client
 {
     Client::Client(asio::io_context &ctx)
@@ -58,6 +61,11 @@ namespace sLink::client
     bool Client::isConnected() const
     {
         return m_Socket.is_open();
+    }
+
+    bool Client::hasProfilePicture() const
+    {
+        return !m_ProfilePicture.getPixels().empty();
     }
 
     utility::SafeQueue<std::string> &Client::getInbox()
@@ -142,8 +150,20 @@ namespace sLink::client
     {
         message::Message joinMessage(joinType, m_Username, m_Password);
 
-        auto data = joinMessage.serialize() + "\n";
+        send(joinMessage);
 
-        asio::write(m_Socket, asio::buffer(data));
+        if (hasProfilePicture())
+        {
+            const auto& pixels = m_ProfilePicture.getPixels();
+
+            std::string encodedPixels = utility::base64::encode(pixels);
+
+            nlohmann::json js;
+            js["base64_pixels"] = encodedPixels;
+
+            message::Message profilePictureMessage(protocol::Command::PROFILE_PICTURE, m_Username, js.dump());
+
+           send(profilePictureMessage);
+        }
     }
 }

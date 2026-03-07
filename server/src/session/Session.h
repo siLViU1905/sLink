@@ -21,6 +21,8 @@ namespace sLink::server::session
 
         using OnRegisterInfoSentCallback = std::move_only_function<void(const user::User&)>;
 
+        using OnProfilePictureSentCallback = std::move_only_function<void(const user::User&, std::string_view)>;
+
         using OnDisconnectCallback = std::move_only_function<void()>;
 
         Session(asio::ip::tcp::socket &&socket, utility::SafeQueue<std::string> &inbox);
@@ -41,6 +43,8 @@ namespace sLink::server::session
         void setOnLoginInfoSentCallback(OnLoginInfoSentCallback &&callback);
 
         void setOnRegisterInfoSentCallback(OnRegisterInfoSentCallback &&callback);
+
+        void setOnProfilePictureSentCallback(OnProfilePictureSentCallback &&callback);
 
         void setOnDisconnectCallback(OnDisconnectCallback &&callback);
 
@@ -66,6 +70,8 @@ namespace sLink::server::session
         OnLoginInfoSentCallback m_OnLoginInfoSentCallback;
 
         OnRegisterInfoSentCallback m_OnRegisterInfoSentCallback;
+
+        OnProfilePictureSentCallback m_OnProfilePictureSentCallback;
 
         OnDisconnectCallback m_OnDisconnectCallback;
 

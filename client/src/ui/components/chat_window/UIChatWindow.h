@@ -44,20 +44,20 @@ namespace sLink::client::ui::component
 
         void addMessage(const message::Message &message);
 
+        void addUserProfilePictureTextureID(std::string_view username, ProfilePictureTextureID id);
+
         void setOnMessageSend(OnSendCallback &&callback);
 
-        void setTextureID(ProfilePictureTextureID id);
-
     private:
-        void drawCircularProfile(ImVec2 pos, float size, std::string_view placeholderText);
+        void drawCircularProfile(std::string_view username, ImVec2 pos, float size, std::string_view placeholderText);
 
         std::vector<message::Message> m_Messages;
+
+        std::unordered_map<std::string, ProfilePictureTextureID> m_ProfilePictureIds;
 
         const std::vector<sLink::ui::component::UIInfo::Info> &m_InfosRef;
 
         std::string m_InputContent;
-
-        ProfilePictureTextureID m_ProfilePictureTextureID;
 
         OnSendCallback m_OnSendCallback;
     };
