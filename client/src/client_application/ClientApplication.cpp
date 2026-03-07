@@ -83,6 +83,8 @@ namespace sLink::client_application
                 m_Renderer.createClientSideProfilePicture(m_Client.getProfilePicture());
 
                 m_LoginLayer->getClientLoginPanel().setTextureID(m_Renderer.getClientSideProfilePictureTextureID());
+
+                m_RegisterLayer->getClientRegisterPanel().setTextureID(m_Renderer.getClientSideProfilePictureTextureID());
             } else
                 m_ChatLayer->getInfoPanel().addFailInfo(result.error());
         }
@@ -151,11 +153,21 @@ namespace sLink::client_application
             [this](std::string_view username, std::string_view password, std::string_view serverPort)
             {
                 onConnect(username, password, serverPort, protocol::Command::REGISTER_REQUEST);
+
+                m_ChatLayer->getChatWindow().addUserProfilePictureTextureID(username, m_Renderer.getClientSideProfilePictureTextureID());
             });
 
         m_RegisterLayer->getClientRegisterPanel().setOnLoginClick([this]()
         {
             m_CurrentLayer = m_LoginLayer;
+        });
+
+        m_RegisterLayer->getClientRegisterPanel().setOnLoadProfilePicture([this]()
+        {
+            std::thread([this]()
+            {
+                m_FileExplorer.open();
+            }).detach();
         });
 
         m_CurrentLayer = m_LoginLayer;
@@ -177,8 +189,6 @@ namespace sLink::client_application
     void ClientApplication::handleProfilePictureCreation(std::string_view username, const profile_picture::ProfilePicture &profilePicture)
     {
         m_Renderer.createProfilePicture(username, profilePicture);
-
-        m_LoginLayer->getClientLoginPanel().setTextureID(m_Renderer.getProfilePictureTextureID(username));
 
         m_ChatLayer->getChatWindow().addUserProfilePictureTextureID(username, m_Renderer.getProfilePictureTextureID(username));
     }
