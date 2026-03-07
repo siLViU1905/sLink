@@ -1,5 +1,6 @@
 #include "Server.h"
-
+#include <nlohmann/json.hpp>
+#include <utility/base64/Base64.h>
 
 namespace sLink::server
 {
@@ -42,44 +43,13 @@ namespace sLink::server
     {
         while (auto response = m_Database.getUserResponses().tryPop())
         {
-            std::shared_ptr<session::Session> session; {
-                std::scoped_lock lock(m_PendingSessionsMutex);
-                auto it = m_PendingSessions.find(response->m_Username);
-                if (it != m_PendingSessions.end())
-                {
-                    session = it->second;
-                    m_PendingSessions.erase(it);
-                }
+            if (response->m_Type == db::Database::Response::ResponseType::USER_PROFILE_PICTURE)
+            {
+                handleProfilePictureDataRequest(*response);
+                continue;
             }
 
-            if (session)
-                switch (response->m_Type)
-                {
-                    case db::Database::Response::ResponseType::LOGIN_SUCCESS:
-                        if (!isUserConnected(session->getUser()))
-                            onClientAccept(session);
-                        else
-                            onClientReject(session, "User is already connected");
-
-                        break;
-
-                    case db::Database::Response::ResponseType::LOGIN_FAIL:
-                        onClientReject(session, response->m_Message);
-
-                        break;
-                    case db::Database::Response::ResponseType::REGISTER_SUCCESS:
-                        if (!isUserConnected(session->getUser()))
-                            onClientAccept(session);
-                        else
-                            onClientReject(session, "User is already connected");
-
-                        break;
-
-                    case db::Database::Response::ResponseType::REGISTER_FAIL:
-                        onClientReject(session, response->m_Message);
-
-                        break;
-                }
+            handlePendingSessions(*response);
         }
 
         while (auto rawMessage = m_Inbox.tryPop())
@@ -126,6 +96,12 @@ namespace sLink::server
                     m_Database.requestUserRegister(user);
                 });
 
+                session->setOnProfilePictureSentCallback(
+                    [this, session](const user::User &user, std::string_view content)
+                    {
+                        m_Database.requestProfilePictureSave(user, content);
+                    });
+
                 session->setOnDisconnectCallback([this, session]()
                 {
                     onClientDisconnected(session);
@@ -143,6 +119,9 @@ namespace sLink::server
     void Server::onClientAccept(const std::shared_ptr<session::Session> &session)
     { {
             std::scoped_lock lock(m_SessionsMutex);
+
+            for (const auto &s: m_Sessions)
+                m_Database.requestUserProfilePicture(s->getUser(), session->getUser().getUsername());
 
             m_Sessions.push_back(session);
         }
@@ -185,6 +164,74 @@ namespace sLink::server
         return it != m_Sessions.end();
     }
 
+    void Server::handleProfilePictureDataRequest(const db::Database::Response &response)
+    {
+        std::scoped_lock lock(m_SessionsMutex);
+        auto it = std::ranges::find_if(m_Sessions, [&](const auto &s)
+        {
+            return s->getUser().getUsername() == response.m_Recipient;
+        });
+
+        if (it != m_Sessions.end())
+        {
+            auto &session = *it;
+            std::span pixelData(
+                reinterpret_cast<const uint8_t *>(response.m_Message.data()),
+                response.m_Message.size()
+            );
+            std::string encodedPixels = utility::base64::encode(pixelData);
+
+            nlohmann::json js;
+            js["base64_pixels"] = encodedPixels;
+
+            session->send({protocol::Command::PROFILE_PICTURE, response.m_Username, js.dump()},
+                          session);
+        }
+    }
+
+    void Server::handlePendingSessions(const db::Database::Response &response)
+    {
+        std::shared_ptr<session::Session> session; {
+            std::scoped_lock lock(m_PendingSessionsMutex);
+            auto it = m_PendingSessions.find(response.m_Username);
+            if (it != m_PendingSessions.end())
+            {
+                session = it->second;
+                m_PendingSessions.erase(it);
+            }
+        }
+
+        switch (response.m_Type)
+        {
+            case db::Database::Response::ResponseType::LOGIN_SUCCESS:
+                if (!isUserConnected(session->getUser()))
+                    onClientAccept(session);
+                else
+                    onClientReject(session, "User is already connected");
+
+                break;
+
+            case db::Database::Response::ResponseType::LOGIN_FAIL:
+                onClientReject(session, response.m_Message);
+
+                break;
+            case db::Database::Response::ResponseType::REGISTER_SUCCESS:
+                if (!isUserConnected(session->getUser()))
+                    onClientAccept(session);
+                else
+                    onClientReject(session, "User is already connected");
+
+                break;
+
+            case db::Database::Response::ResponseType::REGISTER_FAIL:
+                onClientReject(session, response.m_Message);
+
+                break;
+            default:
+                break;
+        }
+    }
+
     void Server::kickUser(const user::User &user, std::string_view reason)
     {
         std::scoped_lock lock(m_SessionsMutex);
@@ -196,7 +243,7 @@ namespace sLink::server
             return session->getUser().getUsername() == user.getUsername();
         });
 
-        auto& session = *it;
+        auto &session = *it;
 
         message::Message message(protocol::Command::SERVER_KICK_REQUEST, "", reason);
 

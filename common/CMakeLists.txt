@@ -8,6 +8,7 @@ add_library(common_shared STATIC
         ui/components/info/UIInfo.cpp
         profile_picture/ProfilePicture.cpp
         utility/file_explorer/FileExplorer.cpp
+        utility/base64/Base64.cpp
 )
 
 target_include_directories(common_shared PUBLIC

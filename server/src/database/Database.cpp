@@ -5,6 +5,8 @@
 #include <chrono>
 
 #include "password_hasher/PasswordHasher.h"
+#include <nlohmann/json.hpp>
+#include <utility/base64/Base64.h>
 
 namespace sLink::server::db
 {
@@ -39,13 +41,25 @@ namespace sLink::server::db
 
                         m_InfoOutbox.push(requestResult ? *requestResult : requestResult.error());
                     },
-                    [this](const MessageRequest& request)
+                    [this](const MessageSaveRequest &request)
                     {
-                        auto requestResult = handleMessageRequest(request.m_Message);
+                        auto requestResult = handleMessageSaveRequest(request.m_Message);
 
                         m_InfoOutbox.push(requestResult ? *requestResult : requestResult.error());
                     },
-                    [this](ShutdownRequest request)
+                    [this](const ProfilePictureSaveRequest &request)
+                    {
+                        auto requestResult = handleProfilePictureSaveRequest(request.m_User, request.m_Content);
+
+                        m_InfoOutbox.push(requestResult ? *requestResult : requestResult.error());
+                    },
+                    [this](const UserProfilePictureRequest &request)
+                    {
+                        auto requestResult = handleUserProfilePictureRequest(request);
+
+                        m_InfoOutbox.push(requestResult ? *requestResult : requestResult.error());
+                    },
+                    [this](ShutdownRequest)
                     {
                         m_Shutdown = true;
                     }
@@ -84,6 +98,10 @@ namespace sLink::server::db
 
         if (sqlite3_exec(m_DatabaseHandle, s_CreateMessagesTableQuery.data(), nullptr, nullptr, &err) != SQLITE_OK)
             return std::unexpected(std::format("Failed to create messages table. Error: {}", err));
+
+        if (sqlite3_exec(m_DatabaseHandle, s_CreateProfilePicturesTableQuery.data(), nullptr, nullptr, &err) !=
+            SQLITE_OK)
+            return std::unexpected(std::format("Failed to create profile_pictures table. Error: {}", err));
 
         SLINK_END_BENCHMARK("[Database]", "start", s_BenchmarkOutputColor)
 
@@ -141,6 +159,38 @@ namespace sLink::server::db
         return userId;
     }
 
+    std::unique_ptr<std::string> Database::getUserProfilePicture(const user::User &user) const
+    {
+        SLINK_START_BENCHMARK
+
+        auto userId = getUserId(user);
+
+        if (!userId)
+            return {};
+
+        sqlite3_stmt *stmt;
+
+        if (sqlite3_prepare_v2(m_DatabaseHandle, s_GetProfilePictureQuery.data(), -1, &stmt, nullptr) != SQLITE_OK)
+            return {};
+
+        sqlite3_bind_int(stmt, 1, *userId);
+
+        std::unique_ptr<std::string> content = {};
+
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            const void *blobPtr = sqlite3_column_blob(stmt, 0);
+            int blobSize = sqlite3_column_bytes(stmt, 0);
+            content = std::make_unique<std::string>(static_cast<const char *>(blobPtr), blobSize);
+        }
+
+        sqlite3_finalize(stmt);
+
+        SLINK_END_BENCHMARK("[Database]", "getUserProfilePicture", s_BenchmarkOutputColor)
+
+        return content;
+    }
+
     bool Database::findUser(const user::User &user) const
     {
         return getUserId(user).has_value();
@@ -158,7 +208,17 @@ namespace sLink::server::db
 
     void Database::requestMessageSave(const message::Message &message)
     {
-        m_Requests.push(MessageRequest{message});
+        m_Requests.push(MessageSaveRequest{message});
+    }
+
+    void Database::requestProfilePictureSave(const user::User &user, std::string_view content)
+    {
+        m_Requests.push(ProfilePictureSaveRequest{user, content.data()});
+    }
+
+    void Database::requestUserProfilePicture(const user::User &user, std::string_view requester)
+    {
+        m_Requests.push(UserProfilePictureRequest{user, requester.data()});
     }
 
     Database::ActionResult Database::checkUserLoginInfo(const user::User &user) const
@@ -242,11 +302,17 @@ namespace sLink::server::db
 
         if (result)
             m_Responses.push({
-                user.getUsername().data(), "", Response::ResponseType::LOGIN_SUCCESS
+                user.getUsername().data(),
+                "",
+                "",
+                Response::ResponseType::LOGIN_SUCCESS
             });
         else
             m_Responses.push({
-                user.getUsername().data(), result.error(), Response::ResponseType::LOGIN_FAIL
+                user.getUsername().data(),
+                result.error(),
+                "",
+                Response::ResponseType::LOGIN_FAIL
             });
 
         return result;
@@ -260,24 +326,54 @@ namespace sLink::server::db
         {
             if (auto addResult = addUser(user))
                 m_Responses.push({
-                    user.getUsername().data(), "", Response::ResponseType::REGISTER_SUCCESS
+                    user.getUsername().data(),
+                    "",
+                    "",
+                    Response::ResponseType::REGISTER_SUCCESS
                 });
             else
                 m_Responses.push({
-                    user.getUsername().data(), addResult.error(),
+                    user.getUsername().data(),
+                    addResult.error(),
+                    "",
                     Response::ResponseType::REGISTER_FAIL
                 });
         } else
             m_Responses.push({
-                user.getUsername().data(), result.error(), Response::ResponseType::REGISTER_FAIL
+                user.getUsername().data(),
+                result.error(),
+                "",
+                Response::ResponseType::REGISTER_FAIL
             });
 
         return result;
     }
 
-    Database::ActionResult Database::handleMessageRequest(const message::Message &message)
+    Database::ActionResult Database::handleMessageSaveRequest(const message::Message &message)
     {
-       return addMessage(message);
+        return addMessage(message);
+    }
+
+    Database::ActionResult Database::handleProfilePictureSaveRequest(const user::User &user, std::string_view content)
+    {
+        return addProfilePicture(user, content);
+    }
+
+    Database::ActionResult Database::handleUserProfilePictureRequest(const UserProfilePictureRequest &request)
+    {
+        if (auto result = getUserProfilePicture(request.m_TargetUser))
+        {
+            m_Responses.push({
+                request.m_TargetUser.getUsername().data(),
+                *result,
+                request.m_RequesterName,
+                Response::ResponseType::USER_PROFILE_PICTURE
+            });
+
+            return {std::format("User {} profile picture found successfully", request.m_TargetUser.getUsername())};
+        }
+
+        return std::unexpected(std::format("User {} profile picture not found", request.m_TargetUser.getUsername()));
     }
 
     Database::ActionResult Database::addMessage(const message::Message &message)
@@ -311,6 +407,40 @@ namespace sLink::server::db
         SLINK_END_BENCHMARK("[Database]", "addMessage", s_BenchmarkOutputColor)
 
         return {"Message successfully added"};
+    }
+
+    Database::ActionResult Database::addProfilePicture(const user::User &user, std::string_view content)
+    {
+        SLINK_START_BENCHMARK
+
+        sqlite3_stmt *stmt;
+
+        if (sqlite3_prepare_v2(m_DatabaseHandle, s_InsertProfilePictureQuery.data(), -1, &stmt, nullptr) != SQLITE_OK)
+            return std::unexpected(std::format("Failed to prepare insert profile picture query"));
+
+        if (auto userId = getUserId(user))
+        {
+            auto js = nlohmann::json::parse(content);
+            std::string encoded = js["base64_pixels"];
+            auto pixels = utility::base64::decode(encoded);
+            sqlite3_bind_blob(stmt, 1, pixels.data(), pixels.size(), SQLITE_TRANSIENT);
+
+            sqlite3_bind_int(stmt, 2, *userId);
+        } else
+            return std::unexpected(std::format("Sender {} not found", user.getUsername()));
+
+        if (sqlite3_step(stmt) != SQLITE_DONE)
+        {
+            sqlite3_finalize(stmt);
+
+            return std::unexpected("Failed to add profile picture");
+        }
+
+        sqlite3_finalize(stmt);
+
+        SLINK_END_BENCHMARK("[Database]", "addProfilePicture", s_BenchmarkOutputColor)
+
+        return {"Profile Picture successfully added"};
     }
 
     Database::~Database()

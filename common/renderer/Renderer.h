@@ -11,6 +11,7 @@
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <ranges>
+#include <unordered_map>
 #include <vector>
 #include <GLFW/glfw3native.h>
 
@@ -41,9 +42,13 @@ namespace sLink::renderer
 
         void renderFrame();
 
-        void createProfilePicture(const profile_picture::ProfilePicture &profilePicture);
+        void createClientSideProfilePicture(const profile_picture::ProfilePicture &profilePicture);
 
-        ImTextureID getProfilePictureTextureID();
+        void createProfilePicture(std::string_view username, const profile_picture::ProfilePicture &profilePicture);
+
+        ImTextureID getClientSideProfilePictureTextureID() const;
+
+        ImTextureID getProfilePictureTextureID(std::string_view username) const;
 
         ~Renderer();
 
@@ -86,15 +91,30 @@ namespace sLink::renderer
 
         void copyBuffer(vk::raii::Buffer &srcBuffer, vk::raii::Buffer &dstBuffer, vk::DeviceSize size);
 
-        void generateProfilePictureMipMaps(vk::Format imageFormat);
-
         void createImGuiDescriptorPool();
 
-        void createProfilePictureImage(const profile_picture::ProfilePicture &profilePicture);
+        struct ProfilePictureTexture
+        {
+            ProfilePictureTexture();
 
-        void createProfilePictureImageView();
+            vk::raii::Image m_Image;
 
-        void createProfilePictureSampler();
+            vk::raii::DeviceMemory m_ImageMemory;
+
+            vk::raii::ImageView m_ImageView;
+
+            vk::raii::Sampler m_Sampler;
+        };
+
+        void createProfilePictureImage(const profile_picture::ProfilePicture &profilePicture, ProfilePictureTexture& texture);
+
+        void createProfilePictureImageView(ProfilePictureTexture& texture);
+
+        void createProfilePictureSampler(ProfilePictureTexture& texture);
+
+        void generateProfilePictureMipMaps(ProfilePictureTexture& texture, vk::Format imageFormat);
+
+        void clearProfilePictureTexture(ProfilePictureTexture &texture) const;
 
         vk::Format findSupportedFormat(const std::vector<vk::Format> &candidates,
                                        vk::ImageTiling tiling,
@@ -237,13 +257,9 @@ namespace sLink::renderer
 
         vk::ClearValue m_ClearColor;
 
-        vk::raii::Image m_ProfilePictureImage;
+        ProfilePictureTexture m_ClientSideProfilePictureTexture;
 
-        vk::raii::DeviceMemory m_ProfilePictureImageMemory;
-
-        vk::raii::ImageView m_ProfilePictureImageView;
-
-        vk::raii::Sampler m_ProfilePictureSampler;
+        std::unordered_map<std::string, ProfilePictureTexture> m_ServerSideProfilePictureTextures;
 
         static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
