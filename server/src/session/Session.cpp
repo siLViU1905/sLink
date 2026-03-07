@@ -142,7 +142,6 @@ namespace sLink::server::session
                 case protocol::Command::PROFILE_PICTURE:
                     m_OnProfilePictureSentCallback(m_User, message.getContent());
 
-                    m_Inbox.push(line);
                     break;
                default:
                     break;
