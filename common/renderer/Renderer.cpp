@@ -1358,7 +1358,7 @@ namespace sLink::renderer
     void Renderer::createProfilePicture(std::string_view username,
         const profile_picture::ProfilePicture &profilePicture)
     {
-        auto& texture = m_ServerSideProfilePictureTextures[username.data()];
+        auto& texture = m_ServerSideProfilePictureTextures[std::string(username)];
 
         createProfilePictureImage(profilePicture, texture);
 
@@ -1378,7 +1378,7 @@ namespace sLink::renderer
 
     ImTextureID Renderer::getProfilePictureTextureID(std::string_view username) const
     {
-        const auto& texture = m_ServerSideProfilePictureTextures.at(username.data());
+        const auto& texture = m_ServerSideProfilePictureTextures.at(std::string(username));
 
         return reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(
             *texture.m_Sampler,

@@ -152,7 +152,7 @@ namespace sLink::client::ui::component
         float rounding = size * 0.5f;
         ImVec2 center = ImVec2(pos.x + rounding, pos.y + rounding);
 
-        if (m_ProfilePictureIds[username.data()] == 0)
+        if (m_ProfilePictureIds[std::string(username)] == 0)
         {
             drawList->AddCircleFilled(center, rounding, ImColor(60, 60, 60, 255), 64);
 
