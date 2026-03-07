@@ -8,6 +8,7 @@
 #include <stb_image_resize2.h>
 
 #include <nlohmann/json.hpp>
+#include <utility/base64/Base64.h>
 
 namespace sLink::profile_picture
 {
@@ -43,6 +44,8 @@ namespace sLink::profile_picture
     void ProfilePicture::setPixelsFromContent(std::string_view content)
     {
         auto js = nlohmann::json::parse(content);
-        m_Pixels = js["bytes"].get<std::vector<uint8_t>>();
+        auto encodedPixels = js.at("base64_pixels").get<std::string>();
+
+        m_Pixels = utility::base64::decode(encodedPixels);
     }
 }
