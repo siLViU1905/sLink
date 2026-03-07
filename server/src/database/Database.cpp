@@ -6,6 +6,7 @@
 
 #include "password_hasher/PasswordHasher.h"
 #include <nlohmann/json.hpp>
+#include <utility/base64/Base64.h>
 
 namespace sLink::server::db
 {
@@ -420,7 +421,8 @@ namespace sLink::server::db
         if (auto userId = getUserId(user))
         {
             auto js = nlohmann::json::parse(content);
-            auto pixels = js["bytes"].get<std::vector<uint8_t>>();
+            std::string encoded = js["base64_pixels"];
+            auto pixels = utility::base64::decode(encoded);
             sqlite3_bind_blob(stmt, 1, pixels.data(), pixels.size(), SQLITE_TRANSIENT);
 
             sqlite3_bind_int(stmt, 2, *userId);

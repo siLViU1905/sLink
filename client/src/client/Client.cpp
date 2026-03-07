@@ -1,6 +1,7 @@
 #include "Client.h"
 
 #include <nlohmann/json.hpp>
+#include <utility/base64/Base64.h>
 
 namespace sLink::client
 {
@@ -155,8 +156,12 @@ namespace sLink::client
         {
             const auto& pixels = m_ProfilePicture.getPixels();
 
-            auto profilePictureContent = nlohmann::json::binary(pixels);
-            message::Message profilePictureMessage(protocol::Command::PROFILE_PICTURE, m_Username, profilePictureContent.dump());
+            std::string encodedPixels = utility::base64::encode(pixels);
+
+            nlohmann::json js;
+            js["base64_pixels"] = encodedPixels;
+
+            message::Message profilePictureMessage(protocol::Command::PROFILE_PICTURE, m_Username, js.dump());
 
            send(profilePictureMessage);
         }

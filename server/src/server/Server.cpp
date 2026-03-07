@@ -1,5 +1,6 @@
 #include "Server.h"
 #include <nlohmann/json.hpp>
+#include <utility/base64/Base64.h>
 
 namespace sLink::server
 {
@@ -174,16 +175,23 @@ namespace sLink::server
         if (it != m_Sessions.end())
         {
             auto &session = *it;
-            auto profilePictureContent = nlohmann::json::binary({response.m_Message.begin(), response.m_Message.end()});
-            session->send({protocol::Command::PROFILE_PICTURE, response.m_Username, profilePictureContent.dump()},
+            std::span pixelData(
+                reinterpret_cast<const uint8_t *>(response.m_Message.data()),
+                response.m_Message.size()
+            );
+            std::string encodedPixels = utility::base64::encode(pixelData);
+
+            nlohmann::json js;
+            js["base64_pixels"] = encodedPixels;
+
+            session->send({protocol::Command::PROFILE_PICTURE, response.m_Username, js.dump()},
                           session);
         }
     }
 
     void Server::handlePendingSessions(const db::Database::Response &response)
     {
-        std::shared_ptr<session::Session> session;
-        {
+        std::shared_ptr<session::Session> session; {
             std::scoped_lock lock(m_PendingSessionsMutex);
             auto it = m_PendingSessions.find(response.m_Username);
             if (it != m_PendingSessions.end())
