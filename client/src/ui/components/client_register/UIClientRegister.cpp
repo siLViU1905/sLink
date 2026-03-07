@@ -22,6 +22,26 @@ namespace sLink::client::ui::component
         ImGui::Begin("Register to sLink", nullptr,
                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
+        float circleDiameter = s_ProfileCircleRadius * 2.f;
+        float startPosX = (s_WindowWidth - circleDiameter) * 0.5f;
+        ImVec2 profilePos = ImGui::GetCursorScreenPos();
+        profilePos.x += startPosX - ImGui::GetStyle().WindowPadding.x;
+        profilePos.y += 10.0f;
+
+        drawCircularProfile(profilePos, circleDiameter, "LOAD");
+
+        ImGui::SetCursorScreenPos(profilePos);
+        if (ImGui::InvisibleButton("##profileCircle", ImVec2(circleDiameter, circleDiameter)))
+        {
+            if (m_OnLoadProfilePictureCallback)
+                m_OnLoadProfilePictureCallback();
+        }
+
+        if (ImGui::IsItemHovered())
+            ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.0f);
+
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, s_InputPaddingY));
 
         ImGui::Text("Username:");
@@ -146,10 +166,52 @@ namespace sLink::client::ui::component
         m_OnLoginClickCallback = std::move(callback);
     }
 
+    void UIClientRegister::setOnLoadProfilePicture(OnLoadProfilePictureCallback &&callback)
+    {
+        m_OnLoadProfilePictureCallback = std::move(callback);
+    }
+
+    void UIClientRegister::setTextureID(ProfilePictureTextureID id)
+    {
+        m_ProfilePictureTextureID = id;
+    }
+
     void UIClientRegister::notifyRegisterFailed(std::string_view message)
     {
         m_RegisterFailMessage = message;
 
         m_ShowRegisterFailedPopup = true;
+    }
+
+    void UIClientRegister::drawCircularProfile(ImVec2 pos, float size, std::string_view placeholderText)
+    {
+        ImDrawList *drawList = ImGui::GetWindowDrawList();
+        float rounding = size * 0.5f;
+        ImVec2 center = ImVec2(pos.x + rounding, pos.y + rounding);
+
+        if (m_ProfilePictureTextureID == 0)
+        {
+            drawList->AddCircleFilled(center, rounding, ImColor(60, 60, 60, 255), 64);
+
+            ImVec2 textSize = ImGui::CalcTextSize(placeholderText.data());
+            drawList->AddText(ImVec2(center.x - textSize.x * 0.5f, center.y - textSize.y * 0.5f),
+                              ImColor(200, 200, 200, 255), placeholderText.data());
+        }
+        else
+        {
+            ImVec2 maxPos = ImVec2(pos.x + size, pos.y + size);
+            drawList->AddImageRounded(
+                m_ProfilePictureTextureID,
+                pos,
+                maxPos,
+                ImVec2(0, 0), ImVec2(1, 1),
+                IM_COL32_WHITE,
+                rounding
+            );
+        }
+
+        drawList->AddCircle(center, rounding, IM_COL32(200, 200, 200, 255), 64, 2.0f);
+
+        ImGui::Dummy(ImVec2(size, size));
     }
 }
