@@ -180,7 +180,7 @@ namespace sLink::client_application
 
     void ClientApplication::initSounds()
     {
-        auto result = m_SendPressSound.load("../assets/sounds/send_button_press_sound.wav");
+        auto result = m_SendPressSound.load("assets/sounds/send_button_press_sound.wav");
 
         if (!result)
             m_ChatLayer->getInfoPanel().addFailInfo(result.error());
