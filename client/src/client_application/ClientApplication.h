@@ -8,6 +8,8 @@
 #include "../ui/layers/register_layer/UIRegisterLayer.h"
 #include <utility/file_explorer/FileExplorer.h>
 
+#include "sound/Sound.h"
+
 namespace sLink::client_application
 {
     class ClientApplication : public application::Application
@@ -26,6 +28,8 @@ namespace sLink::client_application
 
     private:
         void initLayers();
+
+        void initSounds();
 
         void onConnect(std::string_view username, std::string_view password, std::string_view serverPort, protocol::Command joinType);
 
@@ -46,6 +50,8 @@ namespace sLink::client_application
         std::shared_ptr<client::ui::layer::UILoginLayer> m_LoginLayer;
 
         std::shared_ptr<client::ui::layer::UIRegisterLayer> m_RegisterLayer;
+
+        sound::Sound m_SendPressSound;
     };
 }
 

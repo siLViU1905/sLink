@@ -7,6 +7,8 @@ namespace sLink::server_application
     {
         initLayers();
 
+        initSounds();
+
         m_NetworkThread = std::jthread([this]()
         {
             m_IOContext.run();
@@ -75,6 +77,19 @@ namespace sLink::server_application
         m_CurrentLayer = m_ServerPortLayer;
     }
 
+    void ServerApplication::initSounds()
+    {
+        auto result = m_ClientAcceptedSound.load("assets/sounds/client_accepted_sound.wav");
+
+        if (!result)
+            m_ClientsLayer->getInfoPanel().addFailInfo(result.error());
+
+        result = m_ClientDisconnectedSound.load("assets/sounds/client_disconnected_sound.wav");
+
+        if (!result)
+            m_ClientsLayer->getInfoPanel().addFailInfo(result.error());
+    }
+
     void ServerApplication::onPortSelected(std::string_view port)
     {
         uint16_t portNumber = 0;
@@ -95,6 +110,8 @@ namespace sLink::server_application
     {
         while (auto pendingUsername = m_Server.getPendingUsernames().tryPop())
         {
+            m_ClientAcceptedSound.play();
+
             m_ClientsLayer->getClientsPanel().addUsername(*pendingUsername);
 
             m_ClientsLayer->getClientLogger().logClientConnected(*pendingUsername);
@@ -115,6 +132,8 @@ namespace sLink::server_application
     {
         while (auto disconnectedUsername = m_Server.getDisconnectedUsernames().tryPop())
         {
+            m_ClientDisconnectedSound.play();
+
             m_ClientsLayer->getClientsPanel().removeUsername(*disconnectedUsername);
 
             m_ClientsLayer->getClientLogger().logClientDisconnected(*disconnectedUsername);

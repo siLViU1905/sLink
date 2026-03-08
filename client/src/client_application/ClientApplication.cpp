@@ -1,5 +1,7 @@
 #include "ClientApplication.h"
 
+#include <filesystem>
+
 namespace sLink::client_application
 {
     ClientApplication::ClientApplication(int windowWidth, int windowHeight,
@@ -8,6 +10,8 @@ namespace sLink::client_application
                                                                         m_Client(m_IOContext)
     {
         initLayers();
+
+        initSounds();
 
         m_NetworkThread = std::jthread([this]()
         {
@@ -116,6 +120,7 @@ namespace sLink::client_application
 
         m_ChatLayer->getChatWindow().setOnMessageSend([this](std::string_view content)
         {
+            m_SendPressSound.play();
             message::Message message(
                 protocol::Command::CHAT_MESSAGE,
                 m_Client.getUsername(),
@@ -171,6 +176,14 @@ namespace sLink::client_application
         });
 
         m_CurrentLayer = m_LoginLayer;
+    }
+
+    void ClientApplication::initSounds()
+    {
+        auto result = m_SendPressSound.load("assets/sounds/send_button_press_sound.wav");
+
+        if (!result)
+            m_ChatLayer->getInfoPanel().addFailInfo(result.error());
     }
 
     void ClientApplication::onConnect(std::string_view username, std::string_view password, std::string_view serverPort,

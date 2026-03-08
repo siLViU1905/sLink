@@ -20,3 +20,11 @@ target_link_libraries(sLink_Server
 )
 
 set_target_properties(sLink_Server PROPERTIES OUTPUT_NAME "sLinkServer")
+
+# Copy assets folder to executable directory after build
+add_custom_command(TARGET sLink_Server POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:sLink_Server>/assets
+    COMMENT "Copying assets to server executable directory"
+)

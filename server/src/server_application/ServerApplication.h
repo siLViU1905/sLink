@@ -7,6 +7,7 @@
 #include "../database/Database.h"
 #include "../ui/layers/clients_layer/UiClientsLayer.h"
 #include "../ui/layers/server_port/UIServerPortLayer.h"
+#include "sound/Sound.h"
 
 namespace sLink::server_application
 {
@@ -26,6 +27,8 @@ namespace sLink::server_application
 
     private:
         void initLayers();
+
+        void initSounds();
 
         void onPortSelected(std::string_view port);
 
@@ -52,6 +55,10 @@ namespace sLink::server_application
         std::shared_ptr<server::ui::layer::UIClientsLayer> m_ClientsLayer;
 
         std::shared_ptr<server::ui::layer::UIServerPortLayer> m_ServerPortLayer;
+
+        sound::Sound m_ClientAcceptedSound;
+
+        sound::Sound m_ClientDisconnectedSound;
     };
 }
 
