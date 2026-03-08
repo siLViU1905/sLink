@@ -86,7 +86,7 @@ namespace sLink::server_application
         if (result)
             m_ClientsLayer->getInfoPanel().addSuccessInfo(*result);
         else
-            m_ClientsLayer->getInfoPanel().addFailInfo(*result);
+            m_ClientsLayer->getInfoPanel().addFailInfo(result.error());
 
         m_CurrentLayer = m_ClientsLayer;
     }
