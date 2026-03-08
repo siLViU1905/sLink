@@ -121,7 +121,11 @@ namespace sLink::server
             std::scoped_lock lock(m_SessionsMutex);
 
             for (const auto &s: m_Sessions)
+            {
                 m_Database.requestUserProfilePicture(s->getUser(), session->getUser().getUsername());
+
+                m_Database.requestUserProfilePicture(session->getUser(), s->getUser().getUsername());
+            }
 
             m_Sessions.push_back(session);
         }

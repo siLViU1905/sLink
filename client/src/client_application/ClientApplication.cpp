@@ -88,7 +88,8 @@ namespace sLink::client_application
 
                 m_LoginLayer->getClientLoginPanel().setTextureID(m_Renderer.getClientSideProfilePictureTextureID());
 
-                m_RegisterLayer->getClientRegisterPanel().setTextureID(m_Renderer.getClientSideProfilePictureTextureID());
+                m_RegisterLayer->getClientRegisterPanel().setTextureID(
+                    m_Renderer.getClientSideProfilePictureTextureID());
             } else
                 m_ChatLayer->getInfoPanel().addFailInfo(result.error());
         }
@@ -136,7 +137,10 @@ namespace sLink::client_application
             {
                 onConnect(username, password, serverPort, protocol::Command::LOGIN_REQUEST);
 
-                m_ChatLayer->getChatWindow().addUserProfilePictureTextureID(username, m_Renderer.getClientSideProfilePictureTextureID());
+                if (m_Client.hasProfilePicture())
+                    m_ChatLayer->getChatWindow().addUserProfilePictureTextureID(
+                        username, m_Renderer.getClientSideProfilePictureTextureID()
+                    );
             });
 
         m_LoginLayer->getClientLoginPanel().setOnRegisterClick([this]()
@@ -159,7 +163,10 @@ namespace sLink::client_application
             {
                 onConnect(username, password, serverPort, protocol::Command::REGISTER_REQUEST);
 
-                m_ChatLayer->getChatWindow().addUserProfilePictureTextureID(username, m_Renderer.getClientSideProfilePictureTextureID());
+                if (m_Client.hasProfilePicture())
+                    m_ChatLayer->getChatWindow().addUserProfilePictureTextureID(
+                        username, m_Renderer.getClientSideProfilePictureTextureID()
+                    );
             });
 
         m_RegisterLayer->getClientRegisterPanel().setOnLoginClick([this]()
@@ -199,10 +206,12 @@ namespace sLink::client_application
             m_ChatLayer->getInfoPanel().addFailInfo(result.error());
     }
 
-    void ClientApplication::handleProfilePictureCreation(std::string_view username, const profile_picture::ProfilePicture &profilePicture)
+    void ClientApplication::handleProfilePictureCreation(std::string_view username,
+                                                         const profile_picture::ProfilePicture &profilePicture)
     {
         m_Renderer.createProfilePicture(username, profilePicture);
 
-        m_ChatLayer->getChatWindow().addUserProfilePictureTextureID(username, m_Renderer.getProfilePictureTextureID(username));
+        m_ChatLayer->getChatWindow().addUserProfilePictureTextureID(
+            username, m_Renderer.getProfilePictureTextureID(username));
     }
 }
