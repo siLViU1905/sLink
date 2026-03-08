@@ -9,6 +9,7 @@ add_library(common_shared STATIC
         profile_picture/ProfilePicture.cpp
         utility/file_explorer/FileExplorer.cpp
         utility/base64/Base64.cpp
+        sound/Sound.cpp
 )
 
 target_include_directories(common_shared PUBLIC
@@ -27,6 +28,7 @@ target_link_libraries(common_shared
         json_lib
         imgui_lib
         stb_lib
+        miniaudio_lib
         glfw
         Vulkan::Vulkan
 )
