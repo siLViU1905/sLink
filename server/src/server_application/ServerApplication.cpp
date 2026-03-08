@@ -7,6 +7,8 @@ namespace sLink::server_application
     {
         initLayers();
 
+        initSounds();
+
         m_NetworkThread = std::jthread([this]()
         {
             m_IOContext.run();
@@ -75,6 +77,14 @@ namespace sLink::server_application
         m_CurrentLayer = m_ServerPortLayer;
     }
 
+    void ServerApplication::initSounds()
+    {
+        auto result = m_ClientAcceptedSound.load("../assets/sounds/client_accepted_sound.wav");
+
+        if (!result)
+            m_ClientsLayer->getInfoPanel().addFailInfo(result.error());
+    }
+
     void ServerApplication::onPortSelected(std::string_view port)
     {
         uint16_t portNumber = 0;
@@ -95,6 +105,8 @@ namespace sLink::server_application
     {
         while (auto pendingUsername = m_Server.getPendingUsernames().tryPop())
         {
+            m_ClientAcceptedSound.play();
+
             m_ClientsLayer->getClientsPanel().addUsername(*pendingUsername);
 
             m_ClientsLayer->getClientLogger().logClientConnected(*pendingUsername);

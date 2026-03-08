@@ -180,7 +180,6 @@ namespace sLink::client_application
 
     void ClientApplication::initSounds()
     {
-        auto path = std::filesystem::current_path();
         auto result = m_SendPressSound.load("../assets/sounds/send_button_press_sound.wav");
 
         if (!result)
