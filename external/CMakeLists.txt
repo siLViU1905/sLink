@@ -1,7 +1,7 @@
 add_library(asio_lib INTERFACE)
 
 target_include_directories(asio_lib INTERFACE asio/include)
-target_compile_definitions(asio_lib INTERFACE 
+target_compile_definitions(asio_lib INTERFACE
         ASIO_STANDALONE
         $<$<PLATFORM_ID:Windows>:_WIN32_WINNT=0x0601>
 )
@@ -19,6 +19,12 @@ add_library(sqlite3_lib STATIC
 )
 
 target_include_directories(sqlite3_lib PUBLIC sqlite)
+
+add_library(miniaudio_lib STATIC
+        miniaudio/miniaudio.c
+)
+
+target_include_directories(miniaudio_lib PUBLIC miniaudio)
 
 add_library(imgui_lib STATIC
         imgui/imgui.cpp
