@@ -26,8 +26,6 @@ namespace sLink::sound
         ma_engine m_SoundEngine;
 
         ma_sound m_SoundHandle;
-
-        std::string m_Filepath;
     };
 }
 
