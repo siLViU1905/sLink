@@ -165,5 +165,11 @@ namespace sLink::client
 
            send(profilePictureMessage);
         }
+        else
+        {
+            message::Message profilePictureMessage(protocol::Command::PROFILE_PICTURE, m_Username, "");
+
+            send(profilePictureMessage);
+        }
     }
 }

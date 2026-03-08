@@ -69,6 +69,23 @@ namespace sLink::client_application
 
                         handleProfilePictureCreation(message.getSenderName(), profilePicture);
                     }
+                    else
+                    {
+                        profile_picture::ProfilePicture profilePicture;
+
+                        profilePicture.setPixelsFromContent(message.getContent());
+
+                        m_Renderer.createClientSideProfilePicture(profilePicture);
+
+                        m_LoginLayer->getClientLoginPanel().setTextureID(m_Renderer.getClientSideProfilePictureTextureID());
+
+                        m_RegisterLayer->getClientRegisterPanel().setTextureID(
+                            m_Renderer.getClientSideProfilePictureTextureID());
+
+                        m_ChatLayer->getChatWindow().addUserProfilePictureTextureID(
+                        m_Client.getUsername(), m_Renderer.getClientSideProfilePictureTextureID()
+                    );
+                    }
                     break;
 
                 default:

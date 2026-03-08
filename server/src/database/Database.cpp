@@ -49,6 +49,12 @@ namespace sLink::server::db
                     },
                     [this](const ProfilePictureSaveRequest &request)
                     {
+                        if (request.m_Content.empty())
+                        {
+                            requestUserProfilePicture(request.m_User, request.m_User.getUsername());
+                            return;
+                        }
+
                         auto requestResult = handleProfilePictureSaveRequest(request.m_User, request.m_Content);
 
                         m_InfoOutbox.push(requestResult ? *requestResult : requestResult.error());
