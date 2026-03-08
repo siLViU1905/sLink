@@ -956,7 +956,7 @@ namespace sLink::renderer
         m_GraphicsQueue.waitIdle();
     }
 
-    void Renderer::generateProfilePictureMipMaps(ProfilePictureTexture& texture, vk::Format imageFormat)
+    void Renderer::generateProfilePictureMipMaps(ProfilePictureTexture &texture, vk::Format imageFormat)
     {
         vk::FormatProperties formatProperties = m_PhysicalDevice.getFormatProperties(imageFormat);
 
@@ -1091,7 +1091,8 @@ namespace sLink::renderer
         m_ImGuiDescriptorPool = vk::raii::DescriptorPool(m_Device, poolInfo);
     }
 
-    void Renderer::createProfilePictureImage(const profile_picture::ProfilePicture &profilePicture, ProfilePictureTexture& texture)
+    void Renderer::createProfilePictureImage(const profile_picture::ProfilePicture &profilePicture,
+                                             ProfilePictureTexture &texture)
     {
         vk::raii::Buffer stagingBuffer({});
 
@@ -1138,15 +1139,15 @@ namespace sLink::renderer
         generateProfilePictureMipMaps(texture, vk::Format::eR8G8B8A8Srgb);
     }
 
-    void Renderer::createProfilePictureImageView(ProfilePictureTexture& texture)
+    void Renderer::createProfilePictureImageView(ProfilePictureTexture &texture)
     {
         texture.m_ImageView = createImageView(texture.m_Image,
-                                                              vk::Format::eR8G8B8A8Srgb,
-                                                              vk::ImageAspectFlagBits::eColor,
-                                                              profile_picture::ProfilePicture::s_MipLevels);
+                                              vk::Format::eR8G8B8A8Srgb,
+                                              vk::ImageAspectFlagBits::eColor,
+                                              profile_picture::ProfilePicture::s_MipLevels);
     }
 
-    void Renderer::createProfilePictureSampler(ProfilePictureTexture& texture)
+    void Renderer::createProfilePictureSampler(ProfilePictureTexture &texture)
     {
         auto properties = m_PhysicalDevice.getProperties();
 
@@ -1367,9 +1368,9 @@ namespace sLink::renderer
     }
 
     void Renderer::createProfilePicture(std::string_view username,
-        const profile_picture::ProfilePicture &profilePicture)
+                                        const profile_picture::ProfilePicture &profilePicture)
     {
-        auto& texture = m_ServerSideProfilePictureTextures[std::string(username)];
+        auto &texture = m_ServerSideProfilePictureTextures[std::string(username)];
 
         clearProfilePictureTexture(texture);
 
@@ -1391,7 +1392,10 @@ namespace sLink::renderer
 
     ImTextureID Renderer::getProfilePictureTextureID(std::string_view username) const
     {
-        const auto& texture = m_ServerSideProfilePictureTextures.at(std::string(username));
+        const auto &texture = m_ServerSideProfilePictureTextures.at(std::string(username));
+
+        if (!*texture.m_Sampler || !*texture.m_ImageView)
+            return 0;
 
         return reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(
             *texture.m_Sampler,
