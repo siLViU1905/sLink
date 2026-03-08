@@ -79,7 +79,12 @@ namespace sLink::server_application
 
     void ServerApplication::initSounds()
     {
-        auto result = m_ClientAcceptedSound.load("../assets/sounds/client_accepted_sound.wav");
+        auto result = m_ClientAcceptedSound.load("assets/sounds/client_accepted_sound.wav");
+
+        if (!result)
+            m_ClientsLayer->getInfoPanel().addFailInfo(result.error());
+
+        result = m_ClientDisconnectedSound.load("assets/sounds/client_disconnected_sound.wav");
 
         if (!result)
             m_ClientsLayer->getInfoPanel().addFailInfo(result.error());
@@ -127,6 +132,8 @@ namespace sLink::server_application
     {
         while (auto disconnectedUsername = m_Server.getDisconnectedUsernames().tryPop())
         {
+            m_ClientDisconnectedSound.play();
+
             m_ClientsLayer->getClientsPanel().removeUsername(*disconnectedUsername);
 
             m_ClientsLayer->getClientLogger().logClientDisconnected(*disconnectedUsername);

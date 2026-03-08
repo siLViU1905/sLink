@@ -57,6 +57,8 @@ namespace sLink::server_application
         std::shared_ptr<server::ui::layer::UIServerPortLayer> m_ServerPortLayer;
 
         sound::Sound m_ClientAcceptedSound;
+
+        sound::Sound m_ClientDisconnectedSound;
     };
 }
 
