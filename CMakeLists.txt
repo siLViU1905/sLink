@@ -14,16 +14,25 @@ set(VULKAN_SDK "C:/VulkanSDK/1.4.328.1")
 set(Vulkan_ROOT "${VULKAN_SDK}")
 set(Vulkan_INCLUDE_DIR "${VULKAN_SDK}/Include")
 
-set(GLFW_PATH "${CMAKE_SOURCE_DIR}/external/glfw")
+if(CMAKE_BUILD_TYPE)
+    set(CONAN_GENERATORS_DIR "${CMAKE_BINARY_DIR}/build/${CMAKE_BUILD_TYPE}/generators")
+
+    if(EXISTS "${CONAN_GENERATORS_DIR}")
+        list(APPEND CMAKE_PREFIX_PATH "${CONAN_GENERATORS_DIR}")
+    else()
+        list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/generators")
+    endif()
+endif()
 
 find_package(Vulkan 1.4 REQUIRED)
-
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(${GLFW_PATH})
-
-add_subdirectory(external)
+find_package(glfw3 REQUIRED)
+find_package(imgui REQUIRED)
+find_package(Catch2 REQUIRED)
+find_package(nlohmann_json REQUIRED)
+find_package(asio REQUIRED)
+find_package(stb REQUIRED)
+find_package(miniaudio REQUIRED)
+find_package(SQLite3 REQUIRED CONFIG)
 
 add_subdirectory(common)
 
