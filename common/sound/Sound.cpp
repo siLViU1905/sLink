@@ -1,3 +1,4 @@
+#define MINIAUDIO_IMPLEMENTATION
 #include "Sound.h"
 
 #include <format>

@@ -1,6 +1,8 @@
 add_library(common_shared STATIC
         renderer/Renderer.cpp
         window/Window.cpp
+        ${CMAKE_SOURCE_DIR}/common/imgui_bindings/imgui_impl_glfw.cpp
+        ${CMAKE_SOURCE_DIR}/common/imgui_bindings/imgui_impl_vulkan.cpp
         ui/backend/UIBackend.cpp
         application/Application.cpp
         message/Message.cpp
@@ -20,15 +22,16 @@ target_include_directories(common_shared PUBLIC
         renderer
         ui
         utility
+        ${CMAKE_SOURCE_DIR}/common/imgui_bindings
 )
 
 target_link_libraries(common_shared
         PUBLIC
-        asio_lib
-        json_lib
-        imgui_lib
-        stb_lib
-        miniaudio_lib
+        asio::asio
+        nlohmann_json::nlohmann_json
+        imgui::imgui
+        stb::stb
+        miniaudio::miniaudio
         glfw
         Vulkan::Vulkan
 )

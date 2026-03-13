@@ -16,12 +16,11 @@ add_executable(sLink_Server
 target_link_libraries(sLink_Server
         PRIVATE
         common_shared
-        sqlite3_lib
+        SQLite::SQLite3
 )
 
 set_target_properties(sLink_Server PROPERTIES OUTPUT_NAME "sLinkServer")
 
-# Copy assets folder to executable directory after build
 add_custom_command(TARGET sLink_Server POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/assets
